@@ -4,34 +4,27 @@ import me.basiqueevangelist.gadget.network.FieldData;
 import me.basiqueevangelist.gadget.util.FieldPath;
 import me.basiqueevangelist.gadget.util.HiddenFields;
 import me.basiqueevangelist.gadget.util.ReflectionUtil;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.item.Item;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 public final class FieldObjects {
-    private static final List<Class<?>> SIMPLE_CLASSES = List.of(
-        // Standard library classes
-        String.class, Boolean.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
-        Character.class, Class.class,
-
-        AtomicBoolean.class, AtomicInteger.class, AtomicLong.class,
-
-        // Minecraft classes
-        BlockState.class, FluidState.class, ServerWorld.class, ClientWorld.class
-    );
-
+    private static final Map<Class<?>, Function<Object, String>> PRINTERS = new HashMap<>();
     private FieldObjects() {
 
     }
@@ -91,13 +84,39 @@ public final class FieldObjects {
         if (o instanceof String str)
             return new SimpleFieldObject("\"" + str + "\"");
 
-        if (SIMPLE_CLASSES.contains(o.getClass()))
-            return new SimpleFieldObject(o.toString());
+        var printer = ReflectionUtil.findFor(o.getClass(), PRINTERS);
 
-        if (o.getClass().isEnum()) {
+        if (printer != null)
+            return new SimpleFieldObject(printer.apply(o));
+
+        if (o.getClass().isEnum())
             return new ComplexFieldObject(o.getClass().getName() + "#" + ((Enum<?>) o).name());
-        }
 
         return new ComplexFieldObject(o.getClass().getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    private static <T> void register(Function<T, String> printer, Class<? extends T>... classes) {
+        for (Class<?> klass : classes) {
+            PRINTERS.put(klass, (Function<Object, String>) printer);
+        }
+    }
+
+    static {
+        register(Object::toString,
+            // Standard library classes
+            Boolean.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
+            Character.class, Class.class,
+
+            AtomicBoolean.class, AtomicInteger.class, AtomicLong.class,
+
+            // Minecraft classes
+            BlockState.class, FluidState.class, World.class);
+
+        register(x -> "\"" + x + "\"", String.class);
+
+        register(x -> Registry.ITEM.getId(x).toString(), Item.class);
+        register(x -> Registry.BLOCK.getId(x).toString(), Block.class);
     }
 }
