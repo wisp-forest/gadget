@@ -1,0 +1,139 @@
+package me.basiqueevangelist.gadget.client.gui;
+
+import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.core.*;
+import me.basiqueevangelist.gadget.desc.ComplexFieldObject;
+import me.basiqueevangelist.gadget.desc.ErrorFieldObject;
+import me.basiqueevangelist.gadget.desc.SimpleFieldObject;
+import me.basiqueevangelist.gadget.network.FieldData;
+import me.basiqueevangelist.gadget.util.FieldPath;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+import java.util.TreeMap;
+
+public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
+    protected final Map<FieldPath, ClientFieldData> fields = new TreeMap<>();
+    protected VerticalFlowLayout mainContainer;
+
+    @Override
+    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+        return OwoUIAdapter.create(this, Containers::verticalFlow);
+    }
+
+    @Override
+    protected void build(VerticalFlowLayout verticalFlowLayout) {
+        verticalFlowLayout
+            .horizontalAlignment(HorizontalAlignment.CENTER)
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .surface(Surface.VANILLA_TRANSLUCENT);
+
+
+        VerticalFlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+
+        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main);
+
+        verticalFlowLayout.child(scroll.child(main));
+
+        this.mainContainer = main;
+
+        main
+            .padding(Insets.of(15));
+
+        for (var entry : fields.entrySet()) {
+            if (entry.getKey().names().size() != 1) continue;
+
+            var data = entry.getValue();
+
+            makeComponent(main, entry.getKey(), data);
+        }
+    }
+
+    private void makeComponent(VerticalFlowLayout container, FieldPath path, ClientFieldData data) {
+        var rowContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        var row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+
+        data.containerComponent = rowContainer;
+
+        rowContainer.child(row);
+
+        var nameText = Text.literal(path.name());
+
+        if (data.isMixin)
+            nameText.formatted(Formatting.GRAY)
+                .styled(x -> x.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.literal("Mixin-injected field")
+                        .formatted(Formatting.YELLOW))));
+
+        row.child(Components.label(Text.literal(data.obj.type().substring(0, 1)).styled(x -> x.withColor(data.obj.color())))
+                .margins(Insets.right(5)))
+            .child(Components.label(nameText)
+                .margins(Insets.right(0)))
+            .margins(Insets.both(0, 2))
+            .allowOverflow(true);
+
+        if (data.obj instanceof SimpleFieldObject sfo) {
+            row.child(
+                Components.label(
+                    Text.literal(" = " + sfo.contents())
+                        .formatted(Formatting.GRAY)
+                )
+            );
+        } else if (data.obj instanceof ErrorFieldObject efo) {
+            row.child(Components.label(Text.literal(" " + efo.exceptionClass())
+                .styled(x -> x
+                    .withColor(Formatting.RED)
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(efo.fullExceptionText()))))));
+        } else if (data.obj instanceof ComplexFieldObject cfo) {
+            var subContainer = new SubObjectContainer(() -> {
+                requestPath(path);
+            }, () -> {
+            });
+            data.subObjectContainer = subContainer;
+            rowContainer.child(subContainer);
+
+            row
+                .child(
+                    Components.label(
+                        Text.literal(" " + cfo.text() + " ")
+                            .formatted(Formatting.GRAY)
+                    )
+                )
+                .child(subContainer.getSpinnyBoi()
+                    .sizing(Sizing.fixed(10), Sizing.content()));
+        }
+
+        container.child(rowContainer);
+    }
+
+    protected void addFieldData(FieldPath path, FieldData data) {
+        ClientFieldData old = fields.get(path);
+        VerticalFlowLayout container;
+
+        if (path.names().size() == 1) {
+            container = mainContainer;
+        } else {
+            container = fields.get(path.parent()).subObjectContainer;
+        }
+
+        if (old != null) {
+            container.removeChild(old.containerComponent);
+        }
+
+        ClientFieldData newData = new ClientFieldData(data);
+
+        makeComponent(container, path, newData);
+
+        fields.put(path, newData);
+    }
+
+
+    protected abstract void requestPath(FieldPath path);
+}

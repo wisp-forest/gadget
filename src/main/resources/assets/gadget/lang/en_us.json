@@ -1,0 +1,14 @@
+{
+    "message.gadget.fail.noserversupport": "Server doesn't support Gadget",
+    "message.gadget.fail.noblockentity": "Not a block entity",
+    "message.gadget.fail.noentity": "No such entity",
+    "message.gadget.fail.permissions": "Not enough permissions",
+
+    "key.gadget.inspect": [
+        "",
+        {"text": "[", "color":"gray"},
+        {"text": "Gadget", "color": "aqua"},
+        {"text": "] ","color": "gray"},
+        {"text":"Inspect"}
+    ]
+}

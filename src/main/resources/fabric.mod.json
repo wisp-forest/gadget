@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "gadget",
+  "version": "${version}",
+
+  "name": "Gadget",
+  "description": "Debugger's Delight",
+  "authors": [
+    "BasiqueEvangelist"
+  ],
+
+  "license": "LGPL-3.0-only",
+
+  "icon": "assets/gadget/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.basiqueevangelist.gadget.Gadget"
+    ],
+    "client": [
+      "me.basiqueevangelist.gadget.client.GadgetClient"
+    ]
+  },
+  "mixins": [
+    "gadget.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.19.x",
+    "java": ">=17",
+    "owo": ">=0.7.3"
+  }
+}
