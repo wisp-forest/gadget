@@ -37,7 +37,20 @@ public final class FieldObjects {
     }
 
     public static Map<FieldPath, FieldData> collectAllData(FieldPath basePath, Object o) {
-        Map<FieldPath, FieldData> fields = new HashMap<>();
+        Map<FieldPath, FieldData> fields = new LinkedHashMap<>();
+
+        if (o instanceof Iterable<?> iter) {
+            int i = 0;
+
+            for (Object sub : iter) {
+                int idx = i++;
+                var path = basePath.then(String.valueOf(idx));
+
+                FieldObject obj = FieldObjects.fromObject(sub);
+
+                fields.put(path, new FieldData(obj, false));
+            }
+        }
 
         for (Field field : ReflectionUtil.allFields(o.getClass())) {
             if (Modifier.isStatic(field.getModifiers())) continue;

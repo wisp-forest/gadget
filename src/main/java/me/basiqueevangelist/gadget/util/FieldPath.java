@@ -1,5 +1,6 @@
 package me.basiqueevangelist.gadget.util;
 
+import com.google.common.collect.Iterators;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -11,6 +12,8 @@ public record FieldPath(List<String> names) implements Comparable<FieldPath> {
         for (String name : names) {
             if (o.getClass().isArray()) {
                 o = Array.get(o, Integer.parseInt(name));
+            } else if (Character.isDigit(name.charAt(0))) {
+                o = Iterators.get(((Iterable<?>) o).iterator(), Integer.parseInt(name));
             } else {
                 try {
                     var field = ReflectionUtil.findField(o.getClass(), name);
