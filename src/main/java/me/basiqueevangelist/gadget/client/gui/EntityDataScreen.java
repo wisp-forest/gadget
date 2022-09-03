@@ -3,7 +3,7 @@ package me.basiqueevangelist.gadget.client.gui;
 import me.basiqueevangelist.gadget.network.EntityDataS2CPacket;
 import me.basiqueevangelist.gadget.network.GadgetNetworking;
 import me.basiqueevangelist.gadget.network.RequestEntityDataC2SPacket;
-import me.basiqueevangelist.gadget.util.FieldPath;
+import me.basiqueevangelist.gadget.path.ObjectPath;
 
 public class EntityDataScreen extends BaseDataScreen {
     private final int networkId;
@@ -17,7 +17,7 @@ public class EntityDataScreen extends BaseDataScreen {
     }
 
     @Override
-    protected void requestPath(FieldPath path) {
+    protected void requestPath(ObjectPath path) {
         GadgetNetworking.CHANNEL.clientHandle().send(new RequestEntityDataC2SPacket(this.networkId, path));
     }
 

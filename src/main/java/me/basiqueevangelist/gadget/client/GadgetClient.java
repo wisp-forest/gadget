@@ -3,7 +3,7 @@ package me.basiqueevangelist.gadget.client;
 import me.basiqueevangelist.gadget.client.gui.BlockEntityDataScreen;
 import me.basiqueevangelist.gadget.client.gui.EntityDataScreen;
 import me.basiqueevangelist.gadget.network.*;
-import me.basiqueevangelist.gadget.util.FieldPath;
+import me.basiqueevangelist.gadget.path.ObjectPath;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -58,11 +58,11 @@ public class GadgetClient implements ClientModInitializer {
             if (target == null) return;
 
             if (target instanceof EntityHitResult ehr) {
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestEntityDataC2SPacket(ehr.getEntity().getId(), new FieldPath(List.of())));
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestEntityDataC2SPacket(ehr.getEntity().getId(), ObjectPath.EMPTY));
             } else {
                 BlockPos blockPos = target instanceof BlockHitResult blockHitResult ? blockHitResult.getBlockPos() : new BlockPos(target.getPos());
 
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestBlockEntityDataC2SPacket(blockPos, new FieldPath(List.of())));
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestBlockEntityDataC2SPacket(blockPos, ObjectPath.EMPTY));
             }
         });
     }

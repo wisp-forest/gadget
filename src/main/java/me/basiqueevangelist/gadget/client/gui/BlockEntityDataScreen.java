@@ -3,7 +3,7 @@ package me.basiqueevangelist.gadget.client.gui;
 import me.basiqueevangelist.gadget.network.BlockEntityDataS2CPacket;
 import me.basiqueevangelist.gadget.network.GadgetNetworking;
 import me.basiqueevangelist.gadget.network.RequestBlockEntityDataC2SPacket;
-import me.basiqueevangelist.gadget.util.FieldPath;
+import me.basiqueevangelist.gadget.path.ObjectPath;
 import net.minecraft.util.math.BlockPos;
 
 public class BlockEntityDataScreen extends BaseDataScreen {
@@ -18,7 +18,7 @@ public class BlockEntityDataScreen extends BaseDataScreen {
     }
 
     @Override
-    protected void requestPath(FieldPath path) {
+    protected void requestPath(ObjectPath path) {
         GadgetNetworking.CHANNEL.clientHandle().send(new RequestBlockEntityDataC2SPacket(this.blockPos, path));
     }
 

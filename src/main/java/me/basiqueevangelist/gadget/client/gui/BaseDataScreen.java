@@ -10,7 +10,7 @@ import me.basiqueevangelist.gadget.desc.ComplexFieldObject;
 import me.basiqueevangelist.gadget.desc.ErrorFieldObject;
 import me.basiqueevangelist.gadget.desc.SimpleFieldObject;
 import me.basiqueevangelist.gadget.network.FieldData;
-import me.basiqueevangelist.gadget.util.FieldPath;
+import me.basiqueevangelist.gadget.path.ObjectPath;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
-    protected final Map<FieldPath, ClientFieldData> fields = new TreeMap<>();
+    protected final Map<ObjectPath, ClientFieldData> fields = new TreeMap<>();
     protected VerticalFlowLayout mainContainer;
 
     @Override
@@ -48,7 +48,7 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .padding(Insets.of(15));
 
         for (var entry : fields.entrySet()) {
-            if (entry.getKey().names().size() != 1) continue;
+            if (entry.getKey().steps().length != 1) continue;
 
             var data = entry.getValue();
 
@@ -56,7 +56,7 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         }
     }
 
-    private void makeComponent(VerticalFlowLayout container, FieldPath path, ClientFieldData data) {
+    private void makeComponent(VerticalFlowLayout container, ObjectPath path, ClientFieldData data) {
         var rowContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
         var row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 
@@ -113,11 +113,11 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         container.child(rowContainer);
     }
 
-    protected void addFieldData(FieldPath path, FieldData data) {
+    protected void addFieldData(ObjectPath path, FieldData data) {
         ClientFieldData old = fields.get(path);
         VerticalFlowLayout container;
 
-        if (path.names().size() == 1) {
+        if (path.steps().length == 1) {
             container = mainContainer;
         } else {
             container = fields.get(path.parent()).subObjectContainer;
@@ -135,5 +135,5 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
     }
 
 
-    protected abstract void requestPath(FieldPath path);
+    protected abstract void requestPath(ObjectPath path);
 }

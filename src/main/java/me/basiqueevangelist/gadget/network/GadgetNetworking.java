@@ -2,6 +2,7 @@ package me.basiqueevangelist.gadget.network;
 
 import io.wispforest.owo.network.OwoNetChannel;
 import me.basiqueevangelist.gadget.desc.FieldObjects;
+import me.basiqueevangelist.gadget.path.MapPathStepType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -17,6 +18,8 @@ public final class GadgetNetworking {
     }
 
     public static void init() {
+        MapPathStepType.init();
+
         CHANNEL.registerServerbound(RequestBlockEntityDataC2SPacket.class, (packet, access) -> {
             if (!Permissions.check(access.player(), "gadget.inspect.blockentity", 4)) {
                 access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"), true);
