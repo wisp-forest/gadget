@@ -11,6 +11,13 @@ public final class ReflectionUtil {
 
     }
 
+    public static String prettyName(Class<?> klass) {
+        if (klass.isArray())
+            return prettyName(klass.componentType()) + "[]";
+
+        return klass.getName();
+    }
+
     public static <T> T findFor(Class<?> klass, Map<Class<?>, T> map) {
         T val = map.get(klass);
 

@@ -12,6 +12,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
@@ -43,6 +44,20 @@ public final class FieldObjects {
 
                 fields.put(path, new FieldData(obj, false));
             }
+        }
+
+        if (o.getClass().isArray()) {
+            int size = Array.getLength(o);
+
+            for (int i = 0; i < size; i++) {
+                var path = basePath.then(String.valueOf(i));
+
+                FieldObject obj = FieldObjects.fromObject(Array.get(o, i));
+
+                fields.put(path, new FieldData(obj, false));
+            }
+
+            return fields;
         }
 
         for (Field field : ReflectionUtil.allFields(o.getClass())) {
@@ -90,9 +105,9 @@ public final class FieldObjects {
             return new SimpleFieldObject(printer.apply(o));
 
         if (o.getClass().isEnum())
-            return new ComplexFieldObject(o.getClass().getName() + "#" + ((Enum<?>) o).name());
+            return new ComplexFieldObject(ReflectionUtil.prettyName(o.getClass()) + "#" + ((Enum<?>) o).name());
 
-        return new ComplexFieldObject(o.getClass().getName());
+        return new ComplexFieldObject(ReflectionUtil.prettyName(o.getClass()));
     }
 
     @SuppressWarnings("unchecked")
