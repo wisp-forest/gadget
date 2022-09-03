@@ -16,14 +16,14 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.List;
-
 public class GadgetClient implements ClientModInitializer {
     public static KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.MISC_CATEGORY);
+    public static KeyBinding DUMP_KEY = new KeyBinding("key.gadget.dump", GLFW.GLFW_KEY_K, KeyBinding.MISC_CATEGORY);
 
     @Override
     public void onInitializeClient() {
         KeyBindingHelper.registerKeyBinding(INSPECT_KEY);
+        KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
         GadgetNetworking.CHANNEL.registerClientbound(BlockEntityDataS2CPacket.class, (packet, access) -> {
             if (access.runtime().currentScreen instanceof BlockEntityDataScreen gui) {
@@ -65,6 +65,15 @@ public class GadgetClient implements ClientModInitializer {
                 GadgetNetworking.CHANNEL.clientHandle().send(new RequestBlockEntityDataC2SPacket(blockPos, ObjectPath.EMPTY));
             }
         });
-    }
 
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (!DUMP_KEY.wasPressed()) return;
+
+            if (PacketDumper.isDumping()) {
+                PacketDumper.stop();
+            } else {
+                PacketDumper.start();
+            }
+        });
+    }
 }

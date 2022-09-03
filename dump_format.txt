@@ -1,0 +1,15 @@
+Packet:
+
+i32 length of whole packet
+i16 flags
+    - 0bxxxxxxx1 outbound
+    - 0bxxxxxxx0 inbound
+
+    - 0bxxxxx00x handshake
+    - 0bxxxxx01x play
+    - 0bxxxxx10x status
+    - 0bxxxxx11x login
+
+vari32 vanilla packet id
+
+... vanilla packet data
