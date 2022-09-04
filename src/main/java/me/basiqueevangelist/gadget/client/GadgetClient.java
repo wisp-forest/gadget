@@ -53,6 +53,12 @@ public class GadgetClient implements ClientModInitializer {
                 return;
             }
 
+            var perspective = client.options.getPerspective();
+
+            if (!perspective.isFirstPerson() && perspective.isFrontView() && client.player != null) {
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestEntityDataC2SPacket(client.player.getId(), ObjectPath.EMPTY));
+            }
+
             HitResult target = client.crosshairTarget;
 
             if (target == null) return;

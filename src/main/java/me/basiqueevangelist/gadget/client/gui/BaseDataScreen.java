@@ -88,7 +88,7 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         switchButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
-            UISounds.playButtonSound();
+            UISounds.playInteractionSound();
 
             if (isClient())
                 switchToServer();
