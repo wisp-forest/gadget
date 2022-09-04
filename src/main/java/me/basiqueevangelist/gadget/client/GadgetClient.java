@@ -26,7 +26,7 @@ public class GadgetClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
         GadgetNetworking.CHANNEL.registerClientbound(BlockEntityDataS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof BlockEntityDataScreen gui) {
+            if (access.runtime().currentScreen instanceof BlockEntityDataScreen gui && !gui.isClient()) {
                 gui.applyData(packet);
                 return;
             }
@@ -35,7 +35,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(EntityDataS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof EntityDataScreen gui) {
+            if (access.runtime().currentScreen instanceof EntityDataScreen gui && !gui.isClient()) {
                 gui.applyData(packet);
                 return;
             }

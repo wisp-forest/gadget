@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.UISounds;
 import me.basiqueevangelist.gadget.desc.ComplexFieldObject;
 import me.basiqueevangelist.gadget.desc.ErrorFieldObject;
 import me.basiqueevangelist.gadget.desc.SimpleFieldObject;
@@ -15,6 +16,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,6 +24,14 @@ import java.util.TreeMap;
 public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
     protected final Map<ObjectPath, ClientFieldData> fields = new TreeMap<>();
     protected VerticalFlowLayout mainContainer;
+
+    protected abstract void requestPath(ObjectPath path);
+
+    public abstract boolean isClient();
+
+    protected abstract void switchToClient();
+
+    protected abstract void switchToServer();
 
     @Override
     protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
@@ -54,6 +64,46 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
             makeComponent(main, entry.getKey(), data);
         }
+
+        VerticalFlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
+
+        var switchButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
+            .child(Components.label(Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_current"))
+                .verticalTextAlignment(VerticalAlignment.CENTER)
+                .horizontalTextAlignment(HorizontalAlignment.CENTER)
+                .positioning(Positioning.absolute(5, 4))
+                .cursorStyle(CursorStyle.HAND)
+            );
+
+        switchButton
+            .cursorStyle(CursorStyle.HAND)
+            .tooltip(Text.translatable("text.gadget.switch_to_" + (isClient() ? "server" : "client")));
+
+        switchButton.mouseEnter().subscribe(
+            () -> switchButton.surface(Surface.flat(0x80ffffff)));
+
+        switchButton.mouseLeave().subscribe(
+            () -> switchButton.surface(Surface.BLANK));
+
+        switchButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+            UISounds.playButtonSound();
+
+            if (isClient())
+                switchToServer();
+            else
+                switchToClient();
+
+            return true;
+        });
+
+        sidebar
+            .child(switchButton)
+            .positioning(Positioning.absolute(0, 0))
+            .padding(Insets.of(5));
+
+        verticalFlowLayout.child(sidebar);
     }
 
     private void makeComponent(VerticalFlowLayout container, ObjectPath path, ClientFieldData data) {
@@ -92,10 +142,9 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
                     .withColor(Formatting.RED)
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(efo.fullExceptionText()))))));
         } else if (data.obj instanceof ComplexFieldObject cfo) {
-            var subContainer = new SubObjectContainer(() -> {
-                requestPath(path);
-            }, () -> {
-            });
+            var subContainer = new SubObjectContainer(
+                () -> requestPath(path),
+                () -> { });
             data.subObjectContainer = subContainer;
             rowContainer.child(subContainer);
 
@@ -133,7 +182,4 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         fields.put(path, newData);
     }
-
-
-    protected abstract void requestPath(ObjectPath path);
 }

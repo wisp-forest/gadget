@@ -20,7 +20,9 @@ public class NotificationToast implements Toast {
         var root = this.adapter.rootComponent;
 
         root
-            .child(Components.label(headText))
+            .child(Components.label(headText)
+                .maxWidth(160)
+                .horizontalTextAlignment(HorizontalAlignment.CENTER))
             .surface(Surface.VANILLA_TRANSLUCENT.and(Surface.outline(0xFF5800FF)))
             .allowOverflow(true)
             .horizontalAlignment(HorizontalAlignment.CENTER)

@@ -13,6 +13,18 @@
     "message.gadget.dump.started": "Started dumping",
     "message.gadget.dump.stopped": "Saved dump to",
 
+    "text.gadget.client_current": {
+        "text": "C",
+        "color": "yellow"
+    },
+    "text.gadget.server_current": {
+        "text": "S",
+        "color": "green"
+    },
+
+    "text.gadget.switch_to_server": "Switch to server",
+    "text.gadget.switch_to_client": "Switch to client",
+
     "key.gadget.inspect": [
         {"translate": "message.gadget.header"},
         {"text": "Inspect"}
