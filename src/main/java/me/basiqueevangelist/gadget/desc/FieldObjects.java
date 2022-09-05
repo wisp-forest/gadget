@@ -24,6 +24,7 @@ public final class FieldObjects {
 
         if (o instanceof Iterable<?> iter) {
             int i = 0;
+            boolean isFinal = ReflectionUtil.guessImmutability(iter);
 
             for (Object sub : iter) {
                 int idx = i++;
@@ -31,13 +32,14 @@ public final class FieldObjects {
 
                 FieldObject obj = FieldObjects.fromObject(sub);
 
-                fields.put(path, new FieldData(obj, false));
+                fields.put(path, new FieldData(obj, false, isFinal));
             }
         }
 
         if (o instanceof Map<?, ?> map
          && !map.isEmpty()) {
             var oneKey = map.keySet().iterator().next();
+            boolean isFinal = ReflectionUtil.guessImmutability(map);
 
             MapPathStepType type = MapPathStepType.getFor(oneKey.getClass());
 
@@ -47,7 +49,7 @@ public final class FieldObjects {
 
                     FieldObject obj = FieldObjects.fromObject(entry.getValue());
 
-                    fields.put(path, new FieldData(obj, false));
+                    fields.put(path, new FieldData(obj, false, isFinal));
                 }
             }
         }
@@ -60,7 +62,7 @@ public final class FieldObjects {
 
                 FieldObject obj = FieldObjects.fromObject(Array.get(o, i));
 
-                fields.put(path, new FieldData(obj, false));
+                fields.put(path, new FieldData(obj, false, false));
             }
 
             return fields;
@@ -91,7 +93,7 @@ public final class FieldObjects {
 
             boolean isMixin = field.getAnnotation(MixinMerged.class) != null;
 
-            fields.put(path, new FieldData(obj, isMixin));
+            fields.put(path, new FieldData(obj, isMixin, Modifier.isFinal(field.getModifiers())));
         }
 
         return fields;

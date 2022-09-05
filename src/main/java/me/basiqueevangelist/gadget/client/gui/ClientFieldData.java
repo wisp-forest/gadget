@@ -9,9 +9,11 @@ public class ClientFieldData {
     public Component containerComponent;
     public SubObjectContainer subObjectContainer;
     public boolean isMixin;
+    public boolean isFinal;
 
     public ClientFieldData(FieldData data) {
         this.obj = data.obj();
         this.isMixin = data.isMixin();
+        this.isFinal = data.isFinal();
     }
 }
