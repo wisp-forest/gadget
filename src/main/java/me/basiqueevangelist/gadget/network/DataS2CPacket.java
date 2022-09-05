@@ -4,5 +4,5 @@ import me.basiqueevangelist.gadget.path.ObjectPath;
 
 import java.util.Map;
 
-public record EntityDataS2CPacket(int networkId, Map<ObjectPath, FieldData> fields) {
+public record DataS2CPacket(InspectionTarget target, Map<ObjectPath, FieldData> fields) {
 }

@@ -9,9 +9,14 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import me.basiqueevangelist.gadget.desc.ComplexFieldObject;
 import me.basiqueevangelist.gadget.desc.ErrorFieldObject;
+import me.basiqueevangelist.gadget.desc.FieldObjects;
 import me.basiqueevangelist.gadget.desc.SimpleFieldObject;
 import me.basiqueevangelist.gadget.network.FieldData;
+import me.basiqueevangelist.gadget.network.GadgetNetworking;
+import me.basiqueevangelist.gadget.network.InspectionTarget;
+import me.basiqueevangelist.gadget.network.RequestDataC2SPacket;
 import me.basiqueevangelist.gadget.path.ObjectPath;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -21,17 +26,39 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Map;
 import java.util.TreeMap;
 
-public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
+public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
     protected final Map<ObjectPath, ClientFieldData> fields = new TreeMap<>();
+    private final InspectionTarget target;
+    private final boolean isClient;
     protected VerticalFlowLayout mainContainer;
 
-    protected abstract void requestPath(ObjectPath path);
+    public FieldDataScreen(InspectionTarget target, boolean isClient) {
+        this.target = target;
+        this.isClient = isClient;
 
-    public abstract boolean isClient();
+        if (isClient) {
+            FieldObjects.collectAllData(ObjectPath.EMPTY, target.resolve(MinecraftClient.getInstance().world))
+                .forEach((k, v) -> fields.put(k, new ClientFieldData(v)));
+        }
+    }
 
-    protected abstract void switchToClient();
+    protected void requestPath(ObjectPath path) {
+        if (!isClient) {
+            GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(target, path));
+        } else {
+            Object sub = path.follow(target.resolve(MinecraftClient.getInstance().world));
 
-    protected abstract void switchToServer();
+            FieldObjects.collectAllData(path, sub).forEach(this::addFieldData);
+        }
+    }
+
+    public InspectionTarget target() {
+        return target;
+    }
+
+    public boolean isClient() {
+        return isClient;
+    }
 
     @Override
     protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
@@ -91,9 +118,9 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
             UISounds.playInteractionSound();
 
             if (isClient())
-                switchToServer();
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(target, ObjectPath.EMPTY));
             else
-                switchToClient();
+                client.setScreen(new FieldDataScreen(target, true));
 
             return true;
         });
@@ -162,7 +189,12 @@ public abstract class BaseDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         container.child(rowContainer);
     }
 
-    protected void addFieldData(ObjectPath path, FieldData data) {
+    public void addFieldData(ObjectPath path, FieldData data) {
+        if (mainContainer == null) {
+            fields.put(path, new ClientFieldData(data));
+            return;
+        }
+
         ClientFieldData old = fields.get(path);
         VerticalFlowLayout container;
 

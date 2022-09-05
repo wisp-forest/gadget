@@ -1,7 +1,6 @@
 package me.basiqueevangelist.gadget.client;
 
-import me.basiqueevangelist.gadget.client.gui.BlockEntityDataScreen;
-import me.basiqueevangelist.gadget.client.gui.EntityDataScreen;
+import me.basiqueevangelist.gadget.client.gui.FieldDataScreen;
 import me.basiqueevangelist.gadget.network.*;
 import me.basiqueevangelist.gadget.path.ObjectPath;
 import net.fabricmc.api.ClientModInitializer;
@@ -25,22 +24,15 @@ public class GadgetClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(INSPECT_KEY);
         KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
-        GadgetNetworking.CHANNEL.registerClientbound(BlockEntityDataS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof BlockEntityDataScreen gui && !gui.isClient()) {
-                gui.applyData(packet);
+        GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
+            if (access.runtime().currentScreen instanceof FieldDataScreen gui && !gui.isClient() && gui.target().equals(packet.target())) {
+                packet.fields().forEach(gui::addFieldData);
                 return;
             }
 
-            access.runtime().setScreen(new BlockEntityDataScreen(packet));
-        });
-
-        GadgetNetworking.CHANNEL.registerClientbound(EntityDataS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof EntityDataScreen gui && !gui.isClient()) {
-                gui.applyData(packet);
-                return;
-            }
-
-            access.runtime().setScreen(new EntityDataScreen(packet));
+            var screen = new FieldDataScreen(packet.target(), false);
+            packet.fields().forEach(screen::addFieldData);
+            access.runtime().setScreen(screen);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -56,7 +48,7 @@ public class GadgetClient implements ClientModInitializer {
             var perspective = client.options.getPerspective();
 
             if (!perspective.isFirstPerson() && perspective.isFrontView() && client.player != null) {
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestEntityDataC2SPacket(client.player.getId(), ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new EntityTarget(client.player.getId()), ObjectPath.EMPTY));
             }
 
             HitResult target = client.crosshairTarget;
@@ -64,11 +56,11 @@ public class GadgetClient implements ClientModInitializer {
             if (target == null) return;
 
             if (target instanceof EntityHitResult ehr) {
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestEntityDataC2SPacket(ehr.getEntity().getId(), ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new EntityTarget(ehr.getEntity().getId()), ObjectPath.EMPTY));
             } else {
                 BlockPos blockPos = target instanceof BlockHitResult blockHitResult ? blockHitResult.getBlockPos() : new BlockPos(target.getPos());
 
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestBlockEntityDataC2SPacket(blockPos, ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new BlockEntityTarget(blockPos), ObjectPath.EMPTY));
             }
         });
 

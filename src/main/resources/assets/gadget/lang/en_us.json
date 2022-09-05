@@ -6,8 +6,7 @@
     ],
 
     "message.gadget.fail.noserversupport": "Server doesn't support Gadget",
-    "message.gadget.fail.noblockentity": "Not a block entity",
-    "message.gadget.fail.noentity": "No such entity",
+    "message.gadget.fail.notfound": "No such object",
     "message.gadget.fail.permissions": "Not enough permissions",
 
     "message.gadget.dump.started": "Started dumping",
