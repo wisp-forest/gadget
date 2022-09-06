@@ -22,7 +22,7 @@ import java.nio.file.StandardOpenOption;
 
 public class PacketDumper {
     private static final Logger LOGGER = LoggerFactory.getLogger("gadget/PacketDumper");
-    private static final Path DUMP_DIR = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("dumps");
+    public static final Path DUMP_DIR = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("dumps");
 
     private static Path DUMP_PATH;
     private static SeekableByteChannel OUTPUT_CHANNEL;

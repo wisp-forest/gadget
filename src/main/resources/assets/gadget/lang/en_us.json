@@ -20,9 +20,17 @@
         "text": "S",
         "color": "green"
     },
-
     "text.gadget.switch_to_server": "Switch to server",
     "text.gadget.switch_to_client": "Switch to client",
+    "text.gadget.menu_button": {
+        "text": "G",
+        "bold": true,
+        "color": "#0096FF"
+    },
+    "text.gadget.open": {
+        "text": "Open",
+        "underlined": true
+    },
 
     "key.gadget.inspect": [
         {"translate": "message.gadget.header"},
