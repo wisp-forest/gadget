@@ -10,11 +10,9 @@ import io.wispforest.owo.ui.util.UISounds;
 import me.basiqueevangelist.gadget.desc.ComplexFieldObject;
 import me.basiqueevangelist.gadget.desc.ErrorFieldObject;
 import me.basiqueevangelist.gadget.desc.FieldObjects;
-import me.basiqueevangelist.gadget.desc.SimpleFieldObject;
-import me.basiqueevangelist.gadget.network.FieldData;
-import me.basiqueevangelist.gadget.network.GadgetNetworking;
-import me.basiqueevangelist.gadget.network.InspectionTarget;
-import me.basiqueevangelist.gadget.network.RequestDataC2SPacket;
+import me.basiqueevangelist.gadget.desc.PrimitiveFieldObject;
+import me.basiqueevangelist.gadget.desc.edit.PrimitiveEditData;
+import me.basiqueevangelist.gadget.network.*;
 import me.basiqueevangelist.gadget.path.ObjectPath;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.HoverEvent;
@@ -48,7 +46,23 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         } else {
             Object sub = path.follow(target.resolve(MinecraftClient.getInstance().world));
 
-            FieldObjects.collectAllData(path, sub).forEach(this::addFieldData);
+            FieldObjects.collectAllData(path, sub)
+                .forEach(this::addFieldData);
+        }
+    }
+
+    public void setPrimitive(ObjectPath path, PrimitiveEditData data) {
+        if (!isClient) {
+            GadgetNetworking.CHANNEL.clientHandle().send(new SetPrimitiveC2SPacket(target, path, data));
+        } else {
+            Object target = target().resolve(MinecraftClient.getInstance().world);
+
+            path.set(target, data.toObject());
+
+            var parentPath = path.parent();
+
+            FieldObjects.collectAllData(parentPath, parentPath.follow(target))
+                .forEach(this::addFieldData);
         }
     }
 
@@ -156,13 +170,8 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .margins(Insets.both(0, 2))
             .allowOverflow(true);
 
-        if (data.obj instanceof SimpleFieldObject sfo) {
-            row.child(
-                Components.label(
-                    Text.literal(" = " + sfo.contents())
-                        .formatted(Formatting.GRAY)
-                )
-            );
+        if (data.obj instanceof PrimitiveFieldObject sfo) {
+            row.child(new PrimitiveFieldWidget(this, path, data.isFinal, sfo));
         } else if (data.obj instanceof ErrorFieldObject efo) {
             row.child(Components.label(Text.literal(" " + efo.exceptionClass())
                 .styled(x -> x

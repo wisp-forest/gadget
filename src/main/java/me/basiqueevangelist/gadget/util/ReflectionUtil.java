@@ -2,12 +2,9 @@ package me.basiqueevangelist.gadget.util;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class ReflectionUtil {
     @SuppressWarnings("RedundantUnmodifiable")
@@ -68,9 +65,14 @@ public final class ReflectionUtil {
     }
 
     public static Iterable<Field> allFields(Class<?> klass) {
-        if (klass == Object.class)
-            return List.of(klass.getDeclaredFields());
+        TreeSet<Field> fields = new TreeSet<>(Comparator.comparing(Field::getName));
 
-        return Iterables.concat(List.of(klass.getDeclaredFields()), allFields(klass.getSuperclass()));
+        while (klass != Object.class) {
+            fields.addAll(List.of(klass.getDeclaredFields()));
+
+            klass = klass.getSuperclass();
+        }
+
+        return fields;
     }
 }

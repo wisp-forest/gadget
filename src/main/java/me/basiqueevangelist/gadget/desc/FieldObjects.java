@@ -1,5 +1,6 @@
 package me.basiqueevangelist.gadget.desc;
 
+import me.basiqueevangelist.gadget.desc.edit.PrimitiveEditData;
 import me.basiqueevangelist.gadget.network.FieldData;
 import me.basiqueevangelist.gadget.path.*;
 import me.basiqueevangelist.gadget.util.HiddenFields;
@@ -13,6 +14,7 @@ import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class FieldObjects {
     private FieldObjects() {
@@ -93,7 +95,7 @@ public final class FieldObjects {
 
             boolean isMixin = field.getAnnotation(MixinMerged.class) != null;
 
-            fields.put(path, new FieldData(obj, isMixin, Modifier.isFinal(field.getModifiers())));
+            fields.put(path, new FieldData(obj, isMixin, false));
         }
 
         return fields;
@@ -104,7 +106,7 @@ public final class FieldObjects {
         String pretty = PrettyPrinters.tryPrint(o);
 
         if (pretty != null)
-            return new SimpleFieldObject(pretty);
+            return new PrimitiveFieldObject(pretty, Optional.ofNullable(PrimitiveEditData.forObject(o)));
 
         if (o.getClass().isEnum())
             return new ComplexFieldObject(ReflectionUtil.prettyName(o.getClass()) + "#" + ((Enum<?>) o).name());

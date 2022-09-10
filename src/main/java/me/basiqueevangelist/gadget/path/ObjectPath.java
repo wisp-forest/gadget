@@ -13,6 +13,13 @@ public record ObjectPath(PathStep[] steps) implements Comparable<ObjectPath> {
         return o;
     }
 
+    public void set(Object o, Object to) {
+        for (int i = 0; i < steps.length - 1; i++)
+            o = steps[i].follow(o);
+
+        steps[steps.length - 1].set(o, to);
+    }
+
     public String name() {
         return steps[steps.length - 1].toString();
     }
