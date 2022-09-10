@@ -1,4 +1,4 @@
-package me.basiqueevangelist.gadget.client;
+package me.basiqueevangelist.gadget.client.dump;
 
 import me.basiqueevangelist.gadget.client.gui.NotificationToast;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;

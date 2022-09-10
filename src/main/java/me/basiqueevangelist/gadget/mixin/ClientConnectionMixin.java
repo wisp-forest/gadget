@@ -1,7 +1,7 @@
 package me.basiqueevangelist.gadget.mixin;
 
 import io.netty.channel.ChannelHandlerContext;
-import me.basiqueevangelist.gadget.client.PacketDumper;
+import me.basiqueevangelist.gadget.client.dump.PacketDumper;
 import net.minecraft.network.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;

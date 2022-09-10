@@ -34,6 +34,11 @@ public final class ReflectionUtil {
         return map instanceof ImmutableMap<?,?> || map.getClass() == UNMODIFIABLE_MAP_CLASS;
     }
 
+    public static String nameWithoutPackage(Class<?> klass) {
+        String full = klass.getName();
+        return full.substring(full.lastIndexOf('.') + 1);
+    }
+
     public static String prettyName(Class<?> klass) {
         if (klass.isArray())
             return prettyName(klass.componentType()) + "[]";

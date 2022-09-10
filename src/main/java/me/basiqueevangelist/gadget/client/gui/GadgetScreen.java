@@ -2,18 +2,21 @@ package me.basiqueevangelist.gadget.client.gui;
 
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
-import me.basiqueevangelist.gadget.client.PacketDumper;
+import me.basiqueevangelist.gadget.client.dump.PacketDumper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -57,9 +60,23 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
                             .formatted(Formatting.DARK_RED))
                         .margins(Insets.right(5)))
                         .child(Components.label(Text.literal(filename + " ")))
-                        .child(Components.label(Text.translatable("text.gadget.open")))
                         .padding(Insets.bottom(2));
 
+                    LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
+
+                    openLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+                        try (InputStream is = Files.newInputStream(dump)) {
+                            client.setScreen(new OpenDumpScreen(this, is));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        return true;
+                    });
+
+                    row.child(openLabel);
                     main.child(row);
                 }
             }
