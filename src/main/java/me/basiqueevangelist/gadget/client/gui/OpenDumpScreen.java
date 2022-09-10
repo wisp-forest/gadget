@@ -56,7 +56,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
             view.child(Components.label(Text.literal(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()))));
 
-            HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 
             fullRow
                 .child(view)
