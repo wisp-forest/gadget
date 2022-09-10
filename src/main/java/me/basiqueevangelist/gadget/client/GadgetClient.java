@@ -1,5 +1,6 @@
 package me.basiqueevangelist.gadget.client;
 
+import me.basiqueevangelist.gadget.Gadget;
 import me.basiqueevangelist.gadget.client.gui.FieldDataScreen;
 import me.basiqueevangelist.gadget.client.gui.GadgetScreen;
 import me.basiqueevangelist.gadget.network.*;
@@ -81,6 +82,8 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            if (!Gadget.CONFIG.menuButtonEnabled()) return;
+
             if (screen instanceof TitleScreen) {
                 int l = scaledHeight / 4 + 48;
 
@@ -94,7 +97,7 @@ public class GadgetClient implements ClientModInitializer {
             } else if (screen instanceof GameMenuScreen) {
                 Screens.getButtons(screen).add(new ButtonWidget(
                     scaledWidth / 2 + 4 + 96 + 5,
-                    scaledHeight / 4 + 96 + -16,
+                    scaledHeight / 4 + 96 - 16,
                     20,
                     20,
                     Text.translatable("text.gadget.menu_button"),
