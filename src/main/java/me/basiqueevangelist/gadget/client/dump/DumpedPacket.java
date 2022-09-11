@@ -1,9 +1,12 @@
 package me.basiqueevangelist.gadget.client.dump;
 
+import me.basiqueevangelist.gadget.util.NetworkUtil;
+import me.basiqueevangelist.gadget.util.ReflectionUtil;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 
 public record DumpedPacket(boolean outbound, NetworkState state, Packet<?> packet) {
     public static DumpedPacket read(PacketByteBuf buf) {
@@ -29,5 +32,17 @@ public record DumpedPacket(boolean outbound, NetworkState state, Packet<?> packe
             case LOGIN -> 0xFFFF0000;
             case STATUS -> 0xFFFFFF00;
         };
+    }
+
+    public String searchText() {
+        StringBuilder search = new StringBuilder();
+
+        search.append(ReflectionUtil.nameWithoutPackage(packet.getClass()));
+
+        Identifier channelName = NetworkUtil.getChannelOrNull(packet);
+        if (channelName != null)
+            search.append(" ").append(channelName);
+
+        return search.toString();
     }
 }

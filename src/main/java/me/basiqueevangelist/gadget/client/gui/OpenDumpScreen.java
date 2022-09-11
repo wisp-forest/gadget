@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import me.basiqueevangelist.gadget.client.dump.DumpedPacket;
 import me.basiqueevangelist.gadget.client.dump.PacketDumpReader;
+import me.basiqueevangelist.gadget.client.dump.SearchWord;
 import me.basiqueevangelist.gadget.util.NetworkUtil;
 import me.basiqueevangelist.gadget.util.ReflectionUtil;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,37 +21,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private final Screen parent;
-    private final List<DumpedPacket> packets;
+    private final List<DisplayedPacket> packets;
+    private VerticalFlowLayout main;
 
     public OpenDumpScreen(Screen parent, InputStream file) throws IOException {
         this.parent = parent;
-        this.packets = PacketDumpReader.readAll(file);
-    }
+        this.packets = new ArrayList<>();
 
-    @Override
-    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
-        return OwoUIAdapter.create(this, Containers::verticalFlow);
-    }
-
-    @Override
-    protected void build(VerticalFlowLayout rootComponent) {
-        rootComponent
-            .horizontalAlignment(HorizontalAlignment.CENTER)
-            .verticalAlignment(VerticalAlignment.CENTER)
-            .surface(Surface.VANILLA_TRANSLUCENT);
+        var rawPackets = PacketDumpReader.readAll(file);
 
 
-        VerticalFlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main);
-
-        rootComponent.child(scroll.child(main));
-        main.padding(Insets.of(15));
-
-        for (var packet : packets) {
+        for (var packet : rawPackets) {
             VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
             view
@@ -78,13 +64,63 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .child(view)
                 .horizontalAlignment(packet.outbound() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT);
 
-            main.child(fullRow);
+            packets.add(new DisplayedPacket(packet, fullRow));
+        }
+    }
+
+    @Override
+    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+        return OwoUIAdapter.create(this, Containers::verticalFlow);
+    }
+
+    @Override
+    protected void build(VerticalFlowLayout rootComponent) {
+        rootComponent
+            .horizontalAlignment(HorizontalAlignment.CENTER)
+            .verticalAlignment(VerticalAlignment.CENTER)
+            .surface(Surface.VANILLA_TRANSLUCENT);
+
+        this.main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main);
+
+        var searchBox = Components.textBox(Sizing.fill(95));
+        searchBox.setChangedListener(this::rebuildWithSearch);
+
+        rootComponent
+            .child(searchBox)
+            .child(scroll
+                .child(this.main)
+                .margins(Insets.top(5)));
+        this.main.padding(Insets.of(15));
+
+        rebuildWithSearch("");
+    }
+
+    private void rebuildWithSearch(String searchText) {
+        List<SearchWord> words = SearchWord.parseSearch(searchText);
+        List<Component> neededComponents = new ArrayList<>();
+
+        main.clearChildren();
+
+        outer:
+        for (var packet : packets) {
+            String relevantText = packet.packet.searchText();
+
+            for (var word : words) {
+                if (!word.matches(relevantText))
+                    continue outer;
+            }
+
+            neededComponents.add(packet.fullRow);
         }
 
+        main.children(neededComponents);
     }
 
     @Override
     public void close() {
         client.setScreen(parent);
     }
+
+    record DisplayedPacket(DumpedPacket packet, HorizontalFlowLayout fullRow) { }
 }
