@@ -9,9 +9,13 @@ import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import me.basiqueevangelist.gadget.client.dump.DumpedPacket;
 import me.basiqueevangelist.gadget.client.dump.PacketDumpReader;
+import me.basiqueevangelist.gadget.util.NetworkUtil;
 import me.basiqueevangelist.gadget.util.ReflectionUtil;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -51,10 +55,22 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
             view
                 .padding(Insets.of(5))
-                .surface(Surface.outline(0xFFFF0000))
+                .surface(Surface.outline(packet.color()))
                 .margins(Insets.bottom(5));
 
-            view.child(Components.label(Text.literal(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()))));
+            MutableText typeText = Text.literal(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
+            Identifier channel = NetworkUtil.getChannelOrNull(packet.packet());
+
+            if (channel != null)
+                typeText.append(Text.literal(" " + channel)
+                    .formatted(Formatting.GRAY));
+
+            view.child(Components.label(typeText));
+
+            FieldDataIsland island = new FieldDataIsland();
+            island.targetObject(packet.packet(), false);
+
+            view.child(island.mainContainer());
 
             HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 

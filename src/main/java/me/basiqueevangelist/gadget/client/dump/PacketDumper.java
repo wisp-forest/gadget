@@ -62,8 +62,9 @@ public class PacketDumper {
         }
     }
 
-    public static void dump(boolean outbound, NetworkState state, Packet<?> packet) {
+    public static void dump(boolean outbound, Packet<?> packet) {
         PacketByteBuf buf = PacketByteBufs.create();
+        NetworkState state = NetworkState.getPacketHandlerState(packet);
 
         short flags = 0;
 

@@ -4,9 +4,10 @@
     "package": "me.basiqueevangelist.gadget.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "ClientConnectionMixin",
+        "CustomPayloadC2SPacketMixin"
     ],
     "client": [
-        "ClientConnectionMixin"
     ],
     "injectors": {
         "defaultRequire": 1

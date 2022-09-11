@@ -21,4 +21,13 @@ public record DumpedPacket(boolean outbound, NetworkState state, Packet<?> packe
 
         return new DumpedPacket(outbound, state, packet);
     }
+
+    public int color() {
+        return switch (state) {
+            case PLAY -> 0xFF00FF00;
+            case HANDSHAKING -> 0xFF808080;
+            case LOGIN -> 0xFFFF0000;
+            case STATUS -> 0xFFFFFF00;
+        };
+    }
 }

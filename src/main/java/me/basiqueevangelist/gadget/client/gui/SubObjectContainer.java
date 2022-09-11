@@ -36,7 +36,7 @@ public class SubObjectContainer extends VerticalFlowLayout {
     protected final SpinnyBoiComponent spinnyBoi;
 
     protected SubObjectContainer(Runnable loader, Runnable unloader) {
-        super(Sizing.fill(100), Sizing.content());
+        super(Sizing.content(), Sizing.content());
         this.loader = loader;
         this.unloader = unloader;
         this.surface(SURFACE);

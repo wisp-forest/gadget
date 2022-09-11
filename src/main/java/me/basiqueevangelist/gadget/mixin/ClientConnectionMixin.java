@@ -15,14 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ClientConnectionMixin {
     @Shadow @Final private NetworkSide side;
 
-    @Shadow protected abstract NetworkState getState();
-
     @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/Packet;)V", at = @At("HEAD"))
     private void readHook(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
         if (side == NetworkSide.SERVERBOUND) return;
 
         if (PacketDumper.isDumping()) {
-            PacketDumper.dump(false, getState(), packet);
+            PacketDumper.dump(false, packet);
         }
     }
 
@@ -31,7 +29,7 @@ public abstract class ClientConnectionMixin {
         if (side == NetworkSide.SERVERBOUND) return;
 
         if (PacketDumper.isDumping()) {
-            PacketDumper.dump(true, getState(), packet);
+            PacketDumper.dump(true, packet);
         }
     }
 }

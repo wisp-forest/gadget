@@ -15,16 +15,16 @@ import org.lwjgl.glfw.GLFW;
 
 public class PrimitiveFieldWidget extends HorizontalFlowLayout {
     private final PrimitiveEditData editData;
-    private final FieldDataScreen screen;
+    private final FieldDataIsland island;
     private final ObjectPath fieldPath;
 
     private final LabelComponent contentsLabel;
     private final LabelComponent editLabel;
     private final TextFieldWidget editField;
 
-    protected PrimitiveFieldWidget(FieldDataScreen screen, ObjectPath fieldPath, boolean isFinal, PrimitiveFieldObject pfo) {
+    protected PrimitiveFieldWidget(FieldDataIsland island, ObjectPath fieldPath, boolean isFinal, PrimitiveFieldObject pfo) {
         super(Sizing.content(), Sizing.content());
-        this.screen = screen;
+        this.island = island;
         this.fieldPath = fieldPath;
 
         this.contentsLabel = Components.label(
@@ -46,7 +46,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         ));
         child(contentsLabel);
 
-        if (editData != null)
+        if (editData != null && island.primitiveSetter != null)
             child(editLabel);
     }
 
@@ -60,7 +60,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         } else if (keyCode == GLFW.GLFW_KEY_ENTER) {
             UISounds.playButtonSound();
 
-            screen.setPrimitive(fieldPath, new PrimitiveEditData(editData.type(), editField.getText()));
+            island.primitiveSetter.accept(fieldPath, new PrimitiveEditData(editData.type(), editField.getText()));
 
             removeChild(editField);
 
