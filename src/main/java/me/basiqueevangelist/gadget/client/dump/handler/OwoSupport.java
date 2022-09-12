@@ -1,28 +1,22 @@
-package me.basiqueevangelist.gadget.client.dump;
+package me.basiqueevangelist.gadget.client.dump.handler;
 
 import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.util.VectorSerializer;
-import me.basiqueevangelist.gadget.Gadget;
 import me.basiqueevangelist.gadget.client.field.FieldDataIsland;
 import me.basiqueevangelist.gadget.mixin.owo.OwoNetChannelAccessor;
 import me.basiqueevangelist.gadget.mixin.owo.ParticleSystemAccessor;
 import me.basiqueevangelist.gadget.util.NetworkUtil;
 import me.basiqueevangelist.gadget.util.ReflectionUtil;
-import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 
-@SuppressWarnings("UnstableApiUsage")
-public final class DrawPacketHandlers {
-    public static final Identifier LAST_PHASE = Gadget.id("last");
-
-    private DrawPacketHandlers() {
+public final class OwoSupport {
+    private OwoSupport() {
 
     }
 
@@ -30,11 +24,9 @@ public final class DrawPacketHandlers {
         DrawPacketHandler.EVENT.register((packet, view) -> {
             if (packet.state() != NetworkState.PLAY) return false;
 
-            Identifier channelId = NetworkUtil.getChannelOrNull(packet.packet());
+            if (packet.channelId() == null) return false;
 
-            if (channelId == null) return false;
-
-            OwoNetChannelAccessor channel = (OwoNetChannelAccessor) OwoNetChannelAccessor.getRegisteredChannels().get(channelId);
+            OwoNetChannelAccessor channel = (OwoNetChannelAccessor) OwoNetChannelAccessor.getRegisteredChannels().get(packet.channelId());
 
             if (channel == null) return false;
 
@@ -61,11 +53,9 @@ public final class DrawPacketHandlers {
         DrawPacketHandler.EVENT.register((packet, view) -> {
             if (packet.state() != NetworkState.PLAY) return false;
 
-            Identifier channelId = NetworkUtil.getChannelOrNull(packet.packet());
+            if (packet.channelId() == null) return false;
 
-            if (channelId == null) return false;
-
-            ParticleSystemController controller = ParticleSystemController.REGISTERED_CONTROLLERS.get(channelId);
+            ParticleSystemController controller = ParticleSystemController.REGISTERED_CONTROLLERS.get(packet.channelId());
 
             if (controller == null) return false;
 
@@ -87,18 +77,6 @@ public final class DrawPacketHandlers {
             return true;
         });
 
-        DrawPacketHandler.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
-        DrawPacketHandler.EVENT.register(LAST_PHASE, (packet, view) -> {
-            if (NetworkUtil.getChannelOrNull(packet.packet()) != null) {
-                view.child(Components.label(Text.translatable("text.gadget.packet_not_supported")));
-                return true;
-            }
-
-            FieldDataIsland island = new FieldDataIsland();
-            island.targetObject(packet.packet(), false);
-
-            view.child(island.mainContainer());
-            return true;
-        });
+        // TODO: OwO handshake and config sync.
     }
 }

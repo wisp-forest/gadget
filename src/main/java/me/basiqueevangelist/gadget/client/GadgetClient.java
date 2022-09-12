@@ -1,7 +1,7 @@
 package me.basiqueevangelist.gadget.client;
 
 import me.basiqueevangelist.gadget.Gadget;
-import me.basiqueevangelist.gadget.client.dump.DrawPacketHandlers;
+import me.basiqueevangelist.gadget.client.dump.handler.DrawPacketHandlers;
 import me.basiqueevangelist.gadget.client.dump.PacketDumper;
 import me.basiqueevangelist.gadget.client.field.FieldDataScreen;
 import me.basiqueevangelist.gadget.client.gui.GadgetScreen;

@@ -1,6 +1,7 @@
-package me.basiqueevangelist.gadget.client.dump;
+package me.basiqueevangelist.gadget.client.dump.handler;
 
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import me.basiqueevangelist.gadget.client.dump.DumpedPacket;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 

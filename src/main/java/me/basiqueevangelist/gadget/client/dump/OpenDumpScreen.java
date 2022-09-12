@@ -7,13 +7,12 @@ import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
-import me.basiqueevangelist.gadget.util.NetworkUtil;
+import me.basiqueevangelist.gadget.client.dump.handler.DrawPacketHandler;
 import me.basiqueevangelist.gadget.util.ReflectionUtil;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -42,10 +41,9 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .margins(Insets.bottom(5));
 
             MutableText typeText = Text.literal(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
-            Identifier channel = NetworkUtil.getChannelOrNull(packet.packet());
 
-            if (channel != null)
-                typeText.append(Text.literal(" " + channel)
+            if (packet.channelId() != null)
+                typeText.append(Text.literal(" " + packet.channelId())
                     .formatted(Formatting.GRAY));
 
             view.child(Components.label(typeText)
