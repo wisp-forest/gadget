@@ -5,7 +5,10 @@
     "compatibilityLevel": "JAVA_17",
     "mixins": [
         "ClientConnectionMixin",
-        "CustomPayloadC2SPacketMixin"
+        "CustomPayloadC2SPacketMixin",
+        "owo.IndexedSerializerAccessor",
+        "owo.OwoNetChannelAccessor",
+        "owo.ParticleSystemAccessor"
     ],
     "client": [
     ],

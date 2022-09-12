@@ -8,6 +8,7 @@ import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
+import me.basiqueevangelist.gadget.client.dump.OpenDumpScreen;
 import me.basiqueevangelist.gadget.client.dump.PacketDumper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;

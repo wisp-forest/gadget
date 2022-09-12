@@ -32,6 +32,9 @@
         "underlined": true
     },
 
+    "text.gadget.packet_not_supported": "This custom packet isn't supported by Gadget\nAdd support via DrawPacketHandler",
+    "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
+
     "key.gadget.inspect": [
         {"translate": "message.gadget.header"},
         {"text": "Inspect"}

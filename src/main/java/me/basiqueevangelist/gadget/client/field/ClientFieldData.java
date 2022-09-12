@@ -1,6 +1,7 @@
-package me.basiqueevangelist.gadget.client.gui;
+package me.basiqueevangelist.gadget.client.field;
 
 import io.wispforest.owo.ui.core.Component;
+import me.basiqueevangelist.gadget.client.gui.SubObjectContainer;
 import me.basiqueevangelist.gadget.desc.FieldObject;
 import me.basiqueevangelist.gadget.network.FieldData;
 

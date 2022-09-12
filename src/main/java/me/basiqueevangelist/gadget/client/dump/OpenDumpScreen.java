@@ -1,4 +1,4 @@
-package me.basiqueevangelist.gadget.client.gui;
+package me.basiqueevangelist.gadget.client.dump;
 
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -7,9 +7,6 @@ import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
-import me.basiqueevangelist.gadget.client.dump.DumpedPacket;
-import me.basiqueevangelist.gadget.client.dump.PacketDumpReader;
-import me.basiqueevangelist.gadget.client.dump.SearchWord;
 import me.basiqueevangelist.gadget.util.NetworkUtil;
 import me.basiqueevangelist.gadget.util.ReflectionUtil;
 import net.minecraft.client.gui.screen.Screen;
@@ -51,12 +48,10 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 typeText.append(Text.literal(" " + channel)
                     .formatted(Formatting.GRAY));
 
-            view.child(Components.label(typeText));
+            view.child(Components.label(typeText)
+                .margins(Insets.bottom(3)));
 
-            FieldDataIsland island = new FieldDataIsland();
-            island.targetObject(packet.packet(), false);
-
-            view.child(island.mainContainer());
+            DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);
 
             HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 

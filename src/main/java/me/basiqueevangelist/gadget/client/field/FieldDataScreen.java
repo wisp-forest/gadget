@@ -1,4 +1,4 @@
-package me.basiqueevangelist.gadget.client.gui;
+package me.basiqueevangelist.gadget.client.field;
 
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;

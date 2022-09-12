@@ -1,10 +1,11 @@
-package me.basiqueevangelist.gadget.client.gui;
+package me.basiqueevangelist.gadget.client.field;
 
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
+import me.basiqueevangelist.gadget.client.gui.SubObjectContainer;
 import me.basiqueevangelist.gadget.desc.ComplexFieldObject;
 import me.basiqueevangelist.gadget.desc.ErrorFieldObject;
 import me.basiqueevangelist.gadget.desc.FieldObjects;
