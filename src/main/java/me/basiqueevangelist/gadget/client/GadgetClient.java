@@ -81,7 +81,7 @@ public class GadgetClient implements ClientModInitializer {
             if (PacketDumper.isDumping()) {
                 PacketDumper.stop();
             } else {
-                PacketDumper.start();
+                PacketDumper.start(true);
             }
         });
 

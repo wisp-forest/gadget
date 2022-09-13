@@ -31,7 +31,7 @@ public class PacketDumper {
 
     }
 
-    public static void start() {
+    public static void start(boolean doToast) {
         try {
             if (!Files.exists(DUMP_DIR))
                 Files.createDirectories(DUMP_DIR);
@@ -41,7 +41,9 @@ public class PacketDumper {
             OUTPUT_CHANNEL = Files.newByteChannel(DUMP_PATH, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
             LOGGER.info("Started dumping to {}", filename);
-            MinecraftClient.getInstance().getToastManager().add(new NotificationToast(Text.translatable("message.gadget.dump.started"), null));
+
+            if (doToast)
+                MinecraftClient.getInstance().getToastManager().add(new NotificationToast(Text.translatable("message.gadget.dump.started"), null));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

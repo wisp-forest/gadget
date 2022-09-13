@@ -32,8 +32,10 @@
         "underlined": true
     },
 
-    "text.gadget.packet_not_supported": "This custom packet isn't supported by Gadget\nAdd support via DrawPacketHandler",
+    "text.gadget.packet_not_supported": "This custom packet isn't supported by Gadget\nAdd support via DrawPacketHandler.EVENT",
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
+
+    "text.gadget.join_with_dump": "Join and start dumping packets",
 
     "key.gadget.inspect": [
         {"translate": "message.gadget.header"},

@@ -74,7 +74,8 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
         this.main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main);
+        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main)
+            .scrollbarColor(0xA0FFFFFF);
 
         var searchBox = Components.textBox(Sizing.fill(95));
         searchBox.setChangedListener(this::rebuildWithSearch);

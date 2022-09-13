@@ -59,7 +59,8 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         VerticalFlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main);
+        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+            .scrollbarColor(0xA0FFFFFF);
 
         verticalFlowLayout.child(scroll.child(main));
 

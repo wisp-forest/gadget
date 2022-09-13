@@ -11,6 +11,11 @@
         "owo.ParticleSystemAccessor"
     ],
     "client": [
+        "client.ContextMenuScreenMixin",
+        "client.DisconnectedScreenMixin",
+        "client.MinecraftClientMixin",
+        "client.MultiplayerServerEntryMixin",
+        "client.WorldListWidgetWorldEntryMixin"
     ],
     "injectors": {
         "defaultRequire": 1
