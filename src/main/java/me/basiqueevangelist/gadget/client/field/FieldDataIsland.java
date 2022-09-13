@@ -26,6 +26,7 @@ public class FieldDataIsland {
     protected final Map<ObjectPath, ClientFieldData> fields = new TreeMap<>();
     private final VerticalFlowLayout mainContainer;
     private Consumer<ObjectPath> pathRequester = path -> {};
+    private boolean shortenNames = false;
     BiConsumer<ObjectPath, PrimitiveEditData> primitiveSetter = null;
 
     public FieldDataIsland() {
@@ -60,6 +61,10 @@ public class FieldDataIsland {
 
         FieldObjects.collectAllData(ObjectPath.EMPTY, obj)
             .forEach(this::addFieldData);
+    }
+
+    public void shortenNames() {
+        this.shortenNames = true;
     }
 
     public VerticalFlowLayout mainContainer() {
@@ -103,10 +108,15 @@ public class FieldDataIsland {
             data.subObjectContainer = subContainer;
             rowContainer.child(subContainer);
 
+            String text = cfo.text();
+
+            if (shortenNames)
+                text = text.substring(text.lastIndexOf('.') + 1);
+
             row
                 .child(
                     Components.label(
-                        Text.literal(" " + cfo.text() + " ")
+                        Text.literal(" " + text + " ")
                             .formatted(Formatting.GRAY)
                     )
                 )

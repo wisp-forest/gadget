@@ -27,7 +27,7 @@ public final class MinecraftSupport {
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
             String brand = buf.readString();
 
-            view.child(Components.label(Text.literal("brand ")
+            view.child(Components.label(Text.literal("brand")
                 .append(Text.literal(" = \"" + brand + "\"")
                     .formatted(Formatting.GRAY))));
 

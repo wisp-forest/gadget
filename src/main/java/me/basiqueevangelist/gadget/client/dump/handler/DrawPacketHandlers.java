@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class DrawPacketHandlers {
     public static final Identifier LAST_PHASE = Gadget.id("last");
 
@@ -29,6 +28,7 @@ public final class DrawPacketHandlers {
             }
 
             FieldDataIsland island = new FieldDataIsland();
+            island.shortenNames();
             island.targetObject(packet.packet(), false);
 
             view.child(island.mainContainer());
