@@ -66,6 +66,8 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
                     LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
 
+                    openLabel.cursorStyle(CursorStyle.HAND);
+                    GuiUtil.hoverBlue(openLabel);
                     openLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
                         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 

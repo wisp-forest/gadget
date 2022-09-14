@@ -58,7 +58,7 @@ public class GadgetClient implements ClientModInitializer {
 
             var perspective = client.options.getPerspective();
 
-            if (!perspective.isFirstPerson() && perspective.isFrontView() && client.player != null) {
+            if (!perspective.isFirstPerson() && client.player != null) {
                 GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new EntityTarget(client.player.getId()), ObjectPath.EMPTY));
             }
 

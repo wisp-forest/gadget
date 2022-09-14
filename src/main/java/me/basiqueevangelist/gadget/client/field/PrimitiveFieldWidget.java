@@ -3,8 +3,10 @@ package me.basiqueevangelist.gadget.client.field;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
+import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
+import me.basiqueevangelist.gadget.client.gui.GuiUtil;
 import me.basiqueevangelist.gadget.desc.PrimitiveFieldObject;
 import me.basiqueevangelist.gadget.desc.edit.PrimitiveEditData;
 import me.basiqueevangelist.gadget.path.ObjectPath;
@@ -39,6 +41,10 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         this.editField.keyPress().subscribe(this::editFieldKeyPressed);
         this.editField
             .verticalSizing(Sizing.fixed(8));
+        this.editLabel
+            .cursorStyle(CursorStyle.HAND);
+
+        GuiUtil.hoverBlue(this.editLabel);
 
         child(Components.label(
             Text.literal(" = ")

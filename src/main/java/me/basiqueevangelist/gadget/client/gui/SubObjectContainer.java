@@ -3,10 +3,7 @@ package me.basiqueevangelist.gadget.client.gui;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
-import io.wispforest.owo.ui.core.Component;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.core.Surface;
+import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.util.math.MatrixStack;
@@ -45,10 +42,14 @@ public class SubObjectContainer extends VerticalFlowLayout {
         this.allowOverflow(true);
 
         this.spinnyBoi = new SpinnyBoiComponent();
+        this.spinnyBoi
+            .cursorStyle(CursorStyle.HAND);
 
         this.expanded = false;
         this.spinnyBoi.targetRotation = 0;
         this.spinnyBoi.rotation = this.spinnyBoi.targetRotation;
+
+        GuiUtil.hoverBlue(this.spinnyBoi);
 
         this.spinnyBoi.mouseDown().subscribe((mouseX, mouseY, button) -> {
             this.toggleExpansion();
