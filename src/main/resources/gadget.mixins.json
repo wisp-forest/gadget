@@ -8,6 +8,7 @@
         "CustomPayloadC2SPacketMixin",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",
+        "owo.ParentComponentMixin",
         "owo.ParticleSystemAccessor"
     ],
     "client": [
