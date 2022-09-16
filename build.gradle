@@ -85,5 +85,16 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+		def ENV = System.getenv()
+
+		if (ENV.MAVEN_URL) {
+			repositories.maven {
+				url ENV.MAVEN_URL
+				credentials {
+					username ENV.MAVEN_USERNAME
+					password ENV.MAVEN_PASSWORD
+				}
+			}
+		}
 	}
 }
