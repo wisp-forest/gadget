@@ -16,10 +16,10 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "me.basiqueevangelist.gadget.Gadget"
+            "io.wispforest.gadget.Gadget"
         ],
         "client": [
-            "me.basiqueevangelist.gadget.client.GadgetClient"
+            "io.wispforest.gadget.client.GadgetClient"
         ]
     },
     "mixins": [
@@ -39,6 +39,6 @@
         "fabric-api": "*",
         "minecraft": "1.19.x",
         "java": ">=17",
-        "owo": ">=0.7.3"
+        "owo": ">=0.8.1"
     }
 }
