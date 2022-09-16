@@ -5,6 +5,7 @@ import me.basiqueevangelist.gadget.client.dump.handler.DrawPacketHandlers;
 import me.basiqueevangelist.gadget.client.dump.PacketDumper;
 import me.basiqueevangelist.gadget.client.field.FieldDataScreen;
 import me.basiqueevangelist.gadget.client.gui.GadgetScreen;
+import me.basiqueevangelist.gadget.client.gui.VanillaInspector;
 import me.basiqueevangelist.gadget.network.*;
 import me.basiqueevangelist.gadget.path.ObjectPath;
 import net.fabricmc.api.ClientModInitializer;
@@ -34,6 +35,7 @@ public class GadgetClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
         DrawPacketHandlers.init();
+        VanillaInspector.init();
 
         GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
             if (access.runtime().currentScreen instanceof FieldDataScreen gui && !gui.isClient() && gui.target().equals(packet.target())) {
