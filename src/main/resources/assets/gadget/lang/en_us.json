@@ -38,7 +38,27 @@
 
     "text.config.gadget.title": "Gadget",
     "text.config.gadget.option.menuButtonEnabled": "Menu Button Enabled",
-    "text.config.gadget.option.dumpWithContextMenu": "Dump With Context Menu Enabled",
+    "text.config.gadget.option.menuButtonEnabled.tooltip": "Enables the Gadget menu button",
+    "text.config.gadget.option.rightClickDump": "Right Click to Dump",
+    "text.config.gadget.option.rightClickDump.tooltip": [
+        "Enables starting dumping by\n",
+        "right clicking in the singleplayer\n",
+        "and multiplayer screens"
+    ],
+    "text.config.gadget.option.noFrequentPackets": "Don't Dump Frequent Packets",
+    "text.config.gadget.option.noFrequentPackets.tooltip": [
+        "Disables frequently sent packets, such\n",
+        "as player and entity look and move.\n\n",
+        {
+            "text": "⚠ ",
+            "color": "red"
+        },
+        {
+            "text": "Disabling this may lead to bad\n performance in the dump screen",
+            "bold": true,
+            "color": "red"
+        }
+    ],
 
     "text.gadget.packet_not_supported": "This custom packet isn't supported by Gadget\nAdd support via DrawPacketHandler.EVENT",
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",

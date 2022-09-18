@@ -7,5 +7,6 @@ import io.wispforest.owo.config.annotation.Modmenu;
 @Config(name = "gadget", wrapperName = "GadgetConfig")
 public class GadgetConfigModel {
     public boolean menuButtonEnabled = true;
-    public boolean dumpWithContextMenu = true;
+    public boolean rightClickDump = true;
+    public boolean noFrequentPackets = true;
 }

@@ -27,7 +27,7 @@ public abstract class WorldListWidgetWorldEntryMixin {
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onRightClick(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
-        if (!Gadget.CONFIG.dumpWithContextMenu()) return;
+        if (!Gadget.CONFIG.rightClickDump()) return;
 
         DropdownComponent dropdown = Components.dropdown(Sizing.content())
                 .button(Text.translatable("text.gadget.join_with_dump"), dropdown2 -> {
