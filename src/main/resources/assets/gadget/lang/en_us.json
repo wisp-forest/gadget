@@ -31,6 +31,10 @@
         "text": "Open",
         "underlined": true
     },
+    "text.gadget.open_other_dump": {
+        "text": "Open other dump",
+        "underlined": "true"
+    },
 
     "text.config.gadget.title": "Gadget",
     "text.config.gadget.option.menuButtonEnabled": "Menu Button Enabled",
