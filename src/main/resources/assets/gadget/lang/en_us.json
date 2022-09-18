@@ -34,6 +34,7 @@
 
     "text.config.gadget.title": "Gadget",
     "text.config.gadget.option.menuButtonEnabled": "Menu Button Enabled",
+    "text.config.gadget.option.dumpWithContextMenu": "Dump With Context Menu Enabled",
 
     "text.gadget.packet_not_supported": "This custom packet isn't supported by Gadget\nAdd support via DrawPacketHandler.EVENT",
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",

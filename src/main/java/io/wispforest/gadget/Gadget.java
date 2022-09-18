@@ -1,7 +1,7 @@
 package io.wispforest.gadget;
 
 import io.wispforest.gadget.network.GadgetNetworking;
-import me.basiqueevangelist.gadget.util.GadgetConfig;
+import io.wispforest.gadget.util.GadgetConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;

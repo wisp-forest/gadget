@@ -1,7 +1,6 @@
 package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.network.*;
-import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.dump.handler.DrawPacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
@@ -88,7 +87,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (!Gadget.CONFIG.menuButtonEnabled()) return;
+//            if (!Gadget.CONFIG.menuButtonEnabled()) return;
 
             if (screen instanceof TitleScreen) {
                 int l = scaledHeight / 4 + 48;

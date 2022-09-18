@@ -1,5 +1,6 @@
 package io.wispforest.gadget.mixin.client;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.pond.ContextMenuScreenAccess;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.DropdownComponent;
@@ -26,6 +27,7 @@ public abstract class WorldListWidgetWorldEntryMixin {
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onRightClick(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+        if (!Gadget.CONFIG.dumpWithContextMenu()) return;
 
         DropdownComponent dropdown = Components.dropdown(Sizing.content())
                 .button(Text.translatable("text.gadget.join_with_dump"), dropdown2 -> {
