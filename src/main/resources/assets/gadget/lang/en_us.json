@@ -67,10 +67,10 @@
 
     "key.gadget.inspect": [
         {"translate": "message.gadget.header"},
-        {"text": "Inspect"}
+        {"text": "Inspect Object"}
     ],
     "key.gadget.dump": [
         {"translate": "message.gadget.header"},
-        {"text": "Dump"}
+        {"text": "Toggle Dumping"}
     ]
 }

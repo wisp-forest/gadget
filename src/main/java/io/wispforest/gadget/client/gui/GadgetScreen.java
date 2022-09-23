@@ -46,7 +46,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         VerticalFlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
         ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
-            .scrollbarColor(0xA0FFFFFF);
+            .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent.child(scroll.child(main));
         main.padding(Insets.of(15));

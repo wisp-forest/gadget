@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(OwoNetChannel.class)
+@Mixin(value = OwoNetChannel.class, remap = false)
 public interface OwoNetChannelAccessor {
     @Accessor("REGISTERED_CHANNELS")
     static Map<Identifier, OwoNetChannel> getRegisteredChannels() {

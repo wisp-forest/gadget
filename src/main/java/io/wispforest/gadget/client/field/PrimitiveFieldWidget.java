@@ -38,6 +38,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         this.editData = isFinal ? null : pfo.editData().orElse(null);
 
         this.editLabel.mouseDown().subscribe(this::editLabelMouseDown);
+        this.editField.focusLost().subscribe(this::editFieldFocusLost);
         this.editField.keyPress().subscribe(this::editFieldKeyPressed);
         this.editField
             .verticalSizing(Sizing.fixed(8));
@@ -57,13 +58,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
     }
 
     private boolean editFieldKeyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            removeChild(editField);
-
-            child(contentsLabel);
-            child(editLabel);
-            return true;
-        } else if (keyCode == GLFW.GLFW_KEY_ENTER) {
+        if (keyCode == GLFW.GLFW_KEY_ENTER) {
             UISounds.playButtonSound();
 
             island.primitiveSetter.accept(fieldPath, new PrimitiveEditData(editData.type(), editField.getText()));
@@ -78,6 +73,13 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         return false;
     }
 
+    private void editFieldFocusLost() {
+        removeChild(editField);
+
+        child(contentsLabel);
+        child(editLabel);
+    }
+
     private boolean editLabelMouseDown(double mouseX, double mouseY, int button) {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
@@ -89,6 +91,11 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         child(editField);
         editField.setText(editData.data());
         editField.setCursorToStart();
+
+        if (focusHandler() != null)
+            focusHandler().focus(editField, FocusSource.MOUSE_CLICK);
+
+        editField.setTextFieldFocused(true);
 
         return true;
     }

@@ -1,7 +1,7 @@
 package io.wispforest.gadget.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.util.Drawer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
@@ -53,11 +53,12 @@ public class VanillaInspector {
     }
 
     // Mostly copied (and modified) from Drawer$DebugDrawer#drawInspector
-    private void drawInspector(Screen screen, MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
+    public void drawInspector(Screen screen, MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
         if (!enabled) return;
 
         RenderSystem.disableDepthTest();
-        var textRenderer = MinecraftClient.getInstance().textRenderer;
+        var client = MinecraftClient.getInstance();
+        var textRenderer = client.textRenderer;
 
         var children = new ArrayList<Element>();
         if (!onlyHovered) {
@@ -67,21 +68,34 @@ public class VanillaInspector {
         }
 
         for (var child : children) {
-            if (GuiUtil.x(child) == -1) continue;
             if (!GuiUtil.isVisible(child)) continue;
-            if (child instanceof OwoUIAdapter<?>) continue;
 
             matrices.translate(0, 0, 1000);
 
             Drawer.drawRectOutline(matrices, GuiUtil.x(child), GuiUtil.y(child), GuiUtil.width(child), GuiUtil.height(child), 0xFF3AB0FF);
 
             if (onlyHovered) {
-                textRenderer.draw(matrices, Text.of(child.getClass().getSimpleName()),
-                    GuiUtil.x(child) + 1, GuiUtil.y(child) + GuiUtil.height(child) + 1, 0xFFFFFF);
 
-                final var descriptor = Text.literal(GuiUtil.x(child) + "," + GuiUtil.y(child) + " (" + GuiUtil.width(child) + "," + GuiUtil.height(child) + ") ");
+                int inspectorX = GuiUtil.x(child) + 1;
+                int inspectorY = GuiUtil.y(child) + GuiUtil.height(child) + 1;
+                int inspectorHeight = textRenderer.fontHeight * 2 + 4;
+
+                if (inspectorY > client.getWindow().getScaledHeight() - inspectorHeight) {
+                    inspectorY -= GuiUtil.height(child) + inspectorHeight + 1;
+                    if (inspectorY < 0) inspectorY = 1;
+                }
+
+                final var nameText = Text.of(ReflectionUtil.nameWithoutPackage(child.getClass()));
+                final var descriptor = Text.literal(GuiUtil.x(child) + "," + GuiUtil.y(child) + " (" + GuiUtil.width(child) + "," + GuiUtil.height(child) + ")");
+
+                int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
+                Drawer.fill(matrices, inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
+                Drawer.drawRectOutline(matrices, inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
+
+                textRenderer.draw(matrices, nameText,
+                    inspectorX + 2, inspectorY + 2, 0xFFFFFF);
                 textRenderer.draw(matrices, descriptor,
-                    GuiUtil.x(child) + 1, GuiUtil.y(child) + GuiUtil.height(child) + textRenderer.fontHeight + 2, 0xFFFFFF);
+                    inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF);
             }
             matrices.translate(0, 0, -1000);
         }
