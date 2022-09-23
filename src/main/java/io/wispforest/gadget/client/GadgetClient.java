@@ -1,5 +1,7 @@
 package io.wispforest.gadget.client;
 
+import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.mixin.client.KeyboardAccessor;
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.client.dump.handler.DrawPacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
@@ -11,11 +13,13 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
@@ -87,28 +91,34 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-//            if (!Gadget.CONFIG.menuButtonEnabled()) return;
+            if (Gadget.CONFIG.menuButtonEnabled()) {
+                if (screen instanceof TitleScreen) {
+                    int l = scaledHeight / 4 + 48;
 
-            if (screen instanceof TitleScreen) {
-                int l = scaledHeight / 4 + 48;
-
-                Screens.getButtons(screen).add(new ButtonWidget(
-                    scaledWidth / 2 + 104,
-                    l + 48,
-                    20,
-                    20,
-                    Text.translatable("text.gadget.menu_button"),
-                    button -> client.setScreen(new GadgetScreen(screen))));
-            } else if (screen instanceof GameMenuScreen) {
-                Screens.getButtons(screen).add(new ButtonWidget(
-                    scaledWidth / 2 + 4 + 96 + 5,
-                    scaledHeight / 4 + 96 - 16,
-                    20,
-                    20,
-                    Text.translatable("text.gadget.menu_button"),
-                    button -> client.setScreen(new GadgetScreen(screen))));
+                    Screens.getButtons(screen).add(new ButtonWidget(
+                        scaledWidth / 2 + 104,
+                        l + 48,
+                        20,
+                        20,
+                        Text.translatable("text.gadget.menu_button"),
+                        button -> client.setScreen(new GadgetScreen(screen))));
+                } else if (screen instanceof GameMenuScreen) {
+                    Screens.getButtons(screen).add(new ButtonWidget(
+                        scaledWidth / 2 + 4 + 96 + 5,
+                        scaledHeight / 4 + 96 - 16,
+                        20,
+                        20,
+                        Text.translatable("text.gadget.menu_button"),
+                        button -> client.setScreen(new GadgetScreen(screen))));
+                }
             }
 
+            if (Gadget.CONFIG.debugKeysInScreens()) {
+                ScreenKeyboardEvents.allowKeyPress(screen).register(
+                    (screen1, key, scancode, modifiers) ->
+                        !InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_F3)
+                     || !((KeyboardAccessor) client.keyboard).callProcessF3(key));
+            }
         });
     }
 }

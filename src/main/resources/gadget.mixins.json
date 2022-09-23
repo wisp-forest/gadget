@@ -14,6 +14,7 @@
     "client": [
         "client.ContextMenuScreenMixin",
         "client.DisconnectedScreenMixin",
+        "client.KeyboardAccessor",
         "client.KeyboardMixin",
         "client.MinecraftClientMixin",
         "client.MultiplayerServerEntryMixin",

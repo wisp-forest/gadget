@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.util.Drawer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -31,14 +32,11 @@ public class VanillaInspector {
 
     public static void init() {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            VanillaInspector inspector = get(screen);
-
-            if (inspector == null)
-                inspector = new VanillaInspector();
-
-            ALL.put(screen, inspector);
+            VanillaInspector inspector = ALL.computeIfAbsent(screen, unused -> new VanillaInspector());
 
             ScreenEvents.afterRender(screen).register(inspector::drawInspector);
+            ScreenKeyboardEvents.afterKeyPress(screen).register(inspector::keyPressed);
+            ScreenEvents.remove(screen).register(ALL::remove);
         });
     }
 
