@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -120,5 +121,8 @@ public class GadgetClient implements ClientModInitializer {
                      || !((KeyboardAccessor) client.keyboard).callProcessF3(key));
             }
         });
+
+        FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)
+            .forEach(GadgetClientEntrypoint::onGadgetClientInit);
     }
 }

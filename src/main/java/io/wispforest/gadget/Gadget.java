@@ -32,5 +32,8 @@ public class Gadget implements ModInitializer {
                 ░░░╚═╝░░░╚═╝░░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═╝╚═╝░░╚══╝░╚═════╝░
                  Gadget doesn't work very well in production. Caveat emptor.""");
         }
+
+        FabricLoader.getInstance().getEntrypoints("gadget:init", GadgetEntrypoint.class)
+            .forEach(GadgetEntrypoint::onGadgetInit);
     }
 }
