@@ -14,6 +14,7 @@ import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.ObjectPath;
 import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -87,20 +88,28 @@ public class FieldDataIsland {
                     Text.literal("Mixin-injected field")
                         .formatted(Formatting.YELLOW))));
 
-        row.child(Components.label(Text.literal(data.obj.type().substring(0, 1)).styled(x -> x.withColor(data.obj.color())))
-                .margins(Insets.right(5)))
-            .child(Components.label(nameText)
-                .margins(Insets.right(0)))
-            .margins(Insets.both(0, 2))
-            .allowOverflow(true);
+        MutableText rowText = Text.literal("")
+            .append(Text.literal(data.obj.type().charAt(0) + " ")
+                .styled(x -> x.withColor(data.obj.color())))
+            .append(nameText);
+        var rowLabel = Components.label(rowText);
 
-        if (data.obj instanceof PrimitiveFieldObject sfo) {
-            row.child(new PrimitiveFieldWidget(this, path, data.isFinal, sfo));
+        row.child(rowLabel);
+
+        if (data.obj instanceof PrimitiveFieldObject pfo) {
+            if (!data.isFinal && primitiveSetter != null && pfo.editData().isPresent()) {
+                rowText.append(Text.literal(" = ")
+                    .formatted(Formatting.GRAY));
+                row.child(new PrimitiveFieldWidget(this, path, pfo));
+            } else {
+                rowText.append(Text.literal(" = " + pfo.contents())
+                    .formatted(Formatting.GRAY));
+            }
         } else if (data.obj instanceof ErrorFieldObject efo) {
-            row.child(Components.label(Text.literal(" " + efo.exceptionClass())
+            rowText.append(Text.literal(" " + efo.exceptionClass())
                 .styled(x -> x
                     .withColor(Formatting.RED)
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(efo.fullExceptionText()))))));
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(efo.fullExceptionText())))));
         } else if (data.obj instanceof ComplexFieldObject cfo) {
             var subContainer = new SubObjectContainer(
                 () -> pathRequester.accept(path),
@@ -113,16 +122,19 @@ public class FieldDataIsland {
             if (shortenNames)
                 text = text.substring(text.lastIndexOf('.') + 1);
 
+            rowText.append(
+                Text.literal(" " + text + " ")
+                    .formatted(Formatting.GRAY)
+            );
+
             row
-                .child(
-                    Components.label(
-                        Text.literal(" " + text + " ")
-                            .formatted(Formatting.GRAY)
-                    )
-                )
                 .child(subContainer.getSpinnyBoi()
                     .sizing(Sizing.fixed(10), Sizing.content()));
         }
+
+        row
+            .margins(Insets.both(0, 2))
+            .allowOverflow(true);
 
         container.child(rowContainer);
     }

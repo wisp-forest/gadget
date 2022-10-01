@@ -24,7 +24,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
     private final LabelComponent editLabel;
     private final TextFieldWidget editField;
 
-    protected PrimitiveFieldWidget(FieldDataIsland island, ObjectPath fieldPath, boolean isFinal, PrimitiveFieldObject pfo) {
+    protected PrimitiveFieldWidget(FieldDataIsland island, ObjectPath fieldPath, PrimitiveFieldObject pfo) {
         super(Sizing.content(), Sizing.content());
         this.island = island;
         this.fieldPath = fieldPath;
@@ -35,7 +35,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         );
         this.editLabel = Components.label(Text.literal(" ✎ "));
         this.editField = Components.textBox(Sizing.fixed(100));
-        this.editData = isFinal ? null : pfo.editData().orElse(null);
+        this.editData = pfo.editData().orElseThrow();
 
         this.editLabel.mouseDown().subscribe(this::editLabelMouseDown);
         this.editField.focusLost().subscribe(this::editFieldFocusLost);
@@ -47,14 +47,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
 
         GuiUtil.hoverBlue(this.editLabel);
 
-        child(Components.label(
-            Text.literal(" = ")
-                .formatted(Formatting.GRAY)
-        ));
         child(contentsLabel);
-
-        if (editData != null && island.primitiveSetter != null)
-            child(editLabel);
     }
 
     private boolean editFieldKeyPressed(int keyCode, int scanCode, int modifiers) {

@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
@@ -51,7 +52,7 @@ public final class PrettyPrinters {
             AtomicBoolean.class, AtomicInteger.class, AtomicLong.class,
 
             // Minecraft classes
-            BlockState.class, FluidState.class, World.class);
+            BlockState.class, FluidState.class, World.class, Identifier.class);
 
         register(x -> "\"" + x + "\"", String.class);
 

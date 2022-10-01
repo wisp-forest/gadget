@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.dump;
 
+import io.wispforest.gadget.client.gui.BasedLabelComponent;
 import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -32,7 +33,6 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         var rawPackets = PacketDumpReader.readAll(file);
 
-
         for (var packet : rawPackets) {
             VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
@@ -47,7 +47,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 typeText.append(Text.literal(" " + packet.channelId())
                     .formatted(Formatting.GRAY));
 
-            view.child(Components.label(typeText)
+            view.child(new BasedLabelComponent(typeText)
                 .margins(Insets.bottom(3)));
 
             DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);

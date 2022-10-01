@@ -53,6 +53,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         LabelComponent openOther = Components.label(Text.translatable("text.gadget.open_other_dump"));
 
+        openOther.cursorStyle(CursorStyle.HAND);
         GuiUtil.hoverBlue(openOther);
         openOther.margins(Insets.bottom(4));
         openOther.mouseDown().subscribe((mouseX, mouseY, button) -> {

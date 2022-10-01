@@ -1,6 +1,8 @@
 package io.wispforest.gadget.client.gui;
 
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.ParentComponent;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -20,6 +22,18 @@ public final class GuiUtil {
 
         label.mouseLeave().subscribe(
             () -> label.text(((MutableText) label.text()).formatted(Formatting.WHITE)));
+    }
+
+    public static ParentComponent root(Component component) {
+        ParentComponent root = component.parent();
+
+        if (root == null)
+            throw new IllegalStateException();
+
+        if (root.hasParent())
+            root = root.parent();
+
+        return root;
     }
 
     public static void collectChildren(ParentElement root, List<Element> children) {

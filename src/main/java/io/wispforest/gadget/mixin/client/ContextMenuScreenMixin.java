@@ -35,6 +35,12 @@ public class ContextMenuScreenMixin extends Screen implements ContextMenuScreenA
         gadget$adapter.inflateAndMount();
     }
 
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void dispose(CallbackInfo ci) {
+        if (gadget$adapter != null) gadget$adapter.dispose();
+        gadget$adapter = null;
+    }
+
     @Override
     public void gadget$addDropdown(DropdownComponent dropdown) {
         gadget$dropdown = dropdown;
