@@ -48,6 +48,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         GuiUtil.hoverBlue(this.editLabel);
 
         child(contentsLabel);
+        child(editLabel);
     }
 
     private boolean editFieldKeyPressed(int keyCode, int scanCode, int modifiers) {

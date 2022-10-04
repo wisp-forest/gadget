@@ -34,6 +34,8 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         var rawPackets = PacketDumpReader.readAll(file);
 
         for (var packet : rawPackets) {
+            if (packet.isIgnored()) continue;
+
             VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
             view

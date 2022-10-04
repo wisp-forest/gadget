@@ -1,6 +1,5 @@
 package io.wispforest.gadget.client.dump;
 
-import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.NotificationToast;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
@@ -9,11 +8,6 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
@@ -25,7 +19,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Set;
 
 public class PacketDumper {
     private static final Logger LOGGER = LoggerFactory.getLogger("gadget/PacketDumper");
@@ -71,16 +64,7 @@ public class PacketDumper {
         }
     }
 
-    private static final Set<Class<?>> FREQUENT_PACKET_TYPES = Set.of(
-        EntityS2CPacket.MoveRelative.class, EntityS2CPacket.Rotate.class, EntityS2CPacket.RotateAndMoveRelative.class,
-        EntitySetHeadYawS2CPacket.class, PlayerMoveC2SPacket.LookAndOnGround.class, EntityVelocityUpdateS2CPacket.class,
-        PlayerMoveC2SPacket.PositionAndOnGround.class, PlayerMoveC2SPacket.Full.class, EntityPositionS2CPacket.class
-    );
-
     public static void dump(boolean outbound, Packet<?> packet) {
-        if (Gadget.CONFIG.noFrequentPackets() && FREQUENT_PACKET_TYPES.contains(packet.getClass()))
-            return;
-
         PacketByteBuf buf = PacketByteBufs.create();
         NetworkState state = NetworkState.getPacketHandlerState(packet);
 

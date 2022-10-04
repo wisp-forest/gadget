@@ -3,7 +3,7 @@
     "id": "gadget",
     "version": "${version}",
 
-    "name": "Gadget",
+    "name": "gadget",
     "description": "Debugger's Delight",
     "authors": [
         "BasiqueEvangelist"
@@ -39,6 +39,6 @@
         "fabric-api": "*",
         "minecraft": "1.19.x",
         "java": ">=17",
-        "owo": ">=0.8.1"
+        "owo": ">=0.8.3"
     }
 }
