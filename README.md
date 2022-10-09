@@ -24,6 +24,7 @@ gadget_version=...
 
 ```groovy
 repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url 'https://maven.wispforest.io' }
 }
 
