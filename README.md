@@ -5,7 +5,7 @@
     <br>
     <br>
     <a href="https://github.com/wisp-forest/gadget/releases">
-        <img src="https://img.shields.io/github/v/release/glisco03/gadget?logo=github&style=for-the-badge">
+        <img src="https://img.shields.io/github/v/release/wisp-forest/gadget?logo=github&style=for-the-badge">
     </a>
     <a href="https://discord.gg/xrwHKktV2d">
         <img src="https://img.shields.io/discord/825828008644313089?label=wisp%20forest&logo=discord&logoColor=white&style=for-the-badge">
