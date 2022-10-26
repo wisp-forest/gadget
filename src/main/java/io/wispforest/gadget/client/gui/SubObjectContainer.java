@@ -8,7 +8,7 @@ import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -156,7 +156,7 @@ public class SubObjectContainer extends VerticalFlowLayout {
         public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
             matrices.push();
             matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
-            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(this.rotation));
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
             matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
 
             super.draw(matrices, mouseX, mouseY, partialTicks, delta);
