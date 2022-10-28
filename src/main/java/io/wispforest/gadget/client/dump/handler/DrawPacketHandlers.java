@@ -1,10 +1,10 @@
 package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.owo.ui.component.Components;
+import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.client.field.FieldDataIsland;
 import net.fabricmc.fabric.api.event.Event;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public final class DrawPacketHandlers {
@@ -23,7 +23,7 @@ public final class DrawPacketHandlers {
         DrawPacketHandler.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
         DrawPacketHandler.EVENT.register(LAST_PHASE, (packet, view) -> {
             if (packet.channelId() != null) {
-                view.child(Components.label(Text.translatable("text.gadget.packet_not_supported")));
+                view.child(GuiUtil.hexDump(NetworkUtil.unwrapCustom(packet.packet())));
                 return true;
             }
 

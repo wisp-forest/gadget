@@ -62,7 +62,6 @@
     "text.config.gadget.option.debugKeysInScreens": "Debug Keys In Screens",
     "text.config.gadget.option.debugKeysInScreens.tooltip": "Allows you to use F3 debug keys in any screen",
 
-    "text.gadget.packet_not_supported": "This custom packet isn't supported by Gadget\nAdd support via DrawPacketHandler.EVENT",
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
     "text.gadget.join_with_dump": "Join and start dumping packets",
