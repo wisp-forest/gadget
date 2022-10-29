@@ -26,30 +26,31 @@ import io.wispforest.gadget.util.DownloadUtil;
 import io.wispforest.gadget.util.ProgressToast;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.format.Tiny2Reader;
+import net.fabricmc.mappingio.format.Tiny2Writer;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
-import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.zip.GZIPInputStream;
 
-public class YarnMappings implements Mappings {
-    private static final String YARN_API_ENTRYPOINT = "https://meta.fabricmc.net/v2/versions/yarn/" + SharedConstants.getGameVersion().getId();
+public class QuiltMappings implements Mappings {
+    private static final String QM_API_ENTRYPOINT = "https://meta.quiltmc.org/v3/versions/quilt-mappings/" + SharedConstants.getGameVersion().getId();
 
     private volatile Map<String, String> intermediaryToFieldMap = Collections.emptyMap();
     private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
 
-    public YarnMappings() {
+    public QuiltMappings() {
         CompletableFuture.runAsync(() -> {
             var tree = load();
 
@@ -76,39 +77,60 @@ public class YarnMappings implements Mappings {
 
             Files.createDirectories(mappingsDir);
 
-            Path yarnPath = mappingsDir.resolve("yarn-" + SharedConstants.getGameVersion().getId() + ".jar");
+            Path qmPath = mappingsDir.resolve("qm-" + SharedConstants.getGameVersion().getId() + ".tiny");
 
-            if (!Files.exists(yarnPath)) {
-                toast.step(Text.translatable("message.gadget.progress.downloading_yarn_versions"));
-                YarnVersion[] versions = DownloadUtil.read(YARN_API_ENTRYPOINT, YarnVersion[].class);
+            if (Files.exists(qmPath)) {
+                try (BufferedReader br = Files.newBufferedReader(qmPath)) {
+                    var tree = new MemoryMappingTree();
 
-                if (versions.length == 0) {
-                    throw new IllegalStateException("we malden");
+                    Tiny2Reader.read(br, tree);
+
+                    return tree;
                 }
+            }
 
-                int latestBuild = -1;
-                String latestVersion = "";
+            toast.step(Text.translatable("message.gadget.progress.downloading_qm_versions"));
 
-                for (YarnVersion version : versions) {
-                    if (version.build > latestBuild) {
-                        latestVersion = version.version;
-                        latestBuild = version.build;
-                    }
+            QMVersion[] versions = DownloadUtil.read(QM_API_ENTRYPOINT, QMVersion[].class);
+
+            if (versions.length == 0) {
+                throw new IllegalStateException("we malden");
+            }
+
+            int latestBuild = -1;
+            String latestVersion = "";
+
+            for (QMVersion version : versions) {
+                if (version.build > latestBuild) {
+                    latestVersion = version.version;
+                    latestBuild = version.build;
                 }
+            }
 
-                toast.step(Text.translatable("message.gadget.progress.downloading_yarn"));
-                FileUtils.copyURLToFile(new URL("https://maven.fabricmc.net/net/fabricmc/yarn/" + latestVersion + "/yarn-" + latestVersion + "-v2.jar"), yarnPath.toFile());
+            MemoryMappingTree tree = new MemoryMappingTree();
+
+            IntermediaryLoader.loadIntermediary(toast, tree);
+
+            var conn = new URL(
+                "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-mappings/"
+                    + latestVersion
+                    + "/quilt-mappings-"
+                    + latestVersion
+                    + "-tiny.gz").openConnection();
+
+            toast.step(Text.translatable("message.gadget.progress.downloading_qm"));
+            try (var is = conn.getInputStream();
+                 var gz = new GZIPInputStream(is)) {
+                Tiny2Reader.read(new InputStreamReader(gz), tree);
+            }
+
+            try (var bw = Files.newBufferedWriter(qmPath)) {
+                tree.accept(new Tiny2Writer(bw, false));
             }
 
             toast.finish();
 
-            try (FileSystem fs = FileSystems.newFileSystem(yarnPath, (ClassLoader) null)) {
-                try (var br = Files.newBufferedReader(fs.getPath("mappings/mappings.tiny"))) {
-                    MemoryMappingTree tree = new MemoryMappingTree();
-                    Tiny2Reader.read(br, tree);
-                    return tree;
-                }
-            }
+            return tree;
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -127,7 +149,7 @@ public class YarnMappings implements Mappings {
         return intermediaryToFieldMap.getOrDefault(src, src);
     }
 
-    private static class YarnVersion {
+    private static class QMVersion {
         private int build;
         private String version;
     }

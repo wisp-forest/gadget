@@ -4,7 +4,10 @@ import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.util.GadgetConfig;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +24,6 @@ public class Gadget implements ModInitializer {
     @Override
     public void onInitialize() {
         GadgetNetworking.init();
-        MappingsManager.init();
 
         if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LOGGER.warn("""

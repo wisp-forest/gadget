@@ -1,9 +1,6 @@
 package io.wispforest.gadget.util;
 
-import io.wispforest.gadget.mappings.LocalMappings;
-import io.wispforest.gadget.mappings.Mappings;
-import io.wispforest.gadget.mappings.MojangMappings;
-import io.wispforest.gadget.mappings.YarnMappings;
+import io.wispforest.gadget.mappings.*;
 import io.wispforest.owo.config.annotation.Config;
 import io.wispforest.owo.config.annotation.Hook;
 import io.wispforest.owo.config.annotation.Modmenu;
@@ -24,8 +21,8 @@ public class GadgetConfigModel {
         // TODO: finish everything™
         LOCAL(() -> LocalMappings.INSTANCE),
         YARN(YarnMappings::new),
-        MOJANG(MojangMappings::new);
-//        QUILT(() -> null);
+        MOJANG(MojangMappings::new),
+        QUILT(QuiltMappings::new);
 
         private final Supplier<Mappings> factory;
 

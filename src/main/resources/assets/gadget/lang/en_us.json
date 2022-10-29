@@ -11,6 +11,18 @@
 
     "message.gadget.dump.started": "Started dumping",
     "message.gadget.dump.stopped": "Saved dump to",
+    "message.gadget.progress.finished": "Finished!",
+    "message.gadget.progress.downloading_intermediary": "Downloading Intermediary",
+    "message.gadget.progress.downloading_qm_versions": "Downloading QM versions",
+    "message.gadget.progress.downloading_yarn_versions": "Downloading Yarn versions",
+    "message.gadget.progress.downloading_minecraft_versions": "Downloading versions",
+    "message.gadget.progress.downloading_minecraft_version_manifest": "Downloading version manifest",
+    "message.gadget.progress.downloading_qm": "Downloading QM",
+    "message.gadget.progress.downloading_yarn": "Downloading Yarn",
+    "message.gadget.progress.downloading_client_mappings": "Downloading client mappings",
+    "message.gadget.progress.downloading_server_mappings": "Downloading server mappings",
+
+    "message.gadget.loading_mappings": "Loading mappings",
 
     "text.gadget.client_current": {
         "text": "C",
@@ -63,9 +75,22 @@
     "text.config.gadget.option.debugKeysInScreens.tooltip": "Allows you to use F3 debug keys in any screen",
 
     "text.config.gadget.option.mappings": "Mappings",
+    "text.config.gadget.option.mappings.tooltip": [
+        "Controls the mappings used in field dumps\n\n",
+        {
+            "text": "⚠ ",
+            "color": "red"
+        },
+        {
+            "text": "Local mappings are only useful\n inside a development environment",
+            "bold": true,
+            "color": "red"
+        }
+    ],
     "text.config.gadget.option.mappings.value.local": "Local",
     "text.config.gadget.option.mappings.value.yarn": "Yarn",
     "text.config.gadget.option.mappings.value.mojang": "Mojang",
+    "text.config.gadget.option.mappings.value.quilt": "Quilt",
 
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 

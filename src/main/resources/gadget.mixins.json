@@ -18,6 +18,7 @@
         "client.KeyboardMixin",
         "client.MinecraftClientMixin",
         "client.MultiplayerServerEntryMixin",
+        "client.SplashOverlayMixin",
         "client.WorldListWidgetWorldEntryMixin"
     ],
     "injectors": {
