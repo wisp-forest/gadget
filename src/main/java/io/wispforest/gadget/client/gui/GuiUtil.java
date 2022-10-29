@@ -120,17 +120,30 @@ public final class GuiUtil {
 
         int origReaderIdx = buf.readerIndex();
 
+        short[] bytes = new short[16];
+
         int index = 0;
         while (buf.readableBytes() > 0) {
             StringBuilder line = new StringBuilder();
 
             line.append(String.format("%04x  ", index));
 
-            for (int i = 0; i < 16 && buf.readableBytes() > 0; i++) {
-                int b = buf.readUnsignedByte();
+            int i;
+            for (i = 0; i < 16 && buf.readableBytes() > 0; i++) {
+                short b = buf.readUnsignedByte();
+                bytes[i] = (byte) (b & 0xff);
 
                 line.append(String.format("%02x ", b));
                 index++;
+            }
+
+            line.append("   ".repeat(Math.max(0, 16 - i)));
+
+            for (int j = 0; j < i; j++) {
+                if (bytes[j] >= 32 && bytes[j] < 127)
+                    line.append((char) bytes[j]);
+                else
+                    line.append('.');
             }
 
             var label = Components.label(Text.literal(line.toString())
