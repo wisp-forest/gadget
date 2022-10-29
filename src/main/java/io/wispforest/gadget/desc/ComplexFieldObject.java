@@ -1,6 +1,12 @@
 package io.wispforest.gadget.desc;
 
-public record ComplexFieldObject(String text) implements FieldObject {
+import io.wispforest.gadget.mappings.MappingsManager;
+
+public record ComplexFieldObject(String className, String tag) implements FieldObject {
+    public String text() {
+        return MappingsManager.displayMappings().mapClass(className) + tag;
+    }
+
     @Override
     public String type() {
         return "complex";

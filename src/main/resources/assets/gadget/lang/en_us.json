@@ -62,6 +62,11 @@
     "text.config.gadget.option.debugKeysInScreens": "Debug Keys In Screens",
     "text.config.gadget.option.debugKeysInScreens.tooltip": "Allows you to use F3 debug keys in any screen",
 
+    "text.config.gadget.option.mappings": "Mappings",
+    "text.config.gadget.option.mappings.value.local": "Local",
+    "text.config.gadget.option.mappings.value.yarn": "Yarn",
+    "text.config.gadget.option.mappings.value.mojang": "Mojang",
+
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
     "text.gadget.join_with_dump": "Join and start dumping packets",

@@ -1,6 +1,7 @@
 package io.wispforest.gadget.desc;
 
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
+import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.*;
 import io.wispforest.gadget.util.HiddenFields;
@@ -75,7 +76,7 @@ public final class FieldObjects {
             if (HiddenFields.isHidden(field)) continue;
             if (field.isSynthetic()) continue;
 
-            var path = basePath.then(new FieldPathStep(field.getName()));
+            var path = basePath.then(FieldPathStep.forField(field));
 
             FieldObject obj;
 
@@ -108,9 +109,11 @@ public final class FieldObjects {
         if (pretty != null)
             return new PrimitiveFieldObject(pretty, Optional.ofNullable(PrimitiveEditData.forObject(o)));
 
-        if (o.getClass().isEnum())
-            return new ComplexFieldObject(ReflectionUtil.prettyName(o.getClass()) + "#" + ((Enum<?>) o).name());
+        String unmappedClass = MappingsManager.unmapClass(ReflectionUtil.prettyName(o.getClass()));
 
-        return new ComplexFieldObject(ReflectionUtil.prettyName(o.getClass()));
+        if (o.getClass().isEnum())
+            return new ComplexFieldObject(unmappedClass, "#" + ((Enum<?>) o).name());
+
+        return new ComplexFieldObject(unmappedClass, "");
     }
 }
