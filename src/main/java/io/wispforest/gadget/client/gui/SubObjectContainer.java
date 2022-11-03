@@ -44,7 +44,7 @@ public class SubObjectContainer extends VerticalFlowLayout {
 
         this.spinnyBoi = new SpinnyBoiComponent();
         this.spinnyBoi
-            .cursorStyle(CursorStyle.HAND);
+                .cursorStyle(CursorStyle.HAND);
 
         this.expanded = false;
         this.spinnyBoi.targetRotation = 0;

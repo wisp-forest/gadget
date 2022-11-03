@@ -14,8 +14,8 @@ public final class VanillaSupport {
         ElementUtils.registerRootLister((screen, list) -> list.add(screen));
 
         ElementUtils.registerElementSupport(ClickableWidget.class, ElementSupport.fromLambda(
-            w -> w.x,
-            w -> w.y,
+            ClickableWidget::getX,
+            ClickableWidget::getY,
             ClickableWidget::getWidth,
             ClickableWidget::getHeight
         ));
