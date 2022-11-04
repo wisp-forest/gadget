@@ -1,6 +1,8 @@
 package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
+import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.mixin.client.KeyboardAccessor;
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.client.dump.handler.DrawPacketHandlers;
@@ -18,9 +20,11 @@ import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
@@ -40,6 +44,7 @@ public class GadgetClient implements ClientModInitializer {
 
         DrawPacketHandlers.init();
         VanillaInspector.init();
+        ServerData.init();
 
         GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
             if (access.runtime().currentScreen instanceof FieldDataScreen gui && !gui.isClient() && gui.target().equals(packet.target())) {
@@ -120,6 +125,27 @@ public class GadgetClient implements ClientModInitializer {
                         !InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_F3)
                      || !((KeyboardAccessor) client.keyboard).callProcessF3(key));
             }
+
+            if (screen instanceof HandledScreen<?> handled)
+                ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key, scancode, modifiers) -> {
+                    if (!INSPECT_KEY.matchesKey(key, scancode)) return true;
+
+                    double mouseX = client.mouse.getX()
+                        * (double)client.getWindow().getScaledWidth() / (double)client.getWindow().getWidth();
+                    double mouseY = client.mouse.getY()
+                        * (double)client.getWindow().getScaledHeight() / (double)client.getWindow().getHeight();
+                    var slot = ((HandledScreenAccessor) handled).callGetSlotAt(mouseX, mouseY);
+
+                    if (slot == null) return true;
+
+                    ItemStack stack = slot.getStack();
+
+                    if (!stack.hasNbt()) return true;
+
+                    client.setScreen(new StackNbtDataScreen(handled, slot.id));
+
+                    return false;
+                });
         });
 
         FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)

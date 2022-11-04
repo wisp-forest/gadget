@@ -6,6 +6,7 @@ import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.gadget.desc.edit.PrimitiveEditTypes;
 import io.wispforest.gadget.path.MapPathStepType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 
 public final class GadgetNetworking {
@@ -65,6 +66,21 @@ public final class GadgetNetworking {
             CHANNEL.serverHandle(access.player()).send(new DataS2CPacket(packet.target(), fields));
         });
 
+        CHANNEL.registerServerbound(ReplaceStackC2SPacket.class, (packet, access) -> {
+            if (!Permissions.check(access.player(), "gadget.replaceStack", 4)) {
+                access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"));
+                return;
+            }
+
+            ScreenHandler screenHandler = access.player().currentScreenHandler;
+
+            if (screenHandler == null)
+                return;
+
+            screenHandler.slots.get(packet.slotId()).setStack(packet.stack());
+        });
+
         CHANNEL.registerClientboundDeferred(DataS2CPacket.class);
+        CHANNEL.registerClientboundDeferred(AnnounceS2CPacket.class);
     }
 }
