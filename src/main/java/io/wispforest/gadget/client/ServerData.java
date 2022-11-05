@@ -1,6 +1,6 @@
 package io.wispforest.gadget.client;
 
-import io.wispforest.gadget.network.AnnounceS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
 import io.wispforest.gadget.network.GadgetNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;

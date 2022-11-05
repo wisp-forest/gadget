@@ -1,6 +1,8 @@
 package io.wispforest.gadget.client.field;
 
 import io.wispforest.gadget.network.*;
+import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;

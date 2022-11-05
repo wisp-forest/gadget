@@ -2,6 +2,11 @@ package io.wispforest.gadget.network;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.desc.FieldObjects;
+import io.wispforest.gadget.network.packet.c2s.ReplaceStackC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
+import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.gadget.desc.edit.PrimitiveEditTypes;
 import io.wispforest.gadget.path.MapPathStepType;

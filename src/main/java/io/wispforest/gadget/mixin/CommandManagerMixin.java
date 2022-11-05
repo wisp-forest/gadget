@@ -1,6 +1,6 @@
 package io.wispforest.gadget.mixin;
 
-import io.wispforest.gadget.network.AnnounceS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
 import io.wispforest.gadget.network.GadgetNetworking;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.CommandManager;

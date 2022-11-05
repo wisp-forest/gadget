@@ -2,14 +2,13 @@ package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.ServerData;
 import io.wispforest.gadget.network.GadgetNetworking;
-import io.wispforest.gadget.network.ReplaceStackC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.ReplaceStackC2SPacket;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 

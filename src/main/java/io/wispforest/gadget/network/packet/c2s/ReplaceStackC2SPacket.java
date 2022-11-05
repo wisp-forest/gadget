@@ -1,4 +1,4 @@
-package io.wispforest.gadget.network;
+package io.wispforest.gadget.network.packet.c2s;
 
 import net.minecraft.item.ItemStack;
 

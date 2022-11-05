@@ -10,6 +10,8 @@ import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
 import io.wispforest.gadget.client.gui.VanillaInspector;
+import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
