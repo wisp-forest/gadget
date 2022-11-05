@@ -3,7 +3,6 @@ package io.wispforest.gadget.client.nbt;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.mixin.NbtTypesAccessor;
-import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
@@ -20,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class NbtDataIsland extends VerticalFlowLayout {
     private final Map<NbtPath, WidgetData> elements = new HashMap<>();
@@ -50,8 +50,15 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
         WidgetData old = elements.get(path);
         int idx = parentContainer.children().size();
+
+        if (parentContainer instanceof SubObjectContainer subObj)
+            idx = subObj.collapsibleChildren().size();
+
         if (old != null) {
-            idx = parentContainer.children().indexOf(old.fullContainer);
+            int newIdx = parentContainer.children().indexOf(old.fullContainer);
+
+            if (newIdx != -1)
+                idx = newIdx;
 
             parentContainer.removeChild(old.fullContainer);
             elements.entrySet().removeIf(entry -> entry.getKey().startsWith(path));
@@ -118,13 +125,14 @@ public class NbtDataIsland extends VerticalFlowLayout {
                 makeComponent(subPath, sub);
             }
 
-            var plusLabel = Components.label(Text.of("+ "));
+            var plusLabel = Components.label(Text.of("+"));
 
-            GuiUtil.hoverBlue(plusLabel);
-            plusLabel.cursorStyle(CursorStyle.HAND);
-            typeSelector(plusLabel, type -> {
-
-            });
+            GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
+                typeSelector(
+                    (int) (plusLabel.x() + mouseX),
+                    (int) (plusLabel.y() + mouseY),
+                    type -> widgetData.subContainer.child(new KeyAdderWidget(this, path, type, unused -> true)))
+            );
 
             row.child(plusLabel);
         } else if (element instanceof AbstractNbtList<?> list) {
@@ -142,6 +150,42 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
                 makeComponent(subPath, sub);
             }
+
+            var plusLabel = Components.label(Text.of("+ "));
+            Predicate<String> nameVerifier = name -> {
+                try {
+                    var index = Integer.parseInt(name);
+
+                    return index <= list.size();
+                } catch (NumberFormatException nfe) {
+                    return false;
+                }
+            };
+
+            GuiUtil.semiButton(plusLabel, (mouseX, mouseY) -> {
+                if (list instanceof NbtList) {
+                    if (list.isEmpty()) {
+                        typeSelector(
+                            (int) (plusLabel.x() + mouseX),
+                            (int) (plusLabel.y() + mouseY),
+                            type -> widgetData.subContainer.child(new KeyAdderWidget(this, path, type, nameVerifier)));
+                    } else {
+                        widgetData.subContainer.child(
+                            new KeyAdderWidget(this, path, NbtTypes.byId(list.getHeldType()), nameVerifier));
+                    }
+                } else if (list instanceof NbtByteArray) {
+                    widgetData.subContainer.child(
+                        new KeyAdderWidget(this, path, NbtByte.TYPE, nameVerifier));
+                } else if (list instanceof NbtIntArray) {
+                    widgetData.subContainer.child(
+                        new KeyAdderWidget(this, path, NbtInt.TYPE, nameVerifier));
+                } else if (list instanceof NbtLongArray) {
+                    widgetData.subContainer.child(
+                        new KeyAdderWidget(this, path, NbtLong.TYPE, nameVerifier));
+                }
+            });
+
+            row.child(plusLabel);
         }
 
         VerticalFlowLayout target = subContainerOf(path.parent());
@@ -170,39 +214,27 @@ public class NbtDataIsland extends VerticalFlowLayout {
         target.child(idx, full);
     }
 
-    private void typeSelector(Component attachTo, Consumer<NbtType<?>> consumer) {
-        attachTo.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+    public void typeSelector(int mouseX, int mouseY, Consumer<NbtType<?>> consumer) {
+        var dropdown = Components.dropdown(Sizing.content());
+        var root = (FlowLayout) GuiUtil.root(this);
 
-            var dropdown = Components.dropdown(Sizing.content());
-            var root = (FlowLayout) GuiUtil.root(this);
+        dropdown.positioning(Positioning.absolute(mouseX, mouseY));
 
-            dropdown
-                .positioning(Positioning.absolute(
-                    (int) (attachTo.y() + mouseY),
-                    (int) (attachTo.y() + mouseY)
-                ));
+        ((ParentComponent) dropdown.children().get(0)).padding(Insets.of(3));
 
-            ((ParentComponent) dropdown.children().get(0)).padding(Insets.of(3));
+        dropdown.focusLost().subscribe(() -> dropdown.queue(() -> root.removeChild(dropdown)));
 
-            dropdown.focusLost().subscribe(() -> {
-                root.removeChild(dropdown);
-            });
+        for (NbtType<?> type : NbtTypesAccessor.getVALUES()) {
+            dropdown.button(typeText(type, ".full"),
+                unused -> consumer.accept(type));
+        }
 
-            for (NbtType<?> type : NbtTypesAccessor.getVALUES()) {
-                dropdown.button(typeText(type, ".full"), unused -> {
-                });
-            }
-
-            root.child(dropdown);
-            root.focusHandler().focus(dropdown, FocusSource.MOUSE_CLICK);
-
-            return true;
-        });
+        root.child(dropdown);
+        root.focusHandler().focus(dropdown, FocusSource.MOUSE_CLICK);
     }
 
-    private MutableText typeText(NbtType<?> type, String suffix) {
-        String name = "";
+    MutableText typeText(NbtType<?> type, String suffix) {
+        String name;
 
         if (type == NbtCompound.TYPE)
             name = "compound";

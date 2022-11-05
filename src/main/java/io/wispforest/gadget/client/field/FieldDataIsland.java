@@ -1,11 +1,12 @@
 package io.wispforest.gadget.client.field;
 
+import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
+import io.wispforest.gadget.client.nbt.KeyAdderWidget;
 import io.wispforest.gadget.client.nbt.NbtDataIsland;
+import io.wispforest.gadget.client.nbt.NbtPath;
 import io.wispforest.gadget.desc.*;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
-import io.wispforest.gadget.network.GadgetNetworking;
-import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
@@ -158,10 +159,24 @@ public class FieldDataIsland {
             if (nbtCompoundSetter != null)
                 reloader = newData -> nbtCompoundSetter.accept(path, newData);
 
-            subContainer.child(new NbtDataIsland(nfo.data(), reloader));
+            var island = new NbtDataIsland(nfo.data(), reloader);
+
+            subContainer.child(island);
+
             row
                 .child(subContainer.getSpinnyBoi()
                     .sizing(Sizing.fixed(10), Sizing.content()));
+
+            var plusLabel = Components.label(Text.of("+"));
+
+            GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
+                island.typeSelector(
+                    (int) (plusLabel.x() + mouseX),
+                    (int) (plusLabel.y() + mouseY),
+                    type -> data.subObjectContainer.child(new KeyAdderWidget(island, NbtPath.EMPTY, type, unused -> true)))
+            );
+
+            row.child(plusLabel);
         }
 
         row

@@ -144,7 +144,7 @@ public class GadgetClient implements ClientModInitializer {
 
                     if (!stack.hasNbt()) return true;
 
-                    client.setScreen(new StackNbtDataScreen(handled, slot.id));
+                    client.setScreen(new StackNbtDataScreen(handled, slot));
 
                     return false;
                 });

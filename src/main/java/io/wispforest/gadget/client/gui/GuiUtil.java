@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -17,6 +18,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 public final class GuiUtil {
     private GuiUtil() {
@@ -29,6 +32,32 @@ public final class GuiUtil {
 
         label.mouseLeave().subscribe(
             () -> label.text(((MutableText) label.text()).formatted(Formatting.WHITE)));
+    }
+
+    public static void semiButton(LabelComponent label, Runnable onPressed) {
+        hoverBlue(label);
+        label.cursorStyle(CursorStyle.HAND);
+
+        label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+            onPressed.run();
+
+            return true;
+        });
+    }
+
+    public static void semiButton(LabelComponent label, BiConsumer<Double, Double> onPressed) {
+        hoverBlue(label);
+        label.cursorStyle(CursorStyle.HAND);
+
+        label.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+            onPressed.accept(mouseX, mouseY);
+
+            return true;
+        });
     }
 
     public static ParentComponent root(Component component) {
@@ -113,6 +142,14 @@ public final class GuiUtil {
             && y < (y(e) + height(e));
     }
 
+    private static final int INVALID_COLOR = 0xEB1D36;
+    private static final int VALID_COLOR = 0x28FFBF;
+
+    public static void textFieldVerifier(TextFieldWidget textField, Predicate<String> verifier) {
+        textField.setChangedListener(
+            text -> textField.setEditableColor(verifier.test(text) ? VALID_COLOR : INVALID_COLOR));
+    }
+
     public static VerticalFlowLayout hexDump(ByteBuf buf) {
         VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
@@ -161,15 +198,9 @@ public final class GuiUtil {
         if (expandedChildren.size() > 0) {
             LabelComponent ellipsis = Components.label(Text.literal("..."));
 
-            hoverBlue(ellipsis);
-            ellipsis.cursorStyle(CursorStyle.HAND);
-            ellipsis.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
-
+            semiButton(ellipsis, () -> {
                 view.removeChild(ellipsis);
                 view.children(expandedChildren);
-
-                return true;
             });
 
             view.child(ellipsis);

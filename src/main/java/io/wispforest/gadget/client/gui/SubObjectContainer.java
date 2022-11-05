@@ -110,9 +110,23 @@ public class SubObjectContainer extends VerticalFlowLayout {
     }
 
     @Override
+    public FlowLayout child(int index, Component child) {
+        this.collapsibleChildren.add(index, child);
+
+        if (this.expanded) {
+            super.child(index, child);
+        }
+        return this;
+    }
+
+    @Override
     public FlowLayout removeChild(Component child) {
         this.collapsibleChildren.remove(child);
         return super.removeChild(child);
+    }
+
+    public List<Component> collapsibleChildren() {
+        return collapsibleChildren;
     }
 
     protected static class SpinnyBoiComponent extends LabelComponent {

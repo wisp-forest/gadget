@@ -16,7 +16,6 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,12 +52,8 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         LabelComponent openOther = Components.label(Text.translatable("text.gadget.open_other_dump"));
 
-        openOther.cursorStyle(CursorStyle.HAND);
-        GuiUtil.hoverBlue(openOther);
         openOther.margins(Insets.bottom(4));
-        openOther.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
-
+        GuiUtil.semiButton(openOther, () -> {
             String path = DialogUtil.openFileDialog(I18n.translate("text.gadget.open_other_dump"), null, List.of("*.dump"), "gadget network dumps", false);
 
             if (path != null) {
@@ -68,8 +63,6 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
                     throw new RuntimeException(e);
                 }
             }
-
-            return true;
         });
 
         main.child(openOther);
@@ -92,18 +85,12 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
                     LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
 
-                    openLabel.cursorStyle(CursorStyle.HAND);
-                    GuiUtil.hoverBlue(openLabel);
-                    openLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
-
+                    GuiUtil.semiButton(openLabel, () -> {
                         try (InputStream is = Files.newInputStream(dump)) {
                             client.setScreen(new OpenDumpScreen(this, is));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-
-                        return true;
                     });
 
                     row.child(openLabel);

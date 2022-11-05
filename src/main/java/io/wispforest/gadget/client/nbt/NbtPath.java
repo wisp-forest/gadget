@@ -5,6 +5,8 @@ import net.minecraft.nbt.*;
 import java.util.Arrays;
 
 public record NbtPath(String[] steps) {
+    public static final NbtPath EMPTY = new NbtPath(new String[0]);
+
     public NbtElement follow(NbtElement start) {
         for (String element : steps) {
             if (start instanceof NbtCompound compound)
@@ -16,7 +18,6 @@ public record NbtPath(String[] steps) {
         return start;
     }
 
-    @SuppressWarnings("unchecked")
     public void set(NbtElement start, NbtElement to) {
         for (int i = 0; i < steps.length - 1; i++) {
             if (start instanceof NbtCompound compound)
@@ -28,7 +29,21 @@ public record NbtPath(String[] steps) {
         if (start instanceof NbtCompound compound)
             compound.put(steps[steps.length - 1], to);
         else if (start instanceof AbstractNbtList<?> list)
-            ((AbstractNbtList<NbtElement>) list).set(Integer.parseInt(steps[steps.length - 1]), to);
+            list.setElement(Integer.parseInt(steps[steps.length - 1]), to);
+    }
+
+    public void add(NbtElement start, NbtElement to) {
+        for (int i = 0; i < steps.length - 1; i++) {
+            if (start instanceof NbtCompound compound)
+                start = compound.get(steps[i]);
+            else if (start instanceof AbstractNbtList<?> list)
+                start = list.get(Integer.parseInt(steps[i]));
+        }
+
+        if (start instanceof NbtCompound compound)
+            compound.put(steps[steps.length - 1], to);
+        else if (start instanceof AbstractNbtList<?> list)
+            list.addElement(Integer.parseInt(steps[steps.length - 1]), to);
     }
 
     public void remove(NbtElement start) {
