@@ -19,8 +19,6 @@ public class StackNbtDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private final HandledScreen<?> parent;
 
     public StackNbtDataScreen(HandledScreen<?> parent, int slotId) {
-        super();
-
         var stack = parent.getScreenHandler().slots.get(slotId).getStack();
         Consumer<NbtCompound> reloader = null;
 

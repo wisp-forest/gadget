@@ -2,15 +2,15 @@ package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
+import io.wispforest.gadget.mixin.NbtTypesAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
-import io.wispforest.owo.ui.core.CursorStyle;
-import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.nbt.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -24,8 +24,8 @@ import java.util.function.Consumer;
 public class NbtDataIsland extends VerticalFlowLayout {
     private final Map<NbtPath, WidgetData> elements = new HashMap<>();
 
-    private final NbtCompound data;
-    private final Consumer<NbtCompound> reloader;
+    final NbtCompound data;
+    final Consumer<NbtCompound> reloader;
 
     public NbtDataIsland(NbtCompound data, Consumer<NbtCompound> reloader) {
         super(Sizing.content(), Sizing.content());
@@ -44,8 +44,18 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
         full.child(row);
 
+        var parentContainer = subContainerOf(path.parent());
         WidgetData widgetData = new WidgetData();
         widgetData.fullContainer = full;
+
+        WidgetData old = elements.get(path);
+        int idx = parentContainer.children().size();
+        if (old != null) {
+            idx = parentContainer.children().indexOf(old.fullContainer);
+
+            parentContainer.removeChild(old.fullContainer);
+            elements.entrySet().removeIf(entry -> entry.getKey().startsWith(path));
+        }
 
         elements.put(path, widgetData);
 
@@ -54,15 +64,44 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
         row.child(label);
 
-        rowText.append(typeText(element));
+        rowText.append(typeText(element.getNbtType(), ""));
         rowText.append(" " + path.name());
 
         if (element instanceof NbtString string) {
-            rowText.append(Text.literal(" = " + string.asString() + " ")
+            rowText.append(Text.literal(" = ")
                 .formatted(Formatting.GRAY));
+
+            if (reloader != null) {
+                row.child(new PrimitiveEditorWidget(this, path, string.asString(), NbtString::of));
+            } else {
+                rowText.append(Text.literal( string.asString() + " ")
+                    .formatted(Formatting.GRAY));
+            }
         } else if (element instanceof AbstractNbtNumber number) {
-            rowText.append(Text.literal(" = " + number.numberValue() + " ")
+            rowText.append(Text.literal(" = ")
                 .formatted(Formatting.GRAY));
+
+            if (reloader != null) {
+                row.child(new PrimitiveEditorWidget(this, path, number.numberValue(), text -> {
+                    if (number instanceof NbtByte)
+                        return NbtByte.of(Byte.parseByte(text));
+                    else if (number instanceof NbtShort)
+                        return NbtShort.of(Short.parseShort(text));
+                    else if (number instanceof NbtInt)
+                        return NbtInt.of(Integer.parseInt(text));
+                    else if (number instanceof NbtLong)
+                        return NbtLong.of(Long.parseLong(text));
+                    else if (number instanceof NbtFloat)
+                        return NbtFloat.of(Float.parseFloat(text));
+                    else if (number instanceof NbtDouble)
+                        return NbtDouble.of(Double.parseDouble(text));
+                    else
+                        throw new IllegalStateException("Unknown AbstractNbtNumber type!");
+                }));
+            } else {
+                rowText.append(Text.literal( number.numberValue() + " ")
+                    .formatted(Formatting.GRAY));
+            }
         } else if (element instanceof NbtCompound compound) {
             rowText.append(" ");
 
@@ -78,6 +117,16 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
                 makeComponent(subPath, sub);
             }
+
+            var plusLabel = Components.label(Text.of("+ "));
+
+            GuiUtil.hoverBlue(plusLabel);
+            plusLabel.cursorStyle(CursorStyle.HAND);
+            typeSelector(plusLabel, type -> {
+
+            });
+
+            row.child(plusLabel);
         } else if (element instanceof AbstractNbtList<?> list) {
             rowText.append(" ");
 
@@ -95,13 +144,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
             }
         }
 
-        var upPath = path.parent();
-        VerticalFlowLayout target;
-
-        if (upPath.steps().length == 0)
-            target = this;
-        else
-            target = elements.get(upPath).subContainer;
+        VerticalFlowLayout target = subContainerOf(path.parent());
 
         if (reloader != null) {
             var crossLabel = Components.label(Text.literal("❌"));
@@ -124,38 +167,92 @@ public class NbtDataIsland extends VerticalFlowLayout {
             .margins(Insets.both(0, 2))
             .allowOverflow(true);
 
-        target.child(full);
+        target.child(idx, full);
     }
 
-    private MutableText typeText(NbtElement element) {
-        if (element instanceof NbtCompound)
-            return TextOps.withColor("c", 0x0197F6);
-        else if (element instanceof NbtList)
-            return TextOps.withColor("L", 0x1560BD);
-        else if (element instanceof NbtByteArray)
-            return TextOps.withColor("ba", 0x3A7CA5);
-        else if (element instanceof NbtIntArray)
-            return TextOps.withColor("ia", 0x0047AB);
-        else if (element instanceof NbtLongArray)
-            return TextOps.withColor("la", 0x74B3CE);
-        else if (element instanceof NbtString)
-            return TextOps.withColor("s", 0xFFFF00);
-        else if (element instanceof NbtByte)
-            return TextOps.withColor("b", 0x03C04A);
-        else if (element instanceof NbtShort)
-            return TextOps.withColor("s", 0x597D35);
-        else if (element instanceof NbtInt)
-            return TextOps.withColor("i", 0x00FF00);
-        else if (element instanceof NbtLong)
-            return TextOps.withColor("l", 0x03AC13);
-        else if (element instanceof NbtFloat)
-            return TextOps.withColor("f", 0xED7014);
-        else if (element instanceof NbtDouble)
-            return TextOps.withColor("d", 0xEC9706);
-        else if (element instanceof NbtEnd)
-            return TextOps.withFormatting("e", Formatting.GRAY);
+    private void typeSelector(Component attachTo, Consumer<NbtType<?>> consumer) {
+        attachTo.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+            var dropdown = Components.dropdown(Sizing.content());
+            var root = (FlowLayout) GuiUtil.root(this);
+
+            dropdown
+                .positioning(Positioning.absolute(
+                    (int) (attachTo.y() + mouseY),
+                    (int) (attachTo.y() + mouseY)
+                ));
+
+            ((ParentComponent) dropdown.children().get(0)).padding(Insets.of(3));
+
+            dropdown.focusLost().subscribe(() -> {
+                root.removeChild(dropdown);
+            });
+
+            for (NbtType<?> type : NbtTypesAccessor.getVALUES()) {
+                dropdown.button(typeText(type, ".full"), unused -> {
+                });
+            }
+
+            root.child(dropdown);
+            root.focusHandler().focus(dropdown, FocusSource.MOUSE_CLICK);
+
+            return true;
+        });
+    }
+
+    private MutableText typeText(NbtType<?> type, String suffix) {
+        String name = "";
+
+        if (type == NbtCompound.TYPE)
+            name = "compound";
+        else if (type == NbtList.TYPE)
+            name = "list";
+        else if (type == NbtByteArray.TYPE)
+            name = "byte_array";
+        else if (type == NbtIntArray.TYPE)
+            name = "int_array";
+        else if (type == NbtLongArray.TYPE)
+            name = "long_array";
+        else if (type == NbtString.TYPE)
+            name = "string";
+        else if (type == NbtByte.TYPE)
+            name = "byte";
+        else if (type == NbtShort.TYPE)
+            name = "short";
+        else if (type == NbtInt.TYPE)
+            name = "int";
+        else if (type == NbtLong.TYPE)
+            name = "long";
+        else if (type == NbtFloat.TYPE)
+            name = "float";
+        else if (type == NbtDouble.TYPE)
+            name = "double";
+        else if (type == NbtEnd.TYPE)
+            name = "end";
         else
-            return TextOps.withFormatting("u", Formatting.DARK_GRAY);
+            name = "unknown";
+
+        return Text.translatable("text.gadget.nbt." + name + suffix);
+    }
+
+    public void reloadPath(NbtPath path) {
+        if (path.steps().length == 0) {
+            clearChildren();
+
+            for (String key : data.getKeys()) {
+                makeComponent(new NbtPath(new String[] {key}), data.get(key));
+            }
+        } else {
+            makeComponent(path, path.follow(data));
+        }
+    }
+
+    private VerticalFlowLayout subContainerOf(NbtPath path) {
+        if (path.steps().length == 0)
+            return this;
+        else
+            return elements.get(path).subContainer;
     }
 
     private static class WidgetData {

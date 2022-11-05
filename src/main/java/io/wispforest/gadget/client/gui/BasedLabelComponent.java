@@ -12,7 +12,7 @@ public class BasedLabelComponent extends LabelComponent {
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
 
-        int newMaxWidth = (int) (GuiUtil.root(this).width() * 0.95);
+        int newMaxWidth = (int) (GuiUtil.root(this).width() * 0.85);
 
         if (maxWidth() != newMaxWidth)
             maxWidth(newMaxWidth);

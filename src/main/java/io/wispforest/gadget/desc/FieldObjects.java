@@ -7,6 +7,7 @@ import io.wispforest.gadget.path.*;
 import io.wispforest.gadget.util.HiddenFields;
 import io.wispforest.gadget.util.PrettyPrinters;
 import io.wispforest.gadget.util.ReflectionUtil;
+import net.minecraft.nbt.NbtCompound;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Array;
@@ -104,6 +105,9 @@ public final class FieldObjects {
 
 
     public static FieldObject fromObject(Object o) {
+        if (o instanceof NbtCompound compound)
+            return new NbtCompoundFieldObject(compound);
+
         String pretty = PrettyPrinters.tryPrint(o);
 
         if (pretty != null)

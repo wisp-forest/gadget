@@ -37,7 +37,7 @@ public final class GuiUtil {
         if (root == null)
             throw new IllegalStateException();
 
-        if (root.hasParent())
+        while (root.hasParent())
             root = root.parent();
 
         return root;

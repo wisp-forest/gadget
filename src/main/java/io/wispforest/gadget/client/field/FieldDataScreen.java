@@ -2,6 +2,7 @@ package io.wispforest.gadget.client.field;
 
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -35,6 +36,9 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
             this.island.primitiveSetter((path, data) ->
                 GadgetNetworking.CHANNEL.clientHandle().send(new SetPrimitiveC2SPacket(this.target, path, data)));
+
+            this.island.nbtCompoundSetter((path, data) ->
+                GadgetNetworking.CHANNEL.clientHandle().send(new SetNbtCompoundC2SPacket(this.target, path, data)));
         }
     }
 

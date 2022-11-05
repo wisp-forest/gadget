@@ -16,6 +16,21 @@ public record NbtPath(String[] steps) {
         return start;
     }
 
+    @SuppressWarnings("unchecked")
+    public void set(NbtElement start, NbtElement to) {
+        for (int i = 0; i < steps.length - 1; i++) {
+            if (start instanceof NbtCompound compound)
+                start = compound.get(steps[i]);
+            else if (start instanceof AbstractNbtList<?> list)
+                start = list.get(Integer.parseInt(steps[i]));
+        }
+
+        if (start instanceof NbtCompound compound)
+            compound.put(steps[steps.length - 1], to);
+        else if (start instanceof AbstractNbtList<?> list)
+            ((AbstractNbtList<NbtElement>) list).set(Integer.parseInt(steps[steps.length - 1]), to);
+    }
+
     public void remove(NbtElement start) {
         for (int i = 0; i < steps.length - 1; i++) {
             if (start instanceof NbtCompound compound)

@@ -5,8 +5,9 @@
     "compatibilityLevel": "JAVA_17",
     "mixins": [
         "ClientConnectionMixin",
-        "CustomPayloadC2SPacketMixin",
         "CommandManagerMixin",
+        "CustomPayloadC2SPacketMixin",
+        "NbtTypesAccessor",
         "client.HandledScreenAccessor",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",

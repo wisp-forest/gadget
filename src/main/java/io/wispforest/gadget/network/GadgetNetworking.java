@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.desc.FieldObjects;
 import io.wispforest.gadget.network.packet.c2s.ReplaceStackC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
@@ -61,6 +62,30 @@ public final class GadgetNetworking {
             }
 
             packet.path().set(target, packet.data().toObject());
+
+            var parentPath = packet.path().parent();
+
+            Object o = parentPath.follow(target);
+
+            var fields = FieldObjects.collectAllData(parentPath, o);
+
+            CHANNEL.serverHandle(access.player()).send(new DataS2CPacket(packet.target(), fields));
+        });
+
+        CHANNEL.registerServerbound(SetNbtCompoundC2SPacket.class, (packet, access) -> {
+            if (!Permissions.check(access.player(), "gadget.inspect", 4)) {
+                access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"), true);
+                return;
+            }
+
+            Object target = packet.target().resolve(access.player().world);
+
+            if (target == null) {
+                access.player().sendMessage(Text.translatable("message.gadget.fail.notfound"), true);
+                return;
+            }
+
+            packet.path().set(target, packet.data());
 
             var parentPath = packet.path().parent();
 

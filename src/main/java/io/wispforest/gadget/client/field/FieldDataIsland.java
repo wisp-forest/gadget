@@ -1,11 +1,11 @@
 package io.wispforest.gadget.client.field;
 
 import io.wispforest.gadget.client.gui.SubObjectContainer;
-import io.wispforest.gadget.desc.ComplexFieldObject;
-import io.wispforest.gadget.desc.ErrorFieldObject;
-import io.wispforest.gadget.desc.FieldObjects;
-import io.wispforest.gadget.desc.PrimitiveFieldObject;
+import io.wispforest.gadget.client.nbt.NbtDataIsland;
+import io.wispforest.gadget.desc.*;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
+import io.wispforest.gadget.network.GadgetNetworking;
+import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
@@ -13,6 +13,7 @@ import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.ObjectPath;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -29,6 +30,7 @@ public class FieldDataIsland {
     private Consumer<ObjectPath> pathRequester = path -> {};
     private boolean shortenNames = false;
     BiConsumer<ObjectPath, PrimitiveEditData> primitiveSetter = null;
+    BiConsumer<ObjectPath, NbtCompound> nbtCompoundSetter = null;
 
     public FieldDataIsland() {
         this.mainContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
@@ -42,6 +44,10 @@ public class FieldDataIsland {
         this.primitiveSetter = primitiveSetter;
     }
 
+    public void nbtCompoundSetter(BiConsumer<ObjectPath, NbtCompound> nbtCompoundSetter) {
+        this.nbtCompoundSetter = nbtCompoundSetter;
+    }
+
     public void targetObject(Object obj, boolean settable) {
         this.pathRequester = (path) -> {
             Object sub = path.follow(obj);
@@ -50,7 +56,7 @@ public class FieldDataIsland {
                 .forEach(this::addFieldData);
         };
 
-        if (settable)
+        if (settable) {
             this.primitiveSetter = (path, data) -> {
                 path.set(obj, data.toObject());
 
@@ -59,6 +65,16 @@ public class FieldDataIsland {
                 FieldObjects.collectAllData(parentPath, parentPath.follow(obj))
                     .forEach(this::addFieldData);
             };
+
+            this.nbtCompoundSetter = (path, data) -> {
+                path.set(obj, data);
+
+                var parentPath = path.parent();
+
+                FieldObjects.collectAllData(parentPath, parentPath.follow(obj))
+                    .forEach(this::addFieldData);
+            };
+        }
 
         FieldObjects.collectAllData(ObjectPath.EMPTY, obj)
             .forEach(this::addFieldData);
@@ -127,6 +143,22 @@ public class FieldDataIsland {
                     .formatted(Formatting.GRAY)
             );
 
+            row
+                .child(subContainer.getSpinnyBoi()
+                    .sizing(Sizing.fixed(10), Sizing.content()));
+        } else if (data.obj instanceof NbtCompoundFieldObject nfo) {
+            var subContainer = new SubObjectContainer(
+                () -> { },
+                () -> { });
+            data.subObjectContainer = subContainer;
+            rowContainer.child(subContainer);
+
+            Consumer<NbtCompound> reloader = null;
+
+            if (nbtCompoundSetter != null)
+                reloader = newData -> nbtCompoundSetter.accept(path, newData);
+
+            subContainer.child(new NbtDataIsland(nfo.data(), reloader));
             row
                 .child(subContainer.getSpinnyBoi()
                     .sizing(Sizing.fixed(10), Sizing.content()));
