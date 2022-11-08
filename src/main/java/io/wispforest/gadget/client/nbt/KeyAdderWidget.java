@@ -33,23 +33,23 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
 
         child(Components.label(island.typeText(type, "")
             .append(" ")));
-        child((this.nameField = Components.textBox(Sizing.fixed(100)))
+        child((this.nameField = Components.textBox(Sizing.fixed(75)))
             .verticalSizing(Sizing.fixed(8)));
 
         if (typeNeedsValue(type)) {
             child(Components.label(Text.of(" = ")));
 
-            child((this.valueField = Components.textBox(Sizing.fixed(100)))
+            child((this.valueField = Components.textBox(Sizing.fixed(75)))
                 .verticalSizing(Sizing.fixed(8)));
         } else if (typeNeedsSize(type)) {
             child(Components.label(Text.of("["))
-                .margins(Insets.horizontal(3)));
+                .margins(Insets.horizontal(2)));
 
-            child((this.valueField = Components.textBox(Sizing.fixed(100)))
+            child((this.valueField = Components.textBox(Sizing.fixed(50)))
                 .verticalSizing(Sizing.fixed(8)));
 
             child(Components.label(Text.of("]"))
-                .margins(Insets.horizontal(3)));
+                .margins(Insets.horizontal(2)));
         } else {
             this.valueField = null;
         }
@@ -96,6 +96,7 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
 
     private void commit() {
         if (!nameVerifier.test(nameField.getText())) return;
+        if (valueField != null && !verifyValue(valueField.getText())) return;
 
         NbtElement element;
 
@@ -130,8 +131,10 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
 
         NbtPath path = parentPath.then(nameField.getText());
         path.add(island.data, element);
-        island.reloadPath(parentPath);
+        island.makeComponent(path, element);
         island.reloader.accept(island.data);
+
+        parent().removeChild(this);
     }
 
     private boolean onNameFieldKeyPressed(int keyCode, int scanCode, int modifiers) {

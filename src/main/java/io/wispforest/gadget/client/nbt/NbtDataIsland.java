@@ -38,7 +38,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
         }
     }
 
-    private void makeComponent(NbtPath path, NbtElement element) {
+    void makeComponent(NbtPath path, NbtElement element) {
         VerticalFlowLayout full = Containers.verticalFlow(Sizing.content(), Sizing.content());
         HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 
@@ -72,10 +72,10 @@ public class NbtDataIsland extends VerticalFlowLayout {
         row.child(label);
 
         rowText.append(typeText(element.getNbtType(), ""));
-        rowText.append(" " + path.name());
+        rowText.append(" " + path.name() + " ");
 
         if (element instanceof NbtString string) {
-            rowText.append(Text.literal(" = ")
+            rowText.append(Text.literal("= ")
                 .formatted(Formatting.GRAY));
 
             if (reloader != null) {
@@ -85,7 +85,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
                     .formatted(Formatting.GRAY));
             }
         } else if (element instanceof AbstractNbtNumber number) {
-            rowText.append(Text.literal(" = ")
+            rowText.append(Text.literal("= ")
                 .formatted(Formatting.GRAY));
 
             if (reloader != null) {
@@ -110,8 +110,6 @@ public class NbtDataIsland extends VerticalFlowLayout {
                     .formatted(Formatting.GRAY));
             }
         } else if (element instanceof NbtCompound compound) {
-            rowText.append(" ");
-
             widgetData.subContainer = new SubObjectContainer(() -> {}, () -> {});
 
             row.child(widgetData.subContainer.getSpinnyBoi());
@@ -125,7 +123,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
                 makeComponent(subPath, sub);
             }
 
-            var plusLabel = Components.label(Text.of("+"));
+            var plusLabel = Components.label(Text.of("+ "));
 
             GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
                 typeSelector(
@@ -136,8 +134,6 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
             row.child(plusLabel);
         } else if (element instanceof AbstractNbtList<?> list) {
-            rowText.append(" ");
-
             widgetData.subContainer = new SubObjectContainer(() -> {}, () -> {});
 
             row.child(widgetData.subContainer.getSpinnyBoi());

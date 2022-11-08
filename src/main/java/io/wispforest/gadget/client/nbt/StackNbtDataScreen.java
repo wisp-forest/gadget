@@ -10,6 +10,7 @@ import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
@@ -30,6 +31,12 @@ public class StackNbtDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         if (ServerData.ANNOUNCE_PACKET.canReplaceStacks()) {
             reloader = newNbt -> {
                 stack.setNbt(newNbt);
+
+                if (parent instanceof CreativeInventoryScreen) {
+                    // Let it handle it.
+                    return;
+                }
+
                 GadgetNetworking.CHANNEL.clientHandle().send(new ReplaceStackC2SPacket(slot.id, stack));
             };
         }
