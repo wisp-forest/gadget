@@ -45,6 +45,7 @@ public final class GuiUtil {
         label.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
+            UISounds.playButtonSound();
             onPressed.run();
 
             return true;
@@ -58,6 +59,7 @@ public final class GuiUtil {
         label.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
+            UISounds.playButtonSound();
             onPressed.accept(mouseX, mouseY);
 
             return true;

@@ -14,7 +14,6 @@ import net.minecraft.nbt.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -188,17 +187,11 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
         if (reloader != null) {
             var crossLabel = Components.label(Text.literal("❌"));
-            crossLabel.cursorStyle(CursorStyle.HAND);
-            GuiUtil.hoverBlue(crossLabel);
-            crossLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
-
+            GuiUtil.semiButton(crossLabel, () -> {
                 path.remove(data);
                 reloader.accept(data);
                 target.removeChild(full);
                 elements.entrySet().removeIf(entry -> entry.getKey().startsWith(path));
-
-                return true;
             });
             row.child(crossLabel);
         }

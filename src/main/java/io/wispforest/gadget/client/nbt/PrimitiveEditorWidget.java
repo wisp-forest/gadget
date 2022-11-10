@@ -1,11 +1,9 @@
 package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
-import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
-import io.wispforest.owo.ui.core.CursorStyle;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -40,15 +38,11 @@ public class PrimitiveEditorWidget extends HorizontalFlowLayout {
         this.editLabel = Components.label(Text.literal(" ✎ "));
         this.editField = Components.textBox(Sizing.fixed(100));
 
-        this.editLabel.mouseDown().subscribe(this::editLabelMouseDown);
+        GuiUtil.semiButton(this.editLabel, this::startEditing);
         this.editField.focusLost().subscribe(this::editFieldFocusLost);
         this.editField.keyPress().subscribe(this::editFieldKeyPressed);
         this.editField
             .verticalSizing(Sizing.fixed(8));
-        this.editLabel
-            .cursorStyle(CursorStyle.HAND);
-
-        GuiUtil.hoverBlue(this.editLabel);
 
         child(contentsLabel);
         child(editLabel);
@@ -80,11 +74,7 @@ public class PrimitiveEditorWidget extends HorizontalFlowLayout {
         child(editLabel);
     }
 
-    private boolean editLabelMouseDown(double mouseX, double mouseY, int button) {
-        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
-
-        UISounds.playInteractionSound();
-
+    private void startEditing() {
         removeChild(contentsLabel);
         removeChild(editLabel);
 
@@ -96,7 +86,5 @@ public class PrimitiveEditorWidget extends HorizontalFlowLayout {
             focusHandler().focus(editField, FocusSource.MOUSE_CLICK);
 
         editField.setTextFieldFocused(true);
-
-        return true;
     }
 }
