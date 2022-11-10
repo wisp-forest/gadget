@@ -1,7 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
-import io.wispforest.gadget.mappings.MappingsManager;
+import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -43,8 +43,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .surface(Surface.outline(packet.color()))
                 .margins(Insets.bottom(5));
 
-            String name = MappingsManager.remapClassToDisplay(packet.packet().getClass().getName());
-            name = name.substring(name.lastIndexOf('.') + 1);
+            String name = ReflectionUtil.nameWithoutPackage(packet.packet().getClass());
 
             MutableText typeText = Text.literal(name);
 
