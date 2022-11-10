@@ -16,6 +16,8 @@
     "client": [
         "client.ContextMenuScreenMixin",
         "client.DisconnectedScreenMixin",
+        "client.EntryListWidgetAccessor",
+        "client.EntryListWidgetEntryAccessor",
         "client.HandledScreenAccessor",
         "client.KeyboardAccessor",
         "client.KeyboardMixin",

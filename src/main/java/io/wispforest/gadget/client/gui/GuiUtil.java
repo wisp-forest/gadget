@@ -2,14 +2,18 @@ package io.wispforest.gadget.client.gui;
 
 import io.netty.buffer.ByteBuf;
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.mixin.client.EntryListWidgetAccessor;
+import io.wispforest.gadget.mixin.client.EntryListWidgetEntryAccessor;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -99,31 +103,59 @@ public final class GuiUtil {
     }
 
     public static int x(Element element) {
-        if (element instanceof ClickableWidget widget)
+        if (element instanceof ClickableWidget widget) {
             return widget.x;
-        else
+        } else if (element instanceof EntryListWidget<?> list) {
+            return ((EntryListWidgetAccessor) list).getLeft();
+        } else if (element instanceof EntryListWidget.Entry<?> entry) {
+            var list = ((EntryListWidgetEntryAccessor) entry).getParentList();
+
+            return list.getRowLeft();
+        } else {
             return -1;
+        }
     }
 
     public static int y(Element element) {
-        if (element instanceof ClickableWidget widget)
+        if (element instanceof ClickableWidget widget) {
             return widget.y;
-        else
+        } else if (element instanceof EntryListWidget<?> list) {
+            return ((EntryListWidgetAccessor) list).getTop();
+        } else if (element instanceof EntryListWidget.Entry<?> entry) {
+            var list = ((EntryListWidgetEntryAccessor) entry).getParentList();
+
+            return ((EntryListWidgetAccessor) list).callGetRowTop(list.children().indexOf(entry));
+        } else {
             return -1;
+        }
     }
 
     public static int width(Element element) {
-        if (element instanceof ClickableWidget widget)
+        if (element instanceof ClickableWidget widget) {
             return widget.getWidth();
-        else
+        } else if (element instanceof EntryListWidget<?> list) {
+            return ((EntryListWidgetAccessor) list).getWidth();
+        } else if (element instanceof EntryListWidget.Entry<?> entry) {
+            var list = ((EntryListWidgetEntryAccessor) entry).getParentList();
+
+            return list.getRowWidth();
+        } else {
             return -1;
+        }
     }
 
     public static int height(Element element) {
-        if (element instanceof ClickableWidget widget)
+        if (element instanceof ClickableWidget widget) {
             return widget.getHeight();
-        else
+        } else if (element instanceof EntryListWidget<?> list) {
+            return ((EntryListWidgetAccessor) list).getHeight();
+        } else if (element instanceof EntryListWidget.Entry<?> entry) {
+            var list = ((EntryListWidgetEntryAccessor) entry).getParentList();
+
+            return ((EntryListWidgetAccessor) list).getItemHeight();
+        } else {
             return -1;
+        }
     }
 
     public static boolean isVisible(Element element) {
