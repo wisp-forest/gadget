@@ -8,7 +8,6 @@
         "CommandManagerMixin",
         "CustomPayloadC2SPacketMixin",
         "NbtTypesAccessor",
-        "client.HandledScreenAccessor",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",
         "owo.ParentComponentMixin",
@@ -17,6 +16,7 @@
     "client": [
         "client.ContextMenuScreenMixin",
         "client.DisconnectedScreenMixin",
+        "client.HandledScreenAccessor",
         "client.KeyboardAccessor",
         "client.KeyboardMixin",
         "client.MinecraftClientMixin",
