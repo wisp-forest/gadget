@@ -3,6 +3,7 @@ package io.wispforest.gadget.client.gui;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.dump.OpenDumpScreen;
 import io.wispforest.gadget.client.dump.PacketDumper;
+import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -71,35 +72,32 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
             if (!Files.exists(PacketDumper.DUMP_DIR))
                 Files.createDirectories(PacketDumper.DUMP_DIR);
 
-            try (var dumps = Files.list(PacketDumper.DUMP_DIR)) {
-                for (var dump : (Iterable<Path>)dumps::iterator) {
-                    String filename = dump.getFileName().toString();
+            for (var dump : FileUtil.listSortedByFileName(PacketDumper.DUMP_DIR)) {
+                String filename = dump.getFileName().toString();
 
-                    HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
-                    row.child(Components.label(
-                        Text.literal("d")
-                            .formatted(Formatting.DARK_RED))
-                        .margins(Insets.right(5)))
-                        .child(Components.label(Text.literal(filename + " ")))
-                        .padding(Insets.bottom(2));
+                HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+                row.child(Components.label(
+                    Text.literal("d")
+                        .formatted(Formatting.DARK_RED))
+                    .margins(Insets.right(5)))
+                    .child(Components.label(Text.literal(filename + " ")))
+                    .padding(Insets.bottom(2));
 
-                    LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
+                LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
 
-                    GuiUtil.semiButton(openLabel, () -> {
-                        try (InputStream is = Files.newInputStream(dump)) {
-                            client.setScreen(new OpenDumpScreen(this, is));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                GuiUtil.semiButton(openLabel, () -> {
+                    try (InputStream is = Files.newInputStream(dump)) {
+                        client.setScreen(new OpenDumpScreen(this, is));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
-                    row.child(openLabel);
-                    main.child(row);
-                }
+                row.child(openLabel);
+                main.child(row);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-
         }
     }
 
