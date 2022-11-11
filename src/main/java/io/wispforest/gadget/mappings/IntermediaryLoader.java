@@ -37,7 +37,10 @@ public final class IntermediaryLoader {
 
         if (!Files.exists(intermediaryPath)) {
             toast.step(Text.translatable("message.gadget.progress.downloading_intermediary"));
-            FileUtils.copyURLToFile(new URL(INTERMEDIARY_ENDPOINT), intermediaryPath.toFile());
+
+            try (var is = toast.loadWithProgress(new URL(INTERMEDIARY_ENDPOINT))) {
+                FileUtils.copyToFile(is, intermediaryPath.toFile());
+            }
         }
 
         try (FileSystem fs = FileSystems.newFileSystem(intermediaryPath, (ClassLoader) null);

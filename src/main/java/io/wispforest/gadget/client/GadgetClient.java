@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.mixin.client.KeyboardAccessor;
@@ -14,6 +15,7 @@ import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -148,6 +150,10 @@ public class GadgetClient implements ClientModInitializer {
 
                     return false;
                 });
+        });
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            ReloadMappingsCommand.register(dispatcher);
         });
 
         FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)

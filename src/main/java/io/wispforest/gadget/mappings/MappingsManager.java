@@ -49,7 +49,7 @@ public final class MappingsManager {
         Gadget.CONFIG.subscribeToMappings(type -> reloadMappings());
     }
 
-    private static void reloadMappings() {
+    public static void reloadMappings() {
         try {
             DISPLAY_MAPPINGS = Gadget.CONFIG.mappings().factory().get();
         } catch (Exception e) {

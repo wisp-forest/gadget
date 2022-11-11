@@ -18,7 +18,6 @@ import net.minecraft.util.JsonHelper;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -76,7 +75,7 @@ public class MojangMappings implements Mappings {
             IntermediaryLoader.loadIntermediary(toast, tree);
 
             toast.step(Text.translatable("message.gadget.progress.downloading_minecraft_versions"));
-            JsonArray versions = JsonHelper.getArray(DownloadUtil.read(VERSION_MANIFEST_ENDPOINT), "versions");
+            JsonArray versions = JsonHelper.getArray(DownloadUtil.read(toast, VERSION_MANIFEST_ENDPOINT), "versions");
             String chosenUrl = null;
 
             for (int i = 0; i < versions.size(); i++) {
@@ -90,16 +89,16 @@ public class MojangMappings implements Mappings {
                 throw new UnsupportedOperationException("Couldn't find version " + SharedConstants.getGameVersion().getId() + " on Mojang's servers!");
 
             toast.step(Text.translatable("message.gadget.progress.downloading_minecraft_version_manifest"));
-            JsonObject manifest = DownloadUtil.read(chosenUrl);
+            JsonObject manifest = DownloadUtil.read(toast, chosenUrl);
             JsonObject downloads = JsonHelper.getObject(manifest, "downloads");
             JsonObject clientMappings = JsonHelper.getObject(downloads, "client_mappings");
             JsonObject serverMappings = JsonHelper.getObject(downloads, "server_mappings");
             var sw = new MappingSourceNsSwitch(tree, "official");
 
             toast.step(Text.translatable("message.gadget.progress.downloading_client_mappings"));
-            readProGuardInto(JsonHelper.getString(clientMappings, "url"), sw);
+            readProGuardInto(toast, JsonHelper.getString(clientMappings, "url"), sw);
             toast.step(Text.translatable("message.gadget.progress.downloading_server_mappings"));
-            readProGuardInto(JsonHelper.getString(serverMappings, "url"), sw);
+            readProGuardInto(toast, JsonHelper.getString(serverMappings, "url"), sw);
 
             toast.finish();
 
@@ -113,9 +112,8 @@ public class MojangMappings implements Mappings {
         }
     }
 
-    private void readProGuardInto(String url, MappingVisitor visitor) throws IOException {
-        URLConnection connection = new URL(url).openConnection();
-        try (var is = connection.getInputStream()) {
+    private void readProGuardInto(ProgressToast toast, String url, MappingVisitor visitor) throws IOException {
+        try (var is = toast.loadWithProgress(new URL(url))) {
             ProGuardReader.read(new InputStreamReader(new BufferedInputStream(is)), "named", "official", visitor);
         }
     }

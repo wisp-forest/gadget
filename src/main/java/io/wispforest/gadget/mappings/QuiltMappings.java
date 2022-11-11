@@ -91,7 +91,7 @@ public class QuiltMappings implements Mappings {
 
             toast.step(Text.translatable("message.gadget.progress.downloading_qm_versions"));
 
-            QMVersion[] versions = DownloadUtil.read(QM_API_ENTRYPOINT, QMVersion[].class);
+            QMVersion[] versions = DownloadUtil.read(toast, QM_API_ENTRYPOINT, QMVersion[].class);
 
             if (versions.length == 0) {
                 throw new IllegalStateException("we malden");
@@ -111,15 +111,15 @@ public class QuiltMappings implements Mappings {
 
             IntermediaryLoader.loadIntermediary(toast, tree);
 
-            var conn = new URL(
+            var url = new URL(
                 "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-mappings/"
                     + latestVersion
                     + "/quilt-mappings-"
                     + latestVersion
-                    + "-tiny.gz").openConnection();
+                    + "-tiny.gz");
 
             toast.step(Text.translatable("message.gadget.progress.downloading_qm"));
-            try (var is = conn.getInputStream();
+            try (var is = toast.loadWithProgress(url);
                  var gz = new GZIPInputStream(is)) {
                 Tiny2Reader.read(new InputStreamReader(gz), tree);
             }

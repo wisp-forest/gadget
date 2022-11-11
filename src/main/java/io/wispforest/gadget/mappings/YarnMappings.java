@@ -80,7 +80,7 @@ public class YarnMappings implements Mappings {
 
             if (!Files.exists(yarnPath)) {
                 toast.step(Text.translatable("message.gadget.progress.downloading_yarn_versions"));
-                YarnVersion[] versions = DownloadUtil.read(YARN_API_ENTRYPOINT, YarnVersion[].class);
+                YarnVersion[] versions = DownloadUtil.read(toast, YARN_API_ENTRYPOINT, YarnVersion[].class);
 
                 if (versions.length == 0) {
                     throw new IllegalStateException("we malden");
@@ -97,7 +97,9 @@ public class YarnMappings implements Mappings {
                 }
 
                 toast.step(Text.translatable("message.gadget.progress.downloading_yarn"));
-                FileUtils.copyURLToFile(new URL("https://maven.fabricmc.net/net/fabricmc/yarn/" + latestVersion + "/yarn-" + latestVersion + "-v2.jar"), yarnPath.toFile());
+                try (var is = toast.loadWithProgress(new URL("https://maven.fabricmc.net/net/fabricmc/yarn/" + latestVersion + "/yarn-" + latestVersion + "-v2.jar"))) {
+                    FileUtils.copyInputStreamToFile(is, yarnPath.toFile());
+                }
             }
 
             toast.finish();
