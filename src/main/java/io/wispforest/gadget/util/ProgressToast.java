@@ -1,5 +1,6 @@
 package io.wispforest.gadget.util;
 
+import com.google.common.io.CountingInputStream;
 import io.wispforest.gadget.client.gui.ProgressToastImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -10,7 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.function.LongSupplier;
 
+@SuppressWarnings("UnstableApiUsage")
 public interface ProgressToast {
     static ProgressToast create(Text headText) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
@@ -22,7 +25,7 @@ public interface ProgressToast {
 
     void step(Text text);
 
-    void followProgress(ProgressInputStream stream, int total);
+    void followProgress(LongSupplier stream, long total);
 
     default InputStream loadWithProgress(URL url) throws IOException {
         URLConnection connection = url.openConnection();
@@ -32,8 +35,8 @@ public interface ProgressToast {
         if (total == -1) {
             return is;
         } else {
-            ProgressInputStream progress = new ProgressInputStream(is);
-            followProgress(progress, total);
+            CountingInputStream progress = new CountingInputStream(is);
+            followProgress(progress::getCount, total);
             return progress;
         }
     }
@@ -47,7 +50,7 @@ public interface ProgressToast {
         }
 
         @Override
-        public void followProgress(ProgressInputStream stream, int total) {
+        public void followProgress(LongSupplier stream, long total) {
 
         }
 

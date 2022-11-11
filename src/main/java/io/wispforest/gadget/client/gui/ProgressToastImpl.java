@@ -1,6 +1,5 @@
 package io.wispforest.gadget.client.gui;
 
-import io.wispforest.gadget.util.ProgressInputStream;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.component.BoxComponent;
 import io.wispforest.owo.ui.component.Components;
@@ -14,6 +13,8 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
+import java.util.function.LongSupplier;
+
 public class ProgressToastImpl implements Toast, ProgressToast {
     private final OwoUIAdapter<VerticalFlowLayout> adapter;
     private final MinecraftClient client = MinecraftClient.getInstance();
@@ -22,8 +23,8 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     private final LabelComponent stepLabel;
     private final BoxComponent progressBox;
     private long stopTime = 0;
-    private ProgressInputStream following = null;
-    private int followingTotal = 0;
+    private LongSupplier following = null;
+    private long followingTotal = 0;
 
     public ProgressToastImpl(Text headText) {
         this.adapter = OwoUIAdapter.createWithoutScreen(0, 0, 160, 32, Containers::verticalFlow);
@@ -56,7 +57,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
         if (following == null) {
             progressBox.horizontalSizing(Sizing.fixed(0));
         } else {
-            progressBox.horizontalSizing(Sizing.fixed(following.progress() * 140 / followingTotal));
+            progressBox.horizontalSizing(Sizing.fixed((int) (following.getAsLong() * 140 / followingTotal)));
         }
 
         this.adapter.render(matrices, 0, 0, client.getTickDelta());
@@ -86,8 +87,8 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     }
 
     @Override
-    public void followProgress(ProgressInputStream stream, int total) {
-        this.following = stream;
+    public void followProgress(LongSupplier following, long total) {
+        this.following = following;
         this.followingTotal = total;
     }
 
