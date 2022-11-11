@@ -2,6 +2,7 @@ package io.wispforest.gadget.util;
 
 import io.wispforest.gadget.mappings.*;
 import io.wispforest.owo.config.annotation.Config;
+import io.wispforest.owo.config.annotation.ExcludeFromScreen;
 import io.wispforest.owo.config.annotation.Hook;
 import io.wispforest.owo.config.annotation.Modmenu;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,6 +17,8 @@ public class GadgetConfigModel {
     public boolean noFrequentPackets = true;
     public boolean debugKeysInScreens = true;
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
+
+    @ExcludeFromScreen public boolean debugMatrixStackLogging = false;
 
     public enum MappingsType {
         // TODO: finish everything™

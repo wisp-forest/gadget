@@ -1,0 +1,38 @@
+{
+    "schemaVersion": 1,
+    "id": "gadget-testmod",
+    "version": "${version}",
+
+    "name": "gadget testmod",
+    "description": "tm",
+    "authors": [
+        "BasiqueEvangelist"
+    ],
+
+    "license": "LGPL-3.0-only",
+
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+        ],
+        "client": [
+            "io.wispforest.gadget.testmod.client.GadgetTestmodClient"
+        ]
+    },
+
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.discord": "https://wispforest.io/discord"
+            }
+        }
+    },
+
+    "depends": {
+        "fabricloader": ">=0.13.3",
+        "fabric-api": "*",
+        "minecraft": "1.19.x",
+        "java": ">=17",
+        "owo": ">=0.8.3"
+    }
+}

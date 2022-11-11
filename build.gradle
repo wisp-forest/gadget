@@ -31,6 +31,13 @@ repositories {
 	maven { url = "https://ladysnake.jfrog.io/artifactory/mods" }
 }
 
+sourceSets {
+	testmod {
+		runtimeClasspath += main.runtimeClasspath
+		compileClasspath += main.compileClasspath
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -53,6 +60,25 @@ dependencies {
 	modLocalRuntime "dev.emi:trinkets:3.4.0"
 	modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:9.1.530"
 	modLocalRuntime "dev.architectury:architectury-fabric:6.3.49"
+
+	testmodImplementation sourceSets.main.output
+}
+
+loom {
+	runs {
+		testmodClient {
+			client()
+			ideConfigGenerated project.rootProject == project
+			name = "Testmod Client"
+			source sourceSets.testmod
+		}
+		testmodServer {
+			server()
+			ideConfigGenerated project.rootProject == project
+			name = "Testmod Server"
+			source sourceSets.testmod
+		}
+	}
 }
 
 processResources {

@@ -81,4 +81,12 @@ public final class ReflectionUtil {
 
         return fields;
     }
+
+    public static String getCallingMethodData(int depth) {
+        return StackWalker.getInstance().walk(s -> s
+            .skip(depth)
+            .findFirst())
+            .map(x -> x.getClassName() + "#" + x.getMethodName() + ":" + x.getLineNumber())
+            .orElse("unknown");
+    }
 }

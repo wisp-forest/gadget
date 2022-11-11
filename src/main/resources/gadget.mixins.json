@@ -18,13 +18,16 @@
         "client.DisconnectedScreenMixin",
         "client.EntryListWidgetAccessor",
         "client.EntryListWidgetEntryAccessor",
+        "client.GameRendererMixin",
         "client.HandledScreenAccessor",
         "client.KeyboardAccessor",
         "client.KeyboardMixin",
+        "client.MatrixStackMixin",
         "client.MinecraftClientMixin",
         "client.MultiplayerServerEntryMixin",
         "client.SplashOverlayMixin",
-        "client.WorldListWidgetWorldEntryMixin"
+        "client.WorldListWidgetWorldEntryMixin",
+        "client.WorldRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1

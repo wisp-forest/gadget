@@ -1,5 +1,6 @@
 package io.wispforest.gadget.mixin.client;
 
+import io.wispforest.gadget.client.MatrixStackLogger;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.dump.DumpPrimer;
 import net.minecraft.client.MinecraftClient;
@@ -11,6 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
+    @Inject(method = "render", at = @At("RETURN"))
+    private void tripModelViewStack(boolean tick, CallbackInfo ci) {
+        MatrixStackLogger.startLoggingIfNeeded();
+    }
+
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
     private void onDisconnect(Screen screen, CallbackInfo ci) {
         if (DumpPrimer.isPrimed) {
