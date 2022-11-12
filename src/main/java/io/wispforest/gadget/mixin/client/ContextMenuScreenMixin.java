@@ -32,6 +32,7 @@ public class ContextMenuScreenMixin extends Screen implements ContextMenuScreenA
         }
 
         gadget$adapter = OwoUIAdapter.create(this, Containers::verticalFlow);
+        focusOn(null);
         gadget$adapter.inflateAndMount();
     }
 

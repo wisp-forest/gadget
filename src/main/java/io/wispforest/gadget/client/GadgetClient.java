@@ -2,6 +2,7 @@ package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
+import io.wispforest.gadget.client.gui.inspector.VanillaInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.*;
@@ -9,7 +10,6 @@ import io.wispforest.gadget.client.dump.handler.DrawPacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
-import io.wispforest.gadget.client.gui.VanillaInspector;
 import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
@@ -143,6 +143,15 @@ public class GadgetClient implements ClientModInitializer {
 
                     return false;
                 });
+
+            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key, scancode, modifiers) -> {
+                if (!Screen.hasShiftDown()) return true;
+                if (!INSPECT_KEY.matchesKey(key, scancode)) return true;
+
+                VanillaInspector.dumpWidgetTree(screen1);
+
+                return false;
+            });
         });
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
