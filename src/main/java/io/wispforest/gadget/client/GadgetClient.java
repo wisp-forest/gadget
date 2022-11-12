@@ -4,7 +4,6 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
-import io.wispforest.gadget.mixin.client.KeyboardAccessor;
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.client.dump.handler.DrawPacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
@@ -27,7 +26,6 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -121,13 +119,6 @@ public class GadgetClient implements ClientModInitializer {
                         Text.translatable("text.gadget.menu_button"),
                         button -> client.setScreen(new GadgetScreen(screen))));
                 }
-            }
-
-            if (Gadget.CONFIG.debugKeysInScreens()) {
-                ScreenKeyboardEvents.allowKeyPress(screen).register(
-                    (screen1, key, scancode, modifiers) ->
-                        !InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_F3)
-                     || !((KeyboardAccessor) client.keyboard).callProcessF3(key));
             }
 
             if (screen instanceof HandledScreen<?> handled)

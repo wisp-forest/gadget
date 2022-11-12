@@ -20,7 +20,6 @@
         "client.EntryListWidgetEntryAccessor",
         "client.GameRendererMixin",
         "client.HandledScreenAccessor",
-        "client.KeyboardAccessor",
         "client.KeyboardMixin",
         "client.MatrixStackMixin",
         "client.MinecraftClientMixin",
