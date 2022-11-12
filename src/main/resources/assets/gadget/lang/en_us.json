@@ -73,6 +73,26 @@
     ],
     "text.config.gadget.option.debugKeysInScreens": "Debug Keys In Screens",
     "text.config.gadget.option.debugKeysInScreens.tooltip": "Allows you to use F3 debug keys in any screen",
+    "text.config.gadget.option.matrixStackDebugging": "MatrixStack Debugging",
+    "text.config.gadget.option.matrixStackDebugging.tooltip": "Tracks pushes and pops of MatrixStacks to dump on error",
+
+    "text.config.gadget.category.internalSettings": "Internal Settings",
+    "text.config.gadget.category.internalSettings.tooltip": [
+        "gadget developer-only settings.\n\n",
+        {
+            "text": "⚠ ",
+            "color": "yellow"
+        },
+        {
+            "text": "Contains small parts. Keep out of reach of children.",
+            "color": "yellow",
+            "bold": true
+        }
+    ],
+    "text.config.gadget.option.internalSettings.debugMatrixStackDebugging": "Debug MatrixStack Debugging",
+    "text.config.gadget.option.internalSettings.debugMatrixStackDebugging.tooltip": "Dumps all MatrixStacks' logs while holding Shift",
+    "text.config.gadget.option.internalSettings.injectMatrixStackErrors": "Inject MatrixStack Errors",
+    "text.config.gadget.option.internalSettings.injectMatrixStackErrors.tooltip": "Causes MatrixStack errors when Shift is pressed",
 
     "text.config.gadget.option.mappings": "Mappings",
     "text.config.gadget.option.mappings.tooltip": [

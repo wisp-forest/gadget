@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WorldRendererMixin {
     @Inject(method = "checkEmpty", at = @At("HEAD"), cancellable = true)
     private void checkEmpty(MatrixStack matrices, CallbackInfo ci) {
-        if (!matrices.isEmpty()) {
-            MatrixStackLogger.tripError(matrices, "Matrix stack not empty");
+        if (!matrices.isEmpty()
+         && MatrixStackLogger.tripError(matrices, "Matrix stack not empty")) {
             ci.cancel();
         }
     }

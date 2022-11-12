@@ -17,8 +17,8 @@ public class MatrixStackMixin {
 
     @Inject(method = "pop", at = @At("HEAD"), cancellable = true)
     private void onPop(CallbackInfo ci) {
-        if (stack.size() == 1) {
-            MatrixStackLogger.tripError((MatrixStack)(Object) this, "Tried to pop empty MatrixStack");
+        if (stack.size() == 1
+         && MatrixStackLogger.tripError((MatrixStack) (Object) this, "Tried to pop empty MatrixStack")) {
             ci.cancel();
             return;
         }

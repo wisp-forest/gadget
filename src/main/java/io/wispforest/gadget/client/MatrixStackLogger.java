@@ -18,7 +18,7 @@ public final class MatrixStackLogger {
     }
 
     public static void logOp(MatrixStack stack, boolean push, int indent) {
-        if (ERROR_MODE != 2 && !(Gadget.CONFIG.debugMatrixStackLogging() && Screen.hasShiftDown())) return;
+        if (ERROR_MODE != 2 && !(Gadget.CONFIG.internalSettings.debugMatrixStackDebugging() && Screen.hasShiftDown())) return;
 
         var log = LOGS.computeIfAbsent(stack, unused -> new StringBuilder());
 
@@ -27,7 +27,9 @@ public final class MatrixStackLogger {
         log.append("\n");
     }
 
-    public static void tripError(MatrixStack stack, String message) {
+    public static boolean tripError(MatrixStack stack, String message) {
+        if (!Gadget.CONFIG.matrixStackDebugging()) return false;
+
         switch (ERROR_MODE) {
             case 0 -> ERROR_MODE = 1;
             case 2 -> {
@@ -35,10 +37,12 @@ public final class MatrixStackLogger {
                 throw new IllegalStateException(message);
             }
         }
+
+        return true;
     }
 
     public static void startLoggingIfNeeded() {
-        if (Gadget.CONFIG.debugMatrixStackLogging() && Screen.hasShiftDown()) {
+        if (Gadget.CONFIG.internalSettings.debugMatrixStackDebugging() && Screen.hasShiftDown()) {
             for (var log : LOGS.values()) {
                 Gadget.LOGGER.error("log:\n{}", log);
             }

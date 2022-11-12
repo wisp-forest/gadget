@@ -1,10 +1,7 @@
 package io.wispforest.gadget.util;
 
 import io.wispforest.gadget.mappings.*;
-import io.wispforest.owo.config.annotation.Config;
-import io.wispforest.owo.config.annotation.ExcludeFromScreen;
-import io.wispforest.owo.config.annotation.Hook;
-import io.wispforest.owo.config.annotation.Modmenu;
+import io.wispforest.owo.config.annotation.*;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.function.Supplier;
@@ -16,9 +13,14 @@ public class GadgetConfigModel {
     public boolean rightClickDump = true;
     public boolean noFrequentPackets = true;
     public boolean debugKeysInScreens = true;
+    public boolean matrixStackDebugging = true;
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
+    @Nest public InternalSettings internalSettings = new InternalSettings();
 
-    @ExcludeFromScreen public boolean debugMatrixStackLogging = false;
+    public static class InternalSettings {
+        public boolean debugMatrixStackDebugging = false;
+        public boolean injectMatrixStackErrors = false;
+    }
 
     public enum MappingsType {
         // TODO: finish everything™
