@@ -2,7 +2,7 @@ package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
-import io.wispforest.gadget.client.gui.inspector.VanillaInspector;
+import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.*;
@@ -47,7 +47,7 @@ public class GadgetClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
         DrawPacketHandlers.init();
-        VanillaInspector.init();
+        UIInspector.init();
         ServerData.init();
 
         GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
@@ -148,7 +148,7 @@ public class GadgetClient implements ClientModInitializer {
                 if (!Screen.hasShiftDown()) return true;
                 if (!INSPECT_KEY.matchesKey(key, scancode)) return true;
 
-                VanillaInspector.dumpWidgetTree(screen1);
+                UIInspector.dumpWidgetTree(screen1);
 
                 return false;
             });

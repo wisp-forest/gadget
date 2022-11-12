@@ -19,25 +19,30 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class VanillaInspector {
-    private static final Map<Screen, VanillaInspector> ALL = new WeakHashMap<>();
+public class UIInspector {
+    private static final Map<Screen, UIInspector> ALL = new WeakHashMap<>();
 
     private boolean enabled;
     private boolean onlyHovered = true;
 
     private int childAtOffset = 0;
 
-    private VanillaInspector() {
+    private UIInspector() {
 
     }
 
-    public static VanillaInspector get(Screen screen) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean enabled() {
+        return Gadget.CONFIG.uiInspector() && enabled;
+    }
+
+    public static UIInspector get(Screen screen) {
         return ALL.get(screen);
     }
 
     public static void init() {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            VanillaInspector inspector = ALL.computeIfAbsent(screen, unused -> new VanillaInspector());
+            UIInspector inspector = ALL.computeIfAbsent(screen, unused -> new UIInspector());
 
             ScreenEvents.afterRender(screen).register(inspector::drawInspector);
             ScreenKeyboardEvents.afterKeyPress(screen).register(inspector::keyPressed);
@@ -47,7 +52,7 @@ public class VanillaInspector {
     }
 
     private boolean mouseScrolled(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (!enabled) return true;
+        if (!enabled()) return true;
         if (!Screen.hasShiftDown()) return true;
 
         childAtOffset += verticalAmount;
@@ -95,7 +100,7 @@ public class VanillaInspector {
 
     // Mostly copied (and modified) from Drawer$DebugDrawer#drawInspector
     public void drawInspector(Screen screen, MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
-        if (!enabled) return;
+        if (!enabled()) return;
 
         RenderSystem.disableDepthTest();
         var client = MinecraftClient.getInstance();
