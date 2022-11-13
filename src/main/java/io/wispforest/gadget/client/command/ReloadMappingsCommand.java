@@ -9,6 +9,7 @@ import net.minecraft.text.Text;
 import org.spongepowered.include.com.google.common.io.MoreFiles;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -28,10 +29,12 @@ public final class ReloadMappingsCommand {
     private static int reload(CommandContext<FabricClientCommandSource> ctx) {
         Path mappingsDir = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("mappings");
 
-        try {
-            MoreFiles.deleteRecursively(mappingsDir);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (Files.exists(mappingsDir)) {
+            try {
+                MoreFiles.deleteRecursively(mappingsDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         MappingsManager.reloadMappings();

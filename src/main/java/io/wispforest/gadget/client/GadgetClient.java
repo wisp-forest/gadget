@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
@@ -156,6 +157,7 @@ public class GadgetClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             ReloadMappingsCommand.register(dispatcher);
+            ConfigCommand.register(dispatcher);
         });
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
