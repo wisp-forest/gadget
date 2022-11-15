@@ -207,7 +207,7 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)
-            .forEach(GadgetClientEntrypoint::onGadgetClientInit);
+                .forEach(GadgetClientEntrypoint::onGadgetClientInit);
     }
 
     // 100% not stolen from owo-whats-this

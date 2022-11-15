@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registries;
 import net.minecraft.util.registry.Registry;
 
 import java.util.HashMap;
@@ -42,9 +43,9 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
         register("string", String.class, x -> x, String::toString);
         register("identifier", Identifier.class, Identifier::new, Identifier::toString);
 
-        registerForRegistry(Block.class, Registry.BLOCK);
-        registerForRegistry(Item.class, Registry.ITEM);
-        registerForRegistry(StatusEffect.class, Registry.STATUS_EFFECT);
+        registerForRegistry(Block.class, Registries.BLOCK);
+        registerForRegistry(Item.class, Registries.ITEM);
+        registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
 
         PacketBufSerializer.register(SimpleMapPathStepType.class, new PacketBufSerializer<>(
             (buf, type) -> buf.writeString(REGISTRY.inverse().get(type)),

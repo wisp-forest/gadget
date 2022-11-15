@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registries;
 import net.minecraft.util.registry.Registry;
 
 import java.util.HashMap;
@@ -49,12 +50,12 @@ public final class PrimitiveEditTypes {
         registerSimple("string", String.class, x -> x, String::toString);
         registerSimple("identifier", Identifier.class, Identifier::new, Identifier::toString);
 
-        registerForRegistry(Block.class, Registry.BLOCK);
-        registerForRegistry(Item.class, Registry.ITEM);
-        registerForRegistry(StatusEffect.class, Registry.STATUS_EFFECT);
+        registerForRegistry(Block.class, Registries.BLOCK);
+        registerForRegistry(Item.class, Registries.ITEM);
+        registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
 
         PacketBufSerializer.register(PrimitiveEditType.class, new PacketBufSerializer<>(
-            (buf, mapPathStepType) -> buf.writeString(REGISTRY.inverse().get(mapPathStepType)),
-            buf -> REGISTRY.get(buf.readString())));
+                (buf, mapPathStepType) -> buf.writeString(REGISTRY.inverse().get(mapPathStepType)),
+                buf -> REGISTRY.get(buf.readString())));
     }
 }
