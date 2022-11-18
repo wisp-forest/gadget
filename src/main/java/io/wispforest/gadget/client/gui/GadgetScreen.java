@@ -76,11 +76,15 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 String filename = dump.getFileName().toString();
 
                 HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
-                row.child(Components.label(
-                    Text.literal("d")
+
+                Text labelText = Text.literal("")
+                    .append(Text.literal("d ")
                         .formatted(Formatting.DARK_RED))
-                    .margins(Insets.right(5)))
-                    .child(Components.label(Text.literal(filename + " ")))
+                    .append(Text.literal(filename + " "))
+                    .append(Text.literal(FileUtil.formatFileSize(Files.size(dump)) + " ")
+                        .formatted(Formatting.GRAY));
+
+                row.child(Components.label(labelText))
                     .padding(Insets.bottom(2));
 
                 LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
