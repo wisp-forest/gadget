@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
+import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -62,7 +63,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .child(view)
                 .horizontalAlignment(packet.outbound() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT);
 
-            packets.add(new DisplayedPacket(packet, fullRow));
+            packets.add(new DisplayedPacket(packet, new LayoutCacheWrapper<>(fullRow)));
         }
     }
 
@@ -110,7 +111,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                     continue outer;
             }
 
-            neededComponents.add(packet.fullRow);
+            neededComponents.add(packet.component);
         }
 
         main.children(neededComponents);
@@ -121,5 +122,5 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         client.setScreen(parent);
     }
 
-    record DisplayedPacket(DumpedPacket packet, HorizontalFlowLayout fullRow) { }
+    record DisplayedPacket(DumpedPacket packet, Component component) { }
 }
