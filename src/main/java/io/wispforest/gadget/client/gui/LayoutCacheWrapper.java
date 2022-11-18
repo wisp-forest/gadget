@@ -26,6 +26,12 @@ public class LayoutCacheWrapper<C extends Component> extends WrappingParentCompo
     }
 
     @Override
+    public void onChildMutated(Component child) {
+        this.prevSpace = null;
+        super.onChildMutated(child);
+    }
+
+    @Override
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
