@@ -13,6 +13,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 // Copied from owo-ui's CollapsibleContainer
 public class SubObjectContainer extends VerticalFlowLayout {
@@ -24,15 +25,15 @@ public class SubObjectContainer extends VerticalFlowLayout {
         component.y() + component.height(),
         0x77FFFFFF
     );
-    private final Runnable loader;
-    private final Runnable unloader;
+    private final Consumer<SubObjectContainer> loader;
+    private final Consumer<SubObjectContainer> unloader;
 
     protected List<Component> collapsibleChildren = new ArrayList<>();
     protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;
 
-    public SubObjectContainer(Runnable loader, Runnable unloader) {
+    public SubObjectContainer(Consumer<SubObjectContainer> loader, Consumer<SubObjectContainer> unloader) {
         super(Sizing.content(), Sizing.content());
         this.loader = loader;
         this.unloader = unloader;
@@ -76,9 +77,9 @@ public class SubObjectContainer extends VerticalFlowLayout {
         this.expanded = !this.expanded;
 
         if (expanded) {
-            loader.run();
+            loader.accept(this);
         } else {
-            unloader.run();
+            unloader.accept(this);
         }
     }
 
@@ -123,6 +124,12 @@ public class SubObjectContainer extends VerticalFlowLayout {
     public FlowLayout removeChild(Component child) {
         this.collapsibleChildren.remove(child);
         return super.removeChild(child);
+    }
+
+    @Override
+    public FlowLayout clearChildren() {
+        this.collapsibleChildren.clear();
+        return super.clearChildren();
     }
 
     public List<Component> collapsibleChildren() {

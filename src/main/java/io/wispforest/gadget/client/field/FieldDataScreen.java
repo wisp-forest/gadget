@@ -17,10 +17,12 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Map;
+
 public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private final InspectionTarget target;
     private final boolean isClient;
-    private final FieldDataIsland island;
+    public FieldDataIsland island;
 
     public FieldDataScreen(InspectionTarget target, boolean isClient) {
         this.target = target;
@@ -116,7 +118,8 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         verticalFlowLayout.child(sidebar);
     }
 
-    public void addFieldData(ObjectPath path, FieldData data) {
-        island.addFieldData(path, data);
+    public void addFieldData(Map<ObjectPath, FieldData> data) {
+        data.forEach(island::addFieldData);
+        island.commitAdditions();
     }
 }

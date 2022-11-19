@@ -109,7 +109,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
                     .formatted(Formatting.GRAY));
             }
         } else if (element instanceof NbtCompound compound) {
-            widgetData.subContainer = new SubObjectContainer(() -> {}, () -> {});
+            widgetData.subContainer = new SubObjectContainer(unused -> {}, unused -> {});
 
             row.child(widgetData.subContainer.getSpinnyBoi());
 
@@ -133,7 +133,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
 
             row.child(plusLabel);
         } else if (element instanceof AbstractNbtList<?> list) {
-            widgetData.subContainer = new SubObjectContainer(() -> {}, () -> {});
+            widgetData.subContainer = new SubObjectContainer(unused -> {}, unused -> {});
 
             row.child(widgetData.subContainer.getSpinnyBoi());
 

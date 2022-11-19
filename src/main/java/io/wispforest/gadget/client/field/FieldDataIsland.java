@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.field;
 
+import io.wispforest.gadget.client.gui.ComponentAdditionRound;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.client.nbt.KeyAdderWidget;
@@ -30,6 +31,7 @@ public class FieldDataIsland {
     private final VerticalFlowLayout mainContainer;
     private Consumer<ObjectPath> pathRequester = path -> {};
     private boolean shortenNames = false;
+    private ComponentAdditionRound currentRound = null;
     BiConsumer<ObjectPath, PrimitiveEditData> primitiveSetter = null;
     BiConsumer<ObjectPath, NbtCompound> nbtCompoundSetter = null;
 
@@ -55,6 +57,7 @@ public class FieldDataIsland {
 
             FieldObjects.collectAllData(path, sub)
                 .forEach(this::addFieldData);
+            commitAdditions();
         };
 
         if (settable) {
@@ -65,6 +68,7 @@ public class FieldDataIsland {
 
                 FieldObjects.collectAllData(parentPath, parentPath.follow(obj))
                     .forEach(this::addFieldData);
+                commitAdditions();
             };
 
             this.nbtCompoundSetter = (path, data) -> {
@@ -74,11 +78,13 @@ public class FieldDataIsland {
 
                 FieldObjects.collectAllData(parentPath, parentPath.follow(obj))
                     .forEach(this::addFieldData);
+                commitAdditions();
             };
         }
 
         FieldObjects.collectAllData(ObjectPath.EMPTY, obj)
             .forEach(this::addFieldData);
+        commitAdditions();
     }
 
     public void shortenNames() {
@@ -89,7 +95,7 @@ public class FieldDataIsland {
         return mainContainer;
     }
 
-    private void makeComponent(VerticalFlowLayout container, ObjectPath path, ClientFieldData data) {
+    private void makeComponent(VerticalFlowLayout container, ObjectPath path, ClientFieldData data, ComponentAdditionRound round) {
         var rowContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
         var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 
@@ -129,8 +135,8 @@ public class FieldDataIsland {
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(efo.fullExceptionText())))));
         } else if (data.obj instanceof ComplexFieldObject cfo) {
             var subContainer = new SubObjectContainer(
-                () -> pathRequester.accept(path),
-                () -> { });
+                unused -> pathRequester.accept(path),
+                SubObjectContainer::clearChildren);
             data.subObjectContainer = subContainer;
             rowContainer.child(subContainer);
 
@@ -149,8 +155,8 @@ public class FieldDataIsland {
                     .sizing(Sizing.fixed(10), Sizing.content()));
         } else if (data.obj instanceof NbtCompoundFieldObject nfo) {
             var subContainer = new SubObjectContainer(
-                () -> { },
-                () -> { });
+                unused -> { },
+                unused -> { });
             data.subObjectContainer = subContainer;
             rowContainer.child(subContainer);
 
@@ -183,7 +189,7 @@ public class FieldDataIsland {
             .margins(Insets.both(0, 2))
             .allowOverflow(true);
 
-        container.child(rowContainer);
+        round.addTo(container, rowContainer);
     }
 
     public void addFieldData(ObjectPath path, FieldData data) {
@@ -191,6 +197,9 @@ public class FieldDataIsland {
             fields.put(path, new ClientFieldData(data));
             return;
         }
+
+        if (currentRound == null)
+            currentRound = new ComponentAdditionRound();
 
         ClientFieldData old = fields.get(path);
         VerticalFlowLayout container;
@@ -207,8 +216,15 @@ public class FieldDataIsland {
 
         ClientFieldData newData = new ClientFieldData(data);
 
-        makeComponent(container, path, newData);
+        makeComponent(container, path, newData, currentRound);
 
         fields.put(path, newData);
+    }
+
+    public void commitAdditions() {
+        if (currentRound == null) return;
+
+        currentRound.commit();
+        currentRound = null;
     }
 }

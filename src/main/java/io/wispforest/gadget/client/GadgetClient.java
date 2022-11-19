@@ -53,12 +53,12 @@ public class GadgetClient implements ClientModInitializer {
 
         GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
             if (access.runtime().currentScreen instanceof FieldDataScreen gui && !gui.isClient() && gui.target().equals(packet.target())) {
-                packet.fields().forEach(gui::addFieldData);
+                gui.addFieldData(packet.fields());
                 return;
             }
 
             var screen = new FieldDataScreen(packet.target(), false);
-            packet.fields().forEach(screen::addFieldData);
+            screen.addFieldData(packet.fields());
             access.runtime().setScreen(screen);
         });
 
