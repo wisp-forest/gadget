@@ -139,6 +139,8 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         VerticalFlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
         infoButton = new VerticalFlowLayout(Sizing.fixed(16), Sizing.fixed(16)) {
+            private int totalComponents = -1;
+
             @Override
             public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
                 if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
@@ -149,11 +151,21 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                     Text.translatable("text.gadget.info.fps", FileUtil.formatDouble((1000.f / (delta * 50))))
                         .asOrderedText()));
 
-                var list = new ArrayList<Component>();
-                uiAdapter.rootComponent.collectChildren(list);
-                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", list.size()).asOrderedText()));
+                if (totalComponents == -1) {
+                    var list = new ArrayList<Component>();
+                    uiAdapter.rootComponent.collectChildren(list);
+                    totalComponents = list.size();
+                }
+
+                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", totalComponents).asOrderedText()));
 
                 Drawer.drawTooltip(matrices, mouseX, mouseY, tooltip);
+            }
+
+            @Override
+            public void mount(ParentComponent parent, int x, int y) {
+                super.mount(parent, x, y);
+                totalComponents = -1;
             }
         };
 
