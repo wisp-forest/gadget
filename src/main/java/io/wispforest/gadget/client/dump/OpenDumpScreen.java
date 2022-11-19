@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
+import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.gadget.util.ProgressToast;
@@ -10,8 +11,10 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.gadget.client.dump.handler.DrawPacketHandler;
+import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -32,7 +35,6 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private VerticalFlowLayout main;
     private final List<DumpedPacket> rawPackets;
     private FlowLayout infoButton;
-    private double lastFps;
 
     private OpenDumpScreen(Screen parent, ProgressToast toast, Path path) throws IOException {
         this.parent = parent;
@@ -78,7 +80,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .verticalAlignment(VerticalAlignment.CENTER)
             .surface(Surface.VANILLA_TRANSLUCENT);
 
-        this.main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        this.main = new BasedVerticalFlowLayout(Sizing.fill(100), Sizing.content());
         ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
@@ -136,15 +138,33 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         VerticalFlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
-        infoButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
+        infoButton = new VerticalFlowLayout(Sizing.fixed(16), Sizing.fixed(16)) {
+            @Override
+            public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+                if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
+
+                List<TooltipComponent> tooltip = new ArrayList<>();
+
+                tooltip.add(TooltipComponent.of(
+                    Text.translatable("text.gadget.info.fps", FileUtil.formatDouble((1000.f / (delta * 50))))
+                        .asOrderedText()));
+
+                var list = new ArrayList<Component>();
+                uiAdapter.rootComponent.collectChildren(list);
+                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", list.size()).asOrderedText()));
+
+                Drawer.drawTooltip(matrices, mouseX, mouseY, tooltip);
+            }
+        };
+
+        infoButton
             .child(Components.label(Text.translatable("text.gadget.info"))
                 .verticalTextAlignment(VerticalAlignment.CENTER)
                 .horizontalTextAlignment(HorizontalAlignment.CENTER)
                 .positioning(Positioning.absolute(5, 4))
                 .cursorStyle(CursorStyle.HAND)
-            );
-
-        infoButton.cursorStyle(CursorStyle.HAND);
+            )
+            .cursorStyle(CursorStyle.HAND);
 
         infoButton.mouseEnter().subscribe(
             () -> infoButton.surface(Surface.flat(0x80ffffff)));
@@ -164,19 +184,6 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        lastFps = (6 * lastFps + 1000.f / (client.getLastFrameDuration() * 50)) / 7;
-        if (infoButton.isInBoundingBox(mouseX, mouseY)) {
-            List<Text> tooltip = new ArrayList<>();
-
-            tooltip.add(Text.translatable("text.gadget.info.fps", FileUtil.formatDouble(lastFps)));
-
-            var list = new ArrayList<Component>();
-            uiAdapter.rootComponent.collectChildren(list);
-            tooltip.add(Text.translatable("text.gadget.info.total_components", list.size()));
-
-            infoButton.tooltip(tooltip);
-        }
-
         super.render(matrices, mouseX, mouseY, delta);
     }
 
