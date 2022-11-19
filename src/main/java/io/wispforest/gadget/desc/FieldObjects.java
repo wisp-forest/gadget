@@ -49,7 +49,7 @@ public final class FieldObjects {
 
             if (type != null) {
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
-                    var path = basePath.then(new MapPathStep(type, type.toImpl().apply(entry.getKey())));
+                    var path = basePath.then(new MapPathStep(type, type.toNetwork(entry.getKey())));
 
                     FieldObject obj = FieldObjects.fromObject(entry.getValue());
 

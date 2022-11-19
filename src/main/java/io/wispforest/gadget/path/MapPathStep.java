@@ -1,7 +1,5 @@
 package io.wispforest.gadget.path;
 
-import io.wispforest.gadget.util.PrettyPrinters;
-
 import java.util.Map;
 
 public record MapPathStep(MapPathStepType type, String key) implements PathStep {
@@ -13,7 +11,7 @@ public record MapPathStep(MapPathStepType type, String key) implements PathStep 
 
         var basedMap = (Map<Object, ?>) map;
 
-        return basedMap.get(type.fromImpl().apply(key));
+        return basedMap.get(type.fromNetwork(key));
     }
 
     @SuppressWarnings("unchecked")
@@ -24,11 +22,11 @@ public record MapPathStep(MapPathStepType type, String key) implements PathStep 
 
         var basedMap = (Map<Object, Object>) map;
 
-        basedMap.put(type.fromImpl().apply(key), to);
+        basedMap.put(type.fromNetwork(key), to);
     }
 
     @Override
     public String toString() {
-        return "[" + PrettyPrinters.tryPrint(type.fromImpl().apply(key)) + "]";
+        return "[" + type.toPretty(type.fromNetwork(key)) + "]";
     }
 }

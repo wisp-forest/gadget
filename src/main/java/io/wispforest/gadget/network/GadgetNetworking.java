@@ -8,9 +8,10 @@ import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
+import io.wispforest.gadget.path.EnumMapPathStepType;
+import io.wispforest.gadget.path.SimpleMapPathStepType;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.gadget.desc.edit.PrimitiveEditTypes;
-import io.wispforest.gadget.path.MapPathStepType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -23,7 +24,8 @@ public final class GadgetNetworking {
     }
 
     public static void init() {
-        MapPathStepType.init();
+        SimpleMapPathStepType.init();
+        EnumMapPathStepType.init();
         PrimitiveEditTypes.init();
 
         CHANNEL.registerServerbound(RequestDataC2SPacket.class, (packet, access) -> {
