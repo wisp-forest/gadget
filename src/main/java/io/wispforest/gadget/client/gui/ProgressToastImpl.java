@@ -64,6 +64,8 @@ public class ProgressToastImpl implements Toast, ProgressToast {
 
         if (stopTime == -1)
             stopTime = startTime;
+        else if (stopTime == -2)
+            return Visibility.HIDE;
 
         if (stopTime == 0) {
             return Visibility.SHOW;
@@ -93,11 +95,21 @@ public class ProgressToastImpl implements Toast, ProgressToast {
     }
 
     @Override
-    public void finish() {
+    public void force() {
         MinecraftClient.getInstance().execute(() -> {
-            this.stepLabel.text(Text.translatable("message.gadget.progress.finished"));
+            if (!attached) {
+                MinecraftClient.getInstance().getToastManager().add(this);
+                attached = true;
+            }
+        });
+    }
+
+    @Override
+    public void finish(Text text, boolean hideImmediately) {
+        MinecraftClient.getInstance().execute(() -> {
+            this.stepLabel.text(text);
             this.following = null;
-            stopTime = -1;
+            stopTime = hideImmediately ? -2 : -1;
         });
     }
 }

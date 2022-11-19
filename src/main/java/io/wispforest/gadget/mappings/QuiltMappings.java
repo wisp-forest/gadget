@@ -51,8 +51,9 @@ public class QuiltMappings implements Mappings {
     private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
 
     public QuiltMappings() {
-        CompletableFuture.runAsync(() -> {
-            var tree = load();
+        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
+        toast.follow(CompletableFuture.runAsync(() -> {
+            var tree = load(toast);
 
             var classMap = new HashMap<String, String>();
             var fieldMap = new HashMap<String, String>();
@@ -67,12 +68,11 @@ public class QuiltMappings implements Mappings {
 
             intermediaryToFieldMap = fieldMap;
             intermediaryToClassMap = classMap;
-        });
+        }), false);
     }
 
-    private MappingTree load() {
+    private MappingTree load(ProgressToast toast) {
         try {
-            ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
             Path mappingsDir = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("mappings");
 
             Files.createDirectories(mappingsDir);
@@ -127,8 +127,6 @@ public class QuiltMappings implements Mappings {
             try (var bw = Files.newBufferedWriter(qmPath)) {
                 tree.accept(new Tiny2Writer(bw, false));
             }
-
-            toast.finish();
 
             return tree;
 

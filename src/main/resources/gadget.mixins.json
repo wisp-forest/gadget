@@ -10,7 +10,6 @@
         "NbtTypesAccessor",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",
-        "owo.ParentComponentMixin",
         "owo.ParticleSystemAccessor"
     ],
     "client": [

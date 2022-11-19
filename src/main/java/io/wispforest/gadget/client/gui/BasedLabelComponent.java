@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.gui;
 
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.core.Size;
 import net.minecraft.text.Text;
 
 public class BasedLabelComponent extends LabelComponent {
@@ -9,12 +10,12 @@ public class BasedLabelComponent extends LabelComponent {
     }
 
     @Override
-    public void update(float delta, int mouseX, int mouseY) {
-        super.update(delta, mouseX, mouseY);
+    public void inflate(Size space) {
+        int newMaxWidth = space.width();
 
-        int newMaxWidth = (int) (GuiUtil.root(this).width() * 0.85);
+        if (maxWidth != newMaxWidth)
+            maxWidth = newMaxWidth;
 
-        if (maxWidth() != newMaxWidth)
-            maxWidth(newMaxWidth);
+        super.inflate(space);
     }
 }

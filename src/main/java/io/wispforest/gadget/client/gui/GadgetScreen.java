@@ -19,7 +19,6 @@ import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -58,11 +57,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
             String path = DialogUtil.openFileDialog(I18n.translate("text.gadget.open_other_dump"), null, List.of("*.dump"), "gadget network dumps", false);
 
             if (path != null) {
-                try (InputStream is = Files.newInputStream(Path.of(path))) {
-                    client.setScreen(new OpenDumpScreen(this, is));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                OpenDumpScreen.openWithProgress(this, Path.of(path));
             }
         });
 
@@ -89,13 +84,8 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
                 LabelComponent openLabel = Components.label(Text.translatable("text.gadget.open"));
 
-                GuiUtil.semiButton(openLabel, () -> {
-                    try (InputStream is = Files.newInputStream(dump)) {
-                        client.setScreen(new OpenDumpScreen(this, is));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                GuiUtil.semiButton(openLabel,
+                    () -> OpenDumpScreen.openWithProgress(this, dump));
 
                 row.child(openLabel);
                 main.child(row);

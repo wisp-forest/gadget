@@ -21,6 +21,10 @@ public final class FileUtil {
         SIZE_FORMAT.setMaximumFractionDigits(2);
     }
 
+    public static String formatDouble(double num) {
+        return SIZE_FORMAT.format(num);
+    }
+
     public static String formatFileSize(long size) {
         if (size < 1024) {
             return size + " B";

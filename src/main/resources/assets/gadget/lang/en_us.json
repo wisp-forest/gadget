@@ -12,6 +12,7 @@
     "message.gadget.dump.started": "Started dumping",
     "message.gadget.dump.stopped": "Saved dump to",
     "message.gadget.progress.finished": "Finished!",
+    "message.gadget.progress.failed": "Failed! Check logs for details",
     "message.gadget.progress.downloading_intermediary": "Downloading Intermediary",
     "message.gadget.progress.downloading_qm_versions": "Downloading QM versions",
     "message.gadget.progress.downloading_yarn_versions": "Downloading Yarn versions",
@@ -22,7 +23,12 @@
     "message.gadget.progress.downloading_client_mappings": "Downloading client mappings",
     "message.gadget.progress.downloading_server_mappings": "Downloading server mappings",
 
+    "message.gadget.progress.reading_packets": "Reading packet data",
+    "message.gadget.progress.building_screen": "Building screen",
+    "message.gadget.progress.mounting_components": "Mounting components",
+
     "message.gadget.loading_mappings": "Loading mappings",
+    "message.gadget.loading_dump": "Loading dump",
 
     "text.gadget.client_current": {
         "text": "C",
@@ -32,6 +38,21 @@
         "text": "S",
         "color": "green"
     },
+    "text.gadget.info": {
+        "text": "i",
+        "color": "blue",
+        "font": "gadget:monocraft"
+    },
+    "text.gadget.info.fps": [
+        "",
+        {"text": "FPS: ", "color": "gray"},
+        {"index": 0, "color": "white"}
+    ],
+    "text.gadget.info.total_components": [
+        "",
+        {"text": "Total Components: ", "color": "gray"},
+        {"index": 0, "color": "white"}
+    ],
     "text.gadget.switch_to_server": "Switch to server",
     "text.gadget.switch_to_client": "Switch to client",
     "text.gadget.menu_button": {

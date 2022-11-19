@@ -50,8 +50,9 @@ public class YarnMappings implements Mappings {
     private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
 
     public YarnMappings() {
-        CompletableFuture.runAsync(() -> {
-            var tree = load();
+        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
+        toast.follow(CompletableFuture.runAsync(() -> {
+            var tree = load(toast);
 
             var classMap = new HashMap<String, String>();
             var fieldMap = new HashMap<String, String>();
@@ -66,12 +67,11 @@ public class YarnMappings implements Mappings {
 
             intermediaryToFieldMap = fieldMap;
             intermediaryToClassMap = classMap;
-        });
+        }), false);
     }
 
-    private MappingTree load() {
+    private MappingTree load(ProgressToast toast) {
         try {
-            ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
             Path mappingsDir = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("mappings");
 
             Files.createDirectories(mappingsDir);
@@ -101,8 +101,6 @@ public class YarnMappings implements Mappings {
                     FileUtils.copyInputStreamToFile(is, yarnPath.toFile());
                 }
             }
-
-            toast.finish();
 
             try (FileSystem fs = FileSystems.newFileSystem(yarnPath, (ClassLoader) null)) {
                 try (var br = Files.newBufferedReader(fs.getPath("mappings/mappings.tiny"))) {

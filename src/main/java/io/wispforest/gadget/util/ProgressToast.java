@@ -1,6 +1,7 @@
 package io.wispforest.gadget.util;
 
 import com.google.common.io.CountingInputStream;
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.ProgressToastImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -11,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.LongSupplier;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -27,6 +31,19 @@ public interface ProgressToast {
 
     void followProgress(LongSupplier stream, long total);
 
+    default InputStream loadWithProgress(Path path) throws IOException {
+        long size = Files.size(path);
+        var bis = new BufferedInputStream(Files.newInputStream(path));
+
+        if (size == 0) {
+            return bis;
+        } else {
+            CountingInputStream progress = new CountingInputStream(bis);
+            followProgress(progress::getCount, size);
+            return progress;
+        }
+    }
+
     default InputStream loadWithProgress(URL url) throws IOException {
         URLConnection connection = url.openConnection();
         BufferedInputStream is = new BufferedInputStream(connection.getInputStream());
@@ -41,7 +58,21 @@ public interface ProgressToast {
         }
     }
 
-    void finish();
+    void force();
+
+    void finish(Text text, boolean hideImmediately);
+
+    default void follow(CompletableFuture<Void> future, boolean closeImmediately) {
+        future.whenComplete((res, e) -> {
+            if (e != null) {
+                Gadget.LOGGER.error("Loading failed with exception", e);
+                force();
+                finish(Text.translatable("message.gadget.progress.failed"), false);
+            } else {
+                finish(Text.translatable("message.gadget.progress.finished"), closeImmediately);
+            }
+        });
+    }
 
     class Dummy implements ProgressToast {
         @Override
@@ -55,7 +86,12 @@ public interface ProgressToast {
         }
 
         @Override
-        public void finish() {
+        public void force() {
+
+        }
+
+        @Override
+        public void finish(Text text, boolean hideImmediately) {
 
         }
     }
