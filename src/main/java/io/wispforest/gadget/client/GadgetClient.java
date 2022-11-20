@@ -5,6 +5,7 @@ import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
+import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.client.dump.handler.PacketHandlers;
@@ -60,6 +61,12 @@ public class GadgetClient implements ClientModInitializer {
             var screen = new FieldDataScreen(packet.target(), false);
             screen.addFieldData(packet.fields());
             access.runtime().setScreen(screen);
+        });
+
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if (client.getOverlay() == null) {
+                MappingsManager.init();
+            }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

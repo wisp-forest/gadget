@@ -1,7 +1,9 @@
 package io.wispforest.gadget;
 
+import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.util.GadgetConfig;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
@@ -20,6 +22,9 @@ public class Gadget implements ModInitializer {
     @Override
     public void onInitialize() {
         GadgetNetworking.init();
+
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
+            MappingsManager.init();
 
         FabricLoader.getInstance().getEntrypoints("gadget:init", GadgetEntrypoint.class)
             .forEach(GadgetEntrypoint::onGadgetInit);

@@ -24,7 +24,6 @@
         "client.MatrixStackMixin",
         "client.MinecraftClientMixin",
         "client.MultiplayerServerEntryMixin",
-        "client.SplashOverlayMixin",
         "client.WorldListWidgetWorldEntryMixin",
         "client.WorldRendererMixin"
     ],

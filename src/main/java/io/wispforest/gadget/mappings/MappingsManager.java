@@ -4,7 +4,7 @@ import com.google.common.base.Suppliers;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.util.GadgetConfigModel;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.mappingio.format.Tiny2Reader;
+import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.tree.MappingTreeView;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import org.jetbrains.annotations.Nullable;
@@ -80,12 +80,14 @@ public final class MappingsManager {
             try (var is = conn.getInputStream()) {
                 MemoryMappingTree tree = new MemoryMappingTree();
 
-                Tiny2Reader.read(new InputStreamReader(is), tree);
+                MappingReader.read(new InputStreamReader(is), tree);
 
                 return runtimeMappings = tree;
             }
         } catch (IOException e) {
-            throw new RuntimeException("Couldn't load runtime mappings!", e);
+            Gadget.LOGGER.error("Couldn't load runtime mappings!", e);
+
+            return runtimeMappings = new MemoryMappingTree();
         }
     }
 
