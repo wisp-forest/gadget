@@ -10,7 +10,7 @@ import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
-import io.wispforest.gadget.client.dump.handler.DrawPacketHandler;
+import io.wispforest.gadget.client.dump.handler.ProcessPacketHandler;
 import io.wispforest.owo.ui.util.Drawer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private final Screen parent;
     private final ProgressToast toast;
-    private final List<DisplayedPacket> packets;
+    private final List<ProcessedDumpedPacket> packets;
     private VerticalFlowLayout main;
     private final List<DumpedPacket> rawPackets;
     private FlowLayout infoButton;
@@ -111,7 +111,9 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
             view.child(new BasedLabelComponent(typeText)
                 .margins(Insets.bottom(3)));
 
-            DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);
+            StringBuilder searchText = new StringBuilder();
+
+            ProcessPacketHandler.EVENT.invoker().onProcessPacket(packet, view, searchText);
 
             HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 
@@ -119,7 +121,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 .child(view)
                 .horizontalAlignment(packet.outbound() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT);
 
-            packets.add(new DisplayedPacket(packet, new LayoutCacheWrapper<>(fullRow)));
+            packets.add(new ProcessedDumpedPacket(packet, new LayoutCacheWrapper<>(fullRow), searchText.toString()));
 
             progress.add(1);
         }
@@ -207,14 +209,14 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         outer:
         for (var packet : packets) {
-            String relevantText = packet.packet.searchText();
+            String relevantText = packet.searchText();
 
             for (var word : words) {
                 if (!word.matches(relevantText))
                     continue outer;
             }
 
-            neededComponents.add(packet.component);
+            neededComponents.add(packet.component());
         }
 
         main.children(neededComponents);
@@ -224,6 +226,4 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
     public void close() {
         client.setScreen(parent);
     }
-
-    record DisplayedPacket(DumpedPacket packet, Component component) { }
 }

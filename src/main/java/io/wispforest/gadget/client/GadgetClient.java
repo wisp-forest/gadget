@@ -7,7 +7,7 @@ import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.*;
-import io.wispforest.gadget.client.dump.handler.DrawPacketHandlers;
+import io.wispforest.gadget.client.dump.handler.PacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
@@ -47,7 +47,7 @@ public class GadgetClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(INSPECT_KEY);
         KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
-        DrawPacketHandlers.init();
+        PacketHandlers.init();
         UIInspector.init();
         ServerData.init();
 

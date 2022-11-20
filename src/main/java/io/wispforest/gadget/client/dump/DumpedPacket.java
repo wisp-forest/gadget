@@ -1,7 +1,6 @@
 package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.util.ReflectionUtil;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -31,16 +30,5 @@ public record DumpedPacket(boolean outbound, NetworkState state, Packet<?> packe
             case LOGIN -> 0xFFFF0000;
             case STATUS -> 0xFFFFFF00;
         };
-    }
-
-    public String searchText() {
-        StringBuilder search = new StringBuilder();
-
-        search.append(ReflectionUtil.nameWithoutPackage(packet.getClass()));
-
-        if (channelId != null)
-            search.append(" ").append(channelId);
-
-        return search.toString();
     }
 }

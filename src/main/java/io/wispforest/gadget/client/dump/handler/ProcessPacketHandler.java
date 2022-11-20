@@ -5,10 +5,10 @@ import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
-public interface DrawPacketHandler {
-    Event<DrawPacketHandler> EVENT = EventFactory.createArrayBacked(DrawPacketHandler.class, callbacks -> (packet, view) -> {
+public interface ProcessPacketHandler {
+    Event<ProcessPacketHandler> EVENT = EventFactory.createArrayBacked(ProcessPacketHandler.class, callbacks -> (packet, view, searchText) -> {
         for (var callback : callbacks) {
-            boolean result = callback.onDrawPacket(packet, view);
+            boolean result = callback.onProcessPacket(packet, view, searchText);
 
             if (result)
                 return true;
@@ -17,5 +17,5 @@ public interface DrawPacketHandler {
         return false;
     });
 
-    boolean onDrawPacket(DumpedPacket packet, VerticalFlowLayout view);
+    boolean onProcessPacket(DumpedPacket packet, VerticalFlowLayout view, StringBuilder searchText);
 }

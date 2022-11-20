@@ -38,7 +38,7 @@ public final class OwoSupport {
     }
 
     public static void init() {
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             if (packet.state() != NetworkState.PLAY) return false;
 
             if (packet.channelId() == null) return false;
@@ -58,6 +58,7 @@ public final class OwoSupport {
             Object unwrapped = serializer.read(buf);
 
             view.child(Components.label(Text.literal(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()))));
+            searchText.append(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()));
 
             FieldDataIsland island = new FieldDataIsland();
 
@@ -69,7 +70,7 @@ public final class OwoSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             if (packet.state() != NetworkState.PLAY) return false;
 
             if (packet.channelId() == null) return false;
@@ -83,6 +84,7 @@ public final class OwoSupport {
             Vec3d pos = VectorSerializer.read(buf);
 
             view.child(Components.label(Text.translatable("text.gadget.particle_system", systemId, (int) pos.x, (int) pos.y, (int) pos.z)));
+            searchText.append("#").append(systemId);
 
             ParticleSystem<?> system = controller.systemsByIndex.get(systemId);
             Object data = ((ParticleSystemAccessor) system).getAdapter().deserializer().apply(buf);
@@ -97,7 +99,7 @@ public final class OwoSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             if (!(packet.packet() instanceof LoginQueryRequestS2CPacket) || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
@@ -111,7 +113,7 @@ public final class OwoSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             if (!(packet.packet() instanceof LoginQueryResponseC2SPacket) || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());

@@ -18,7 +18,7 @@ public final class FapiSupport {
     }
 
     public static void init() {
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             if (!Objects.equals(packet.channelId(), EARLY_REGISTRATION_CHANNEL)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());

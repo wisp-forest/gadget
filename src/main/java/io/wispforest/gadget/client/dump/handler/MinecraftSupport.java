@@ -21,7 +21,7 @@ public final class MinecraftSupport {
     }
 
     public static void init() {
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             if (!Objects.equals(packet.channelId(), CustomPayloadS2CPacket.BRAND)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
@@ -34,7 +34,7 @@ public final class MinecraftSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
             Text header;
 
             if (Objects.equals(packet.channelId(), REGISTER_CHANNEL)) {
