@@ -21,17 +21,15 @@ public final class PacketHandlers {
         FapiSupport.init();
         MinecraftSupport.init();
 
-        ProcessPacketHandler.EVENT.register((packet, view, searchText) -> {
+        SearchTextPacketHandler.EVENT.register((packet, searchText) -> {
             searchText.append(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
 
             if (packet.channelId() != null)
                 searchText.append(" ").append(packet.channelId());
-
-            return false;
         });
 
-        ProcessPacketHandler.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
-        ProcessPacketHandler.EVENT.register(LAST_PHASE, (packet, view, searchText) -> {
+        DrawPacketHandler.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
+        DrawPacketHandler.EVENT.register(LAST_PHASE, (packet, view) -> {
             if (packet.channelId() != null) {
                 view.child(GuiUtil.hexDump(NetworkUtil.unwrapCustom(packet.packet())));
                 return true;

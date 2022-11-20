@@ -1,11 +1,11 @@
 package io.wispforest.gadget.client.dump;
 
+import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
 import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
@@ -29,7 +29,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private final List<ProcessedDumpedPacket> packets;
     private VerticalFlowLayout main;
     private FlowLayout infoButton;
-    private SliderComponent timeSlider;
+    private BasedSliderComponent timeSlider;
     private final long startTime;
     private final long endTime;
 
@@ -95,10 +95,14 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         searchBox.setChangedListener(text -> rebuild(text, currentTime()));
         searchBox.margins(Insets.bottom(3));
 
-        timeSlider = Components.slider(Sizing.fill(95));
-        timeSlider.message(unused -> Text.of(
-            DurationFormatUtils.formatDurationHMS(currentTime() - startTime)
-        ));
+        timeSlider = new BasedSliderComponent(Sizing.fill(95));
+        timeSlider
+            .tooltipFactory(value -> Text.of(
+                DurationFormatUtils.formatDurationHMS(currentTime(value) - startTime)
+            ))
+            .message(unused -> Text.of(
+                DurationFormatUtils.formatDurationHMS(currentTime() - startTime)
+            ));
         timeSlider.onChanged(value -> {
             rebuild(searchBox.getText(), currentTime());
         });
@@ -122,10 +126,21 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         infoButton = new VerticalFlowLayout(Sizing.fixed(16), Sizing.fixed(16)) {
             private int totalComponents = -1;
+            private int frameNumber = 11;
 
             @Override
             public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+                frameNumber++;
+
                 if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
+
+                if (frameNumber > 9) {
+                    frameNumber = 0;
+
+                    var list = new ArrayList<Component>();
+                    uiAdapter.rootComponent.collectChildren(list);
+                    totalComponents = list.size();
+                }
 
                 List<TooltipComponent> tooltip = new ArrayList<>();
 
@@ -133,21 +148,13 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                     Text.translatable("text.gadget.info.fps", FileUtil.formatDouble((1000.f / (delta * 50))))
                         .asOrderedText()));
 
-                if (totalComponents == -1) {
-                    var list = new ArrayList<Component>();
-                    uiAdapter.rootComponent.collectChildren(list);
-                    totalComponents = list.size();
-                }
-
                 tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", totalComponents).asOrderedText()));
 
-                Drawer.drawTooltip(matrices, mouseX, mouseY, tooltip);
-            }
+                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_packets", packets.size()).asOrderedText()));
 
-            @Override
-            public void mount(ParentComponent parent, int x, int y) {
-                super.mount(parent, x, y);
-                totalComponents = -1;
+                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.packets_on_screen", main.children().size()).asOrderedText()));
+
+                Drawer.drawTooltip(matrices, mouseX, mouseY, tooltip);
             }
         };
 
@@ -176,8 +183,12 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         toast.step(Text.translatable("message.gadget.progress.mounting_components"));
     }
 
+    private long currentTime(double value) {
+        return (long) (startTime + (endTime - startTime) * value);
+    }
+
     private long currentTime() {
-        return (long) (startTime + (endTime - startTime) * timeSlider.value());
+        return currentTime(timeSlider.value());
     }
 
     @Override

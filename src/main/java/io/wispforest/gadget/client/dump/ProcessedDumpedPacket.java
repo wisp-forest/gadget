@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
-import io.wispforest.gadget.client.dump.handler.ProcessPacketHandler;
+import io.wispforest.gadget.client.dump.handler.DrawPacketHandler;
+import io.wispforest.gadget.client.dump.handler.SearchTextPacketHandler;
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.util.ReflectionUtil;
@@ -13,7 +14,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.lang.ref.SoftReference;
-import java.util.Objects;
 
 public final class ProcessedDumpedPacket {
     private final DumpedPacket packet;
@@ -29,47 +29,48 @@ public final class ProcessedDumpedPacket {
     }
 
     public Component component() {
-        if (component == null || component.get() == null) init();
+        if (component == null || component.get() == null) {
+            VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
+
+            view
+                .padding(Insets.of(5))
+                .surface(Surface.outline(packet.color()))
+                .margins(Insets.bottom(5));
+
+            String name = ReflectionUtil.nameWithoutPackage(packet.packet().getClass());
+
+            MutableText typeText = Text.literal(name);
+
+            if (packet.channelId() != null)
+                typeText.append(Text.literal(" " + packet.channelId())
+                    .formatted(Formatting.GRAY));
+
+            view.child(new BasedLabelComponent(typeText)
+                .margins(Insets.bottom(3)));
+
+            DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);
+
+            HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+
+            fullRow
+                .child(view)
+                .horizontalAlignment(packet.outbound() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT);
+
+            component = new SoftReference<>(new LayoutCacheWrapper<>(fullRow));
+        }
 
         return component.get();
     }
 
     public String searchText() {
-        if (searchText == null) init();
+        if (searchText == null) {
+            StringBuilder sb = new StringBuilder();
+
+            SearchTextPacketHandler.EVENT.invoker().onCreateSearchText(packet, sb);
+
+            this.searchText = sb.toString();
+        }
 
         return searchText;
-    }
-
-    private void init() {
-        VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
-
-        view
-            .padding(Insets.of(5))
-            .surface(Surface.outline(packet.color()))
-            .margins(Insets.bottom(5));
-
-        String name = ReflectionUtil.nameWithoutPackage(packet.packet().getClass());
-
-        MutableText typeText = Text.literal(name);
-
-        if (packet.channelId() != null)
-            typeText.append(Text.literal(" " + packet.channelId())
-                .formatted(Formatting.GRAY));
-
-        view.child(new BasedLabelComponent(typeText)
-            .margins(Insets.bottom(3)));
-
-        StringBuilder searchTextSb = new StringBuilder();
-
-        ProcessPacketHandler.EVENT.invoker().onProcessPacket(packet, view, searchTextSb);
-
-        HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
-
-        fullRow
-            .child(view)
-            .horizontalAlignment(packet.outbound() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT);
-
-        component = new SoftReference<>(new LayoutCacheWrapper<>(fullRow));
-        this.searchText = searchTextSb.toString();
     }
 }

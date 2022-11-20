@@ -53,6 +53,16 @@
         {"text": "Total Components: ", "color": "gray"},
         {"index": 0, "color": "white"}
     ],
+    "text.gadget.info.packets_on_screen": [
+        "",
+        {"text": "Packets On Screen: ", "color": "gray"},
+        {"index": 0, "color": "white"}
+    ],
+    "text.gadget.info.total_packets": [
+        "",
+        {"text": "Total Packets: ", "color": "gray"},
+        {"index": 0, "color": "white"}
+    ],
     "text.gadget.switch_to_server": "Switch to server",
     "text.gadget.switch_to_client": "Switch to client",
     "text.gadget.menu_button": {

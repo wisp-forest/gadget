@@ -35,4 +35,23 @@ public final class NetworkUtil {
             return pkt.getResponse();
         else return null;
     }
+
+    public static InfallibleClosable resetIndexes(Packet<?> packet) {
+        PacketByteBuf buf = unwrapCustom(packet);
+
+        if (buf == null) return () -> {};
+
+        int readerIdx = buf.readerIndex();
+        int writerIdx = buf.writerIndex();
+
+        return () -> {
+            buf.readerIndex(readerIdx);
+            buf.writerIndex(writerIdx);
+        };
+    }
+
+    public interface InfallibleClosable extends AutoCloseable {
+        @Override
+        void close();
+    }
 }
