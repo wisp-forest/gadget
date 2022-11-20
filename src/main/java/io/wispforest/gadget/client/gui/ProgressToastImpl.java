@@ -90,8 +90,10 @@ public class ProgressToastImpl implements Toast, ProgressToast {
 
     @Override
     public void followProgress(LongSupplier following, long total) {
-        this.following = following;
-        this.followingTotal = total;
+        MinecraftClient.getInstance().execute(() -> {
+            this.following = following;
+            this.followingTotal = total;
+        });
     }
 
     @Override

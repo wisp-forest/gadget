@@ -78,7 +78,7 @@
         "right clicking in the singleplayer\n",
         "and multiplayer screens"
     ],
-    "text.config.gadget.option.noFrequentPackets": "Don't Dump Frequent Packets",
+    "text.config.gadget.option.noFrequentPackets": "Don't Show Frequent Packets",
     "text.config.gadget.option.noFrequentPackets.tooltip": [
         "Disables frequently sent packets, such\n",
         "as player and entity look and move.\n\n",

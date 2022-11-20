@@ -16,7 +16,10 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PacketDumpReader {
@@ -24,7 +27,7 @@ public class PacketDumpReader {
 
     }
 
-    public static List<DumpedPacket> readAll(InputStream is) throws IOException {
+    public static List<DumpedPacket> readV0(InputStream is) throws IOException {
         DataInputStream dis = new DataInputStream(is);
         List<DumpedPacket> list = new ArrayList<>();
         PacketByteBuf buf = PacketByteBufs.create();
@@ -61,7 +64,69 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, 0));
+            }
+        } catch (EOFException e) {
+            return list;
+        }
+    }
+
+    public static List<DumpedPacket> readNew(InputStream is) throws IOException {
+        DataInputStream dis = new DataInputStream(is);
+
+        var magic = dis.readNBytes(11);
+
+        if (!Arrays.equals(magic, "gadget:dump".getBytes(StandardCharsets.UTF_8))) {
+            throw new IllegalStateException("Invalid gdump file!");
+        }
+
+        var version = dis.readInt();
+
+        if (version == 1)
+            return readV1(dis);
+        else
+            throw new IllegalStateException("Invalid gdump version " + version);
+    }
+
+    private static List<DumpedPacket> readV1(DataInputStream is) throws IOException {
+        List<DumpedPacket> list = new ArrayList<>();
+
+        PacketByteBuf buf = PacketByteBufs.create();
+
+        Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
+
+        try {
+            // I know, IntelliJ.
+            //noinspection InfiniteLoopStatement
+            while (true) {
+                int length = is.readInt();
+
+                buf.readerIndex(0);
+                buf.writerIndex(0);
+
+                buf.writeBytes(is.readNBytes(length));
+
+                short flags = buf.readShort();
+                boolean outbound = (flags & 1) != 0;
+                NetworkState state = switch (flags & 0b0110) {
+                    case 0b0000 -> NetworkState.HANDSHAKING;
+                    case 0b0010 -> NetworkState.PLAY;
+                    case 0b0100 -> NetworkState.STATUS;
+                    case 0b0110 -> NetworkState.LOGIN;
+                    default -> throw new IllegalStateException();
+                };
+                long sentAt = buf.readLong();
+                int packetId = buf.readVarInt();
+                Packet<?> packet = state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
+                Identifier channelId = NetworkUtil.getChannelOrNull(packet);
+
+                if (packet instanceof LoginQueryRequestS2CPacket req) {
+                    loginQueryChannels.put(req.getQueryId(), req.getChannel());
+                } else if (packet instanceof LoginQueryResponseC2SPacket res) {
+                    channelId = loginQueryChannels.get(res.getQueryId());
+                }
+
+                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt));
             }
         } catch (EOFException e) {
             return list;
