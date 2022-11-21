@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.util.Identifier;
 
 public final class PacketHandlers {
+    public static final Identifier FIRST_PHASE = Gadget.id("first");
     public static final Identifier LAST_PHASE = Gadget.id("last");
 
 
@@ -21,7 +22,8 @@ public final class PacketHandlers {
         FapiSupport.init();
         MinecraftSupport.init();
 
-        SearchTextPacketHandler.EVENT.register((packet, searchText) -> {
+        SearchTextPacketHandler.EVENT.addPhaseOrdering(FIRST_PHASE, Event.DEFAULT_PHASE);
+        SearchTextPacketHandler.EVENT.register(FIRST_PHASE, (packet, searchText) -> {
             searchText.append(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
 
             if (packet.channelId() != null)

@@ -17,7 +17,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +54,7 @@ public class PacketDumpReader {
                     default -> throw new IllegalStateException();
                 };
                 int packetId = buf.readVarInt();
+                int size = buf.readableBytes();
                 Packet<?> packet = state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
@@ -64,7 +64,7 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, 0));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
             }
         } catch (EOFException e) {
             return list;
@@ -117,6 +117,7 @@ public class PacketDumpReader {
                 };
                 long sentAt = buf.readLong();
                 int packetId = buf.readVarInt();
+                int size = buf.readableBytes();
                 Packet<?> packet = state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
@@ -126,7 +127,7 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
             }
         } catch (EOFException e) {
             return list;

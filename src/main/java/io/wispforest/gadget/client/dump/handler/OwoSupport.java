@@ -88,7 +88,7 @@ public final class OwoSupport {
 
             Object unwrapped = serializer.read(buf);
 
-            searchText.append(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()));
+            searchText.append(" ").append(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()));
         });
 
         DrawPacketHandler.EVENT.register((packet, view) -> {

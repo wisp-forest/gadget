@@ -12,7 +12,8 @@ import net.minecraft.util.Identifier;
 
 import java.util.Set;
 
-public record DumpedPacket(boolean outbound, NetworkState state, Packet<?> packet, Identifier channelId, long sentAt) {
+public record DumpedPacket(boolean outbound, NetworkState state, Packet<?> packet, Identifier channelId, long sentAt,
+                           int size) {
     private static final Set<Class<?>> FREQUENT_PACKET_TYPES = Set.of(
         EntityS2CPacket.MoveRelative.class, EntityS2CPacket.Rotate.class, EntityS2CPacket.RotateAndMoveRelative.class,
         EntitySetHeadYawS2CPacket.class, PlayerMoveC2SPacket.LookAndOnGround.class, EntityVelocityUpdateS2CPacket.class,

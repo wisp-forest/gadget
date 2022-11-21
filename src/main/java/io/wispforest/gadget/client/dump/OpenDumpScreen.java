@@ -2,13 +2,14 @@ package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
-import io.wispforest.gadget.util.FileUtil;
+import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -16,6 +17,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -145,7 +147,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 List<TooltipComponent> tooltip = new ArrayList<>();
 
                 tooltip.add(TooltipComponent.of(
-                    Text.translatable("text.gadget.info.fps", FileUtil.formatDouble((1000.f / (delta * 50))))
+                    Text.translatable("text.gadget.info.fps", NumberUtil.formatDouble((1000.f / (delta * 50))))
                         .asOrderedText()));
 
                 tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", totalComponents).asOrderedText()));
@@ -173,8 +175,37 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         infoButton.mouseLeave().subscribe(
             () -> infoButton.surface(Surface.BLANK));
 
+        VerticalFlowLayout statsButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16));
+
+        statsButton
+            .child(Components.label(Text.translatable("text.gadget.stats"))
+                .verticalTextAlignment(VerticalAlignment.CENTER)
+                .horizontalTextAlignment(HorizontalAlignment.CENTER)
+                .positioning(Positioning.absolute(5, 4))
+                .cursorStyle(CursorStyle.HAND)
+            )
+            .cursorStyle(CursorStyle.HAND)
+            .tooltip(Text.translatable("text.gadget.stats.tooltip"));
+
+        statsButton.mouseEnter().subscribe(
+            () -> statsButton.surface(Surface.flat(0x80ffffff)));
+
+        statsButton.mouseLeave().subscribe(
+            () -> statsButton.surface(Surface.BLANK));
+
+        statsButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+
+            UISounds.playInteractionSound();
+
+            client.setScreen(new DumpStatsScreen(this, packets));
+
+            return true;
+        });
+
         sidebar
             .child(infoButton)
+            .child(statsButton)
             .positioning(Positioning.absolute(0, 0))
             .padding(Insets.of(2));
 

@@ -4,6 +4,7 @@ import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.dump.OpenDumpScreen;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.util.FileUtil;
+import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -76,7 +77,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
                     .append(Text.literal("d ")
                         .formatted(Formatting.DARK_RED))
                     .append(Text.literal(filename + " "))
-                    .append(Text.literal(FileUtil.formatFileSize(Files.size(dump)) + " ")
+                    .append(Text.literal(NumberUtil.formatFileSize(Files.size(dump)) + " ")
                         .formatted(Formatting.GRAY));
 
                 row.child(Components.label(labelText))

@@ -63,6 +63,12 @@
         {"text": "Total Packets: ", "color": "gray"},
         {"index": 0, "color": "white"}
     ],
+    "text.gadget.stats": {
+        "text": "s",
+        "color": "yellow",
+        "font": "gadget:monocraft"
+    },
+    "text.gadget.stats.tooltip": "View Stats",
     "text.gadget.switch_to_server": "Switch to server",
     "text.gadget.switch_to_client": "Switch to client",
     "text.gadget.menu_button": {
