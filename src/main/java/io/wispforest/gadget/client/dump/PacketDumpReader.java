@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class PacketDumpReader {
     private PacketDumpReader() {
@@ -72,7 +73,7 @@ public class PacketDumpReader {
     }
 
     public static List<DumpedPacket> readNew(InputStream is) throws IOException {
-        DataInputStream dis = new DataInputStream(is);
+        DataInputStream dis = new DataInputStream(new GZIPInputStream(is));
 
         var magic = dis.readNBytes(11);
 

@@ -1,3 +1,5 @@
+The file is gzip compressed.
+
 Header:
 "gadget:dump"
 i32 version (currently 1)

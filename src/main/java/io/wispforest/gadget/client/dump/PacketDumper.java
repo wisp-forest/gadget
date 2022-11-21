@@ -17,11 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.zip.GZIPOutputStream;
 
 public class PacketDumper {
     public static final int VERSION = 1;
@@ -30,7 +32,7 @@ public class PacketDumper {
     public static final Path DUMP_DIR = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("dumps");
 
     private static Path DUMP_PATH;
-    private static SeekableByteChannel OUTPUT_CHANNEL;
+    private static WritableByteChannel OUTPUT_CHANNEL;
 
     private PacketDumper() {
 
@@ -43,7 +45,10 @@ public class PacketDumper {
 
             String filename = Util.getFormattedCurrentTime() + ".gdump";
             DUMP_PATH = DUMP_DIR.resolve(filename);
-            OUTPUT_CHANNEL = Files.newByteChannel(DUMP_PATH, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            OUTPUT_CHANNEL =
+                Channels.newChannel(
+                    new GZIPOutputStream(Files.newOutputStream(DUMP_PATH, StandardOpenOption.WRITE, StandardOpenOption.CREATE))
+                );
             ByteBuffer headerBuf = ByteBuffer.allocate(15);
             headerBuf.put("gadget:dump".getBytes(StandardCharsets.UTF_8));
             headerBuf.putInt(VERSION);
