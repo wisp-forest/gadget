@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public class GadgetConfigModel {
     public boolean menuButtonEnabled = true;
     public boolean rightClickDump = true;
-    public boolean noFrequentPackets = true;
+    public boolean dropChunkData = false;
     public boolean debugKeysInScreens = true;
     public boolean matrixStackDebugging = true;
     public boolean uiInspector = true;

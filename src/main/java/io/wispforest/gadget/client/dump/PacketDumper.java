@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.dump;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.NotificationToast;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
@@ -8,6 +9,7 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
@@ -73,6 +75,9 @@ public class PacketDumper {
     }
 
     public static void dump(boolean outbound, Packet<?> packet) {
+        if (packet instanceof ChunkDataS2CPacket && Gadget.CONFIG.dropChunkData())
+            return;
+
         PacketByteBuf buf = PacketByteBufs.create();
         NetworkState state = NetworkState.getPacketHandlerState(packet);
 
