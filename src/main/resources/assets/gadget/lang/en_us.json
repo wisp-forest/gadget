@@ -84,6 +84,11 @@
         "text": "Open other dump",
         "underlined": "true"
     },
+    "text.gadget.inspect_resources": {
+        "text": "Inspect resources",
+        "underlined": "true"
+    },
+    "text.gadget.image_size": "%sx%s %s image.",
 
     "text.config.gadget.title": "Gadget",
     "text.config.gadget.option.menuButtonEnabled": "Menu Button Enabled",

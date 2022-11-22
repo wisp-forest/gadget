@@ -1,6 +1,5 @@
 package io.wispforest.gadget.client.gui;
 
-import io.netty.buffer.ByteBuf;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -80,25 +79,20 @@ public final class GuiUtil {
             text -> textField.setEditableColor(verifier.test(text) ? VALID_COLOR : INVALID_COLOR));
     }
 
-    public static VerticalFlowLayout hexDump(ByteBuf buf) {
+    public static VerticalFlowLayout hexDump(byte[] bytes) {
         VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
         List<Component> expandedChildren = new ArrayList<>();
 
-        int origReaderIdx = buf.readerIndex();
-
-        short[] bytes = new short[16];
-
         int index = 0;
-        while (buf.readableBytes() > 0) {
+        while (index < bytes.length) {
             StringBuilder line = new StringBuilder();
 
             line.append(String.format("%04x  ", index));
 
             int i;
-            for (i = 0; i < 16 && buf.readableBytes() > 0; i++) {
-                short b = buf.readUnsignedByte();
-                bytes[i] = (byte) (b & 0xff);
+            for (i = 0; i < 16 && index < bytes.length; i++) {
+                short b = (short) (bytes[index] & 0xff);
 
                 line.append(String.format("%02x ", b));
                 index++;
@@ -107,8 +101,10 @@ public final class GuiUtil {
             line.append("   ".repeat(Math.max(0, 16 - i)));
 
             for (int j = 0; j < i; j++) {
-                if (bytes[j] >= 32 && bytes[j] < 127)
-                    line.append((char) bytes[j]);
+                short b = (short) (bytes[index - i + j] & 0xff);
+
+                if (b >= 32 && b < 127)
+                    line.append((char) b);
                 else
                     line.append('.');
             }
@@ -122,8 +118,6 @@ public final class GuiUtil {
             else
                 view.child(label);
         }
-
-        buf.readerIndex(origReaderIdx);
 
         if (expandedChildren.size() > 0) {
             LabelComponent ellipsis = Components.label(Text.literal("..."));

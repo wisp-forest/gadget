@@ -8,6 +8,7 @@
         "CommandManagerMixin",
         "CustomPayloadC2SPacketMixin",
         "NbtTypesAccessor",
+        "ZipResourcePackMixin",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",
         "owo.ParentComponentMixin",

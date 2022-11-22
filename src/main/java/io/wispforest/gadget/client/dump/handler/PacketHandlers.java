@@ -33,7 +33,10 @@ public final class PacketHandlers {
         DrawPacketHandler.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
         DrawPacketHandler.EVENT.register(LAST_PHASE, (packet, view) -> {
             if (packet.channelId() != null) {
-                view.child(GuiUtil.hexDump(NetworkUtil.unwrapCustom(packet.packet())));
+                var buf = NetworkUtil.unwrapCustom(packet.packet());
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                view.child(GuiUtil.hexDump(bytes));
                 return true;
             }
 

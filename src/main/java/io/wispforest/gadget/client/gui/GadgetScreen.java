@@ -3,6 +3,7 @@ package io.wispforest.gadget.client.gui;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.dump.OpenDumpScreen;
 import io.wispforest.gadget.client.dump.PacketDumper;
+import io.wispforest.gadget.client.resource.ViewResourcesScreen;
 import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
@@ -63,6 +64,14 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
         });
 
         main.child(openOther);
+
+        LabelComponent inspectResources = Components.label(Text.translatable("text.gadget.inspect_resources"));
+
+        inspectResources.margins(Insets.bottom(4));
+        GuiUtil.semiButton(inspectResources,
+            () -> client.setScreen(new ViewResourcesScreen(this, client.getResourceManager())));
+
+        main.child(inspectResources);
 
         try {
             if (!Files.exists(PacketDumper.DUMP_DIR))
