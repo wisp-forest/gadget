@@ -24,6 +24,9 @@
         "client.MatrixStackMixin",
         "client.MinecraftClientMixin",
         "client.MultiplayerServerEntryMixin",
+        "client.NarratorLinuxMixin",
+        "client.NarratorWindowsMixin",
+        "client.ProfileKeysMixin",
         "client.WorldListWidgetWorldEntryMixin",
         "client.WorldRendererMixin"
     ],

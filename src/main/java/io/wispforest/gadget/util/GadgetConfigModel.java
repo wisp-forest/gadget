@@ -15,6 +15,7 @@ public class GadgetConfigModel {
     public boolean debugKeysInScreens = true;
     public boolean matrixStackDebugging = true;
     public boolean uiInspector = true;
+    @RestartRequired public boolean silenceStartupErrors = true;
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     @Nest public InternalSettings internalSettings = new InternalSettings();
 
