@@ -25,19 +25,26 @@ import org.lwjgl.glfw.GLFW;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 
 public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     private static final Identifier FILE_TEXTURE_ID = Gadget.id("file_texture");
 
     private final Screen parent;
-    private final ResourceManager manager;
+    private final Map<Identifier, Integer> resourcePaths;
+    private BiConsumer<Identifier, Integer> resRequester;
     private NativeImageBackedTexture prevTexture;
     private VerticalFlowLayout contents;
 
-    public ViewResourcesScreen(Screen parent, ResourceManager manager) {
+    public ViewResourcesScreen(Screen parent, Map<Identifier, Integer> resourcePaths) {
         this.parent = parent;
-        this.manager = manager;
+        this.resourcePaths = resourcePaths;
+    }
+
+    public void resRequester(BiConsumer<Identifier, Integer> resRequester) {
+        this.resRequester = resRequester;
     }
 
     @Override
@@ -64,10 +71,9 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 .margins(Insets.right(3)))
             .child(contentsScroll);
 
-        var resources = manager.findAllResources("", x -> true);
         TreeEntry root = new TreeEntry("", tree);
 
-        for (var pair : resources.entrySet()) {
+        for (var pair : resourcePaths.entrySet()) {
             String fullPath = pair.getKey().getNamespace() + "/" + pair.getKey().getPath();
             String[] split = fullPath.split("/");
             TreeEntry parent = root;
@@ -76,8 +82,10 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 parent = parent.directory(split[i]);
             }
 
-            if (pair.getValue().size() > 1) {
-                SubObjectContainer sub = new SubObjectContainer(unused -> {}, unused -> {});
+            if (pair.getValue() > 1) {
+                SubObjectContainer sub = new SubObjectContainer(unused -> {
+                }, unused -> {
+                });
                 VerticalFlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
                 HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 
@@ -89,19 +97,17 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                                 .margins(Insets.left(3))))
                         .child(sub));
 
-                int i = 0;
-                for (var resource : pair.getValue()) {
-                    sub.child(makeRecipeRow(String.valueOf(i), pair.getKey(), resource::getInputStream));
-                    i++;
+                for (int i = 0; i < pair.getValue(); i++) {
+                    sub.child(makeRecipeRow(String.valueOf(i), pair.getKey(), i));
                 }
 
             } else {
-                parent.container.child(makeRecipeRow(split[split.length - 1], pair.getKey(), pair.getValue().get(0)::getInputStream));
+                parent.container.child(makeRecipeRow(split[split.length - 1], pair.getKey(), 0));
             }
         }
     }
 
-    private HorizontalFlowLayout makeRecipeRow(String name, Identifier key, Callable<InputStream> isGetter) {
+    private HorizontalFlowLayout makeRecipeRow(String name, Identifier key, int index) {
         var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         var fileLabel = Components.label(Text.literal(name));
 
@@ -115,14 +121,15 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         row.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
-            openFile(key, isGetter);
+            resRequester.accept(key, index);
 
             return true;
         });
 
         return row;
     }
-    private void openFile(Identifier id, Callable<InputStream> isGetter) {
+
+    public void openFile(Identifier id, Callable<InputStream> isGetter) {
         if (prevTexture != null) {
             prevTexture.close();
             prevTexture = null;
@@ -218,7 +225,9 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 if (entry.name.equals(name))
                     return entry;
 
-            SubObjectContainer sub = new SubObjectContainer(unused -> {}, unused -> {});
+            SubObjectContainer sub = new SubObjectContainer(unused -> {
+            }, unused -> {
+            });
             VerticalFlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
             HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 

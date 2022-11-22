@@ -15,7 +15,8 @@ public class CommandManagerMixin {
     @Inject(method = "sendCommandTree(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("HEAD"))
     private void onReloadPermissions(ServerPlayerEntity player, CallbackInfo ci) {
         boolean canReplaceStacks = Permissions.check(player, "gadget.replaceStack", 4);
+        boolean canRequestServerData = Permissions.check(player, "gadget.requestServerData", 4);
 
-        GadgetNetworking.CHANNEL.serverHandle(player).send(new AnnounceS2CPacket(canReplaceStacks));
+        GadgetNetworking.CHANNEL.serverHandle(player).send(new AnnounceS2CPacket(canReplaceStacks, canRequestServerData));
     }
 }

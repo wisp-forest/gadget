@@ -5,6 +5,7 @@ import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
+import io.wispforest.gadget.client.resource.ViewResourcesScreen;
 import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.*;
@@ -13,7 +14,10 @@ import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
 import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.RequestResourceC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -39,6 +43,8 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.ByteArrayInputStream;
+
 public class GadgetClient implements ClientModInitializer {
     public static KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.MISC_CATEGORY);
     public static KeyBinding DUMP_KEY = new KeyBinding("key.gadget.dump", GLFW.GLFW_KEY_K, KeyBinding.MISC_CATEGORY);
@@ -61,6 +67,22 @@ public class GadgetClient implements ClientModInitializer {
             var screen = new FieldDataScreen(packet.target(), false);
             screen.addFieldData(packet.fields());
             access.runtime().setScreen(screen);
+        });
+
+        GadgetNetworking.CHANNEL.registerClientbound(ResourceListS2CPacket.class, (packet, access) -> {
+            var screen = new ViewResourcesScreen(access.runtime().currentScreen, packet.resources());
+
+            screen.resRequester(
+                (id, idx) -> GadgetNetworking.CHANNEL.clientHandle().send(new RequestResourceC2SPacket(id, idx)));
+
+            access.runtime().setScreen(screen);
+        });
+
+        GadgetNetworking.CHANNEL.registerClientbound(ResourceDataS2CPacket.class, (packet, access) -> {
+            if (!(access.runtime().currentScreen instanceof ViewResourcesScreen screen))
+                return;
+
+            screen.openFile(packet.id(), () -> new ByteArrayInputStream(packet.data()));
         });
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {

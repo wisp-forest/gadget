@@ -88,6 +88,10 @@
         "text": "Inspect resources",
         "underlined": "true"
     },
+    "text.gadget.inspect_server_data": {
+        "text": "Inspect server data",
+        "underlined": "true"
+    },
     "text.gadget.image_size": "%sx%s %s image.",
 
     "text.config.gadget.title": "Gadget",

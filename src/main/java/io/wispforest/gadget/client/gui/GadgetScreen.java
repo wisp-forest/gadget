@@ -1,9 +1,12 @@
 package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.client.DialogUtil;
+import io.wispforest.gadget.client.ServerData;
 import io.wispforest.gadget.client.dump.OpenDumpScreen;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
+import io.wispforest.gadget.network.GadgetNetworking;
+import io.wispforest.gadget.network.packet.c2s.ListResourcesC2SPacket;
 import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
@@ -18,11 +21,13 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 
 public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
@@ -69,9 +74,35 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         inspectResources.margins(Insets.bottom(4));
         GuiUtil.semiButton(inspectResources,
-            () -> client.setScreen(new ViewResourcesScreen(this, client.getResourceManager())));
+            () -> {
+                var resources = client.getResourceManager().findAllResources("", x -> true);
+                var map = new HashMap<Identifier, Integer>();
+
+                for (var entry : resources.entrySet())
+                    map.put(entry.getKey(), entry.getValue().size());
+
+                var screen = new ViewResourcesScreen(this, map);
+
+                screen.resRequester(
+                    (id, idx) -> screen.openFile(
+                        id, client.getResourceManager().getAllResources(id).get(idx)::getInputStream));
+
+                client.setScreen(screen);
+            });
 
         main.child(inspectResources);
+
+        if (ServerData.ANNOUNCE_PACKET != null && ServerData.ANNOUNCE_PACKET.canRequestServerData()) {
+            LabelComponent inspectServerData = Components.label(Text.translatable("text.gadget.inspect_server_data"));
+
+            inspectServerData.margins(Insets.bottom(4));
+            GuiUtil.semiButton(inspectServerData,
+                () -> {
+                    GadgetNetworking.CHANNEL.clientHandle().send(new ListResourcesC2SPacket());
+                });
+
+            main.child(inspectServerData);
+        }
 
         try {
             if (!Files.exists(PacketDumper.DUMP_DIR))
