@@ -10,10 +10,10 @@ import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.resource.ResourceManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -23,6 +23,10 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +66,8 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         ScrollContainer<VerticalFlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
         contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> contentsScroll = Containers.verticalScroll(Sizing.content(), Sizing.fill(100), contents)
+        ScrollContainer<VerticalFlowLayout> contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
-        treeScroll.surface(Surface.outline(11184810));
 
         rootComponent
             .child(treeScroll
@@ -121,6 +124,8 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         row.mouseDown().subscribe((mouseX, mouseY, button) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
+            UISounds.playInteractionSound();
+
             resRequester.accept(key, index);
 
             return true;
@@ -168,7 +173,40 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             boolean isText = id.getPath().endsWith(".txt")
                 || id.getPath().endsWith(".json")
                 || id.getPath().endsWith(".fsh")
-                || id.getPath().endsWith(".vsh");
+                || id.getPath().endsWith(".vsh")
+                || id.getPath().endsWith(".snbt");
+
+            if (!isText) {
+                try {
+                    is.mark(128);
+                    byte[] bytes = is.readNBytes(128);
+
+                    var chars = StandardCharsets.UTF_8
+                        .newDecoder()
+                        .onUnmappableCharacter(CodingErrorAction.REPORT)
+                        .onMalformedInput(CodingErrorAction.REPORT)
+                        .decode(ByteBuffer.wrap(bytes));
+
+                    isText = true;
+
+                    for (int i = 0; i < chars.length(); i++) {
+                        int codepoint = chars.charAt(i);
+
+                        if (codepoint > 127) continue;
+
+                        if (!Character.isDigit(codepoint)
+                         && !Character.isAlphabetic(codepoint)
+                         && !Character.isSpaceChar(codepoint)) {
+                            isText = false;
+                            break;
+                        }
+                    }
+                } catch (CharacterCodingException cce) {
+                    // ...
+                }
+
+                is.reset();
+            }
 
             if (isText) {
                 var reader = new InputStreamReader(is);
@@ -182,7 +220,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                                     .formatted(Formatting.GRAY))
                                 .append(Text.literal(line.replace("\t", "    "))
                                     .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                        .horizontalSizing(Sizing.fill(75)));
+                        .horizontalSizing(Sizing.fill(74)));
 
                     i++;
                 }
@@ -190,7 +228,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             }
 
             // Display as bytes.
-            contents.child(GuiUtil.hexDump(is.readAllBytes()));
+            contents.child(GuiUtil.hexDump(is.readAllBytes(), false));
         } catch (Exception e) {
             CharArrayWriter writer = new CharArrayWriter();
             e.printStackTrace(new PrintWriter(writer));

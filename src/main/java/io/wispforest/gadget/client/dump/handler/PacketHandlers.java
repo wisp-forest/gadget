@@ -36,7 +36,7 @@ public final class PacketHandlers {
                 var buf = NetworkUtil.unwrapCustom(packet.packet());
                 byte[] bytes = new byte[buf.readableBytes()];
                 buf.readBytes(bytes);
-                view.child(GuiUtil.hexDump(bytes));
+                view.child(GuiUtil.hexDump(bytes, true));
                 return true;
             }
 

@@ -79,7 +79,7 @@ public final class GuiUtil {
             text -> textField.setEditableColor(verifier.test(text) ? VALID_COLOR : INVALID_COLOR));
     }
 
-    public static VerticalFlowLayout hexDump(byte[] bytes) {
+    public static VerticalFlowLayout hexDump(byte[] bytes, boolean doEllipsis) {
         VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
         List<Component> expandedChildren = new ArrayList<>();
@@ -113,7 +113,7 @@ public final class GuiUtil {
                     .styled(x -> x.withFont(Gadget.id("monocraft"))))
                 .margins(Insets.bottom(3));
 
-            if (view.children().size() > 10)
+            if (view.children().size() > 10 && doEllipsis)
                 expandedChildren.add(label);
             else
                 view.child(label);
