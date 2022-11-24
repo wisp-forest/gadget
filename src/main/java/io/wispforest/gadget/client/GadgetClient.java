@@ -3,6 +3,7 @@ package io.wispforest.gadget.client;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
+import io.wispforest.gadget.client.config.GadgetConfigScreen;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
@@ -19,6 +20,7 @@ import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
+import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.Insets;
@@ -64,6 +66,8 @@ public class GadgetClient implements ClientModInitializer {
         PacketHandlers.init();
         UIInspector.init();
         ServerData.init();
+
+        ConfigScreen.registerProvider("gadget", GadgetConfigScreen::new);
 
         GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
             if (access.runtime().currentScreen instanceof FieldDataScreen gui && !gui.isClient() && gui.target().equals(packet.target())) {

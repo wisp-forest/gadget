@@ -29,6 +29,7 @@
 
     "message.gadget.loading_mappings": "Loading mappings",
     "message.gadget.loading_dump": "Loading dump",
+    "message.gadget.loading_quiltflower": "Loading Quiltflower",
 
     "text.gadget.client_current": {
         "text": "C",
@@ -155,6 +156,7 @@
     "text.config.gadget.option.mappings.value.yarn": "Yarn",
     "text.config.gadget.option.mappings.value.mojang": "Mojang",
     "text.config.gadget.option.mappings.value.quilt": "Quilt",
+    "text.gadget.latest_version": "Latest",
 
     "text.gadget.nbt.compound": {"text": "c", "color": "#0197F6"},
     "text.gadget.nbt.compound.full": ["", {"text": "c", "color": "#0197F6"}, "ompound"],
