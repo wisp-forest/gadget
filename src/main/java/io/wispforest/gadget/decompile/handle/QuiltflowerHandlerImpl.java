@@ -18,7 +18,7 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
     }
 
     public byte[] getClassBytes(String name) {
-        return classBytecodeStash.computeIfAbsent(name,
+        return classBytecodeStash.computeIfAbsent(name.replace('/', '.'),
             name2 -> KnotUtil.getPostMixinClassByteArray(name2, true));
     }
 
