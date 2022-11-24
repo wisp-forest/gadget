@@ -211,7 +211,7 @@ public class FieldDataIsland {
         }
 
         if (old != null) {
-            container.removeChild(old.containerComponent);
+            currentRound.removeFrom(container, old.containerComponent);
         }
 
         ClientFieldData newData = new ClientFieldData(data);

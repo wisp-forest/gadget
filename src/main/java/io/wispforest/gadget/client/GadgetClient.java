@@ -19,6 +19,12 @@ import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.layers.Layer;
+import io.wispforest.owo.ui.layers.Layers;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -26,8 +32,8 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
-import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -36,6 +42,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -130,29 +137,28 @@ public class GadgetClient implements ClientModInitializer {
             }
         });
 
+        Layers.add(Containers::verticalFlow, instance -> {
+            if (!Gadget.CONFIG.menuButtonEnabled()) return;
+
+            var translationKey = instance.screen instanceof TitleScreen
+                ? "menu.multiplayer"
+                : "menu.shareToLan";
+
+            instance.adapter.rootComponent.child(
+                Components.button(
+                    Text.translatable("text.gadget.menu_button"),
+                    button -> MinecraftClient.getInstance().setScreen(new GadgetScreen(instance.screen))
+                ).<ButtonWidget>configure(button -> {
+                    button.margins(Insets.left(4)).sizing(Sizing.fixed(20));
+                    instance.alignComponentToWidget(widget -> {
+                        if (!(widget instanceof ButtonWidget daButton)) return false;
+                        return daButton.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals(translationKey);
+                    }, Layer.Instance.AnchorSide.RIGHT, 0, button);
+                })
+            );
+        }, TitleScreen.class, GameMenuScreen.class);
+
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (Gadget.CONFIG.menuButtonEnabled()) {
-                if (screen instanceof TitleScreen) {
-                    int l = scaledHeight / 4 + 48;
-
-                    Screens.getButtons(screen).add(new ButtonWidget(
-                        scaledWidth / 2 + 104,
-                        l + 48,
-                        20,
-                        20,
-                        Text.translatable("text.gadget.menu_button"),
-                        button -> client.setScreen(new GadgetScreen(screen))));
-                } else if (screen instanceof GameMenuScreen) {
-                    Screens.getButtons(screen).add(new ButtonWidget(
-                        scaledWidth / 2 + 4 + 96 + 5,
-                        scaledHeight / 4 + 96 - 16,
-                        20,
-                        20,
-                        Text.translatable("text.gadget.menu_button"),
-                        button -> client.setScreen(new GadgetScreen(screen))));
-                }
-            }
-
             if (screen instanceof HandledScreen<?> handled)
                 ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key, scancode, modifiers) -> {
                     if (!INSPECT_KEY.matchesKey(key, scancode)) return true;

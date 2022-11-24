@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.nbt.*;
 import net.minecraft.text.Text;
@@ -79,19 +80,13 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
     }
 
     private void onFieldFocusLost() {
-        try {
-            this.queue(() -> {
-                var newFocused = focusHandler().focused();
+        MinecraftClient.getInstance().send(() -> {
+            var newFocused = focusHandler().focused();
 
-                if (newFocused == nameField || newFocused == valueField) return;
+            if (newFocused == nameField || newFocused == valueField) return;
 
-                parent().removeChild(this);
-            });
-        } catch (NullPointerException npe) {
-            // mald.
-
-            // TODO: remove this when the underlying issue gets fixed.
-        }
+            parent().removeChild(this);
+        });
     }
 
     private void commit() {

@@ -27,7 +27,7 @@ public interface ParentComponentMixin extends Component {
         }
     }
 
-    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lio/wispforest/owo/ui/core/Component;update(FII)V", ordinal = 1))
+    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lio/wispforest/owo/ui/core/Component;update(FII)V"))
     private void mald2(Component instance, float delta, int mouseX, int mouseY) {
         if (this instanceof BasedVerticalFlowLayout) {
             if (!ScissorStack.isVisible(instance, null))
