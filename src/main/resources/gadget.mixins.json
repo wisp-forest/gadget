@@ -8,6 +8,7 @@
         "ClientConnectionMixin",
         "CommandManagerMixin",
         "CustomPayloadC2SPacketMixin",
+        "NamespaceResourceManagerMixin",
         "NbtTypesAccessor",
         "ZipResourcePackMixin",
         "owo.IndexedSerializerAccessor",

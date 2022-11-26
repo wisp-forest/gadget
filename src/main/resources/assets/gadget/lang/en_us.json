@@ -110,7 +110,7 @@
     ],
     "text.config.gadget.option.dropChunkData": "Drop Chunk Data",
     "text.config.gadget.option.dropChunkData.tooltip": [
-        "Drops chunk data packets, to\n",
+        "Drops chunk data packets to\n",
         "reduce dump file size."
     ],
     "text.config.gadget.option.debugKeysInScreens": "Debug Keys In Screens",
@@ -143,8 +143,8 @@
     "text.config.gadget.option.internalSettings.injectMatrixStackErrors": "Inject MatrixStack Errors",
     "text.config.gadget.option.internalSettings.injectMatrixStackErrors.tooltip": "Causes MatrixStack errors when Shift is pressed",
 
-    "text.config.gadget.option.inspectClasses": "Inspect Classes [Alpha]",
-    "text.config.gadget.option.inspectClasses.tooltip": "Allows you to inspect game classes",
+    "text.config.gadget.option.internalSettings.inspectClasses": "Inspect Classes",
+    "text.config.gadget.option.internalSettings.inspectClasses.tooltip": "Allows you to inspect game classes",
     "text.config.gadget.option.quiltflowerVersion": "Quiltflower Version",
 
     "text.config.gadget.option.mappings": "Mappings",

@@ -9,6 +9,7 @@ import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
 import io.wispforest.gadget.path.EnumMapPathStepType;
 import io.wispforest.gadget.path.SimpleMapPathStepType;
+import io.wispforest.gadget.util.ResourceUtil;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.gadget.desc.edit.PrimitiveEditTypes;
 import me.lucko.fabric.api.permissions.v0.Permissions;
@@ -121,7 +122,8 @@ public final class GadgetNetworking {
                 return;
             }
 
-            var resources = access.runtime().getResourceManager().findAllResources("", x -> true);
+            var resources =
+                ResourceUtil.collectAllResources(access.runtime().getResourceManager());
             var network = new HashMap<Identifier, Integer>();
 
             for (var entry : resources.entrySet())

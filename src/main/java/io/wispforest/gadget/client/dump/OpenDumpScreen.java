@@ -94,7 +94,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         var searchBox = Components.textBox(Sizing.fill(95));
-        searchBox.setChangedListener(text -> rebuild(text, currentTime()));
+        searchBox.onChanged().subscribe(text -> rebuild(text, currentTime()));
         searchBox.margins(Insets.bottom(3));
 
         timeSlider = new BasedSliderComponent(Sizing.fill(95));
@@ -105,7 +105,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .message(unused -> Text.of(
                 DurationFormatUtils.formatDurationHMS(currentTime() - startTime)
             ));
-        timeSlider.onChanged(value -> {
+        timeSlider.onChanged().subscribe(value -> {
             rebuild(searchBox.getText(), currentTime());
         });
 

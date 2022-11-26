@@ -12,6 +12,7 @@ import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.network.packet.c2s.ListResourcesC2SPacket;
 import io.wispforest.gadget.util.FileUtil;
 import io.wispforest.gadget.util.NumberUtil;
+import io.wispforest.gadget.util.ResourceUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -78,7 +79,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
         inspectResources.margins(Insets.bottom(4));
         GuiUtil.semiButton(inspectResources,
             () -> {
-                var resources = client.getResourceManager().findAllResources("", x -> true);
+                var resources = ResourceUtil.collectAllResources(client.getResourceManager());
                 var map = new HashMap<Identifier, Integer>();
 
                 for (var entry : resources.entrySet())
