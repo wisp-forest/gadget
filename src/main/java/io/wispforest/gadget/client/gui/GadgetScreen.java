@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.gui;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.ServerData;
 import io.wispforest.gadget.client.dump.OpenDumpScreen;
@@ -106,17 +107,19 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
             main.child(inspectServerData);
         }
 
-        LabelComponent inspectClasses = Components.label(Text.translatable("text.gadget.inspect_classes"));
+        if (Gadget.CONFIG.internalSettings.inspectClasses()) {
+            LabelComponent inspectClasses = Components.label(Text.translatable("text.gadget.inspect_classes"));
 
-        inspectClasses.margins(Insets.bottom(4));
-        GuiUtil.semiButton(inspectClasses,
-            () -> {
-                QuiltflowerManager.ensureInstalled()
-                    .thenRunAsync(
-                        () -> client.setScreen(new ViewClassesScreen(this)), client);
-            });
+            inspectClasses.margins(Insets.bottom(4));
+            GuiUtil.semiButton(inspectClasses,
+                () -> {
+                    QuiltflowerManager.ensureInstalled()
+                        .thenRunAsync(
+                            () -> client.setScreen(new ViewClassesScreen(this)), client);
+                });
 
-        main.child(inspectClasses);
+            main.child(inspectClasses);
+        }
 
         try {
             if (!Files.exists(PacketDumper.DUMP_DIR))
