@@ -62,8 +62,8 @@ public interface ProgressToast {
 
     void finish(Text text, boolean hideImmediately);
 
-    default void follow(CompletableFuture<Void> future, boolean closeImmediately) {
-        future.whenComplete((res, e) -> {
+    default CompletableFuture<Void> follow(CompletableFuture<Void> future, boolean closeImmediately) {
+        return future.whenComplete((res, e) -> {
             if (e != null) {
                 Gadget.LOGGER.error("Loading failed with exception", e);
                 force();

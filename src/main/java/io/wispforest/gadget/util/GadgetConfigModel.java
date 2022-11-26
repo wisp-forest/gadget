@@ -6,7 +6,6 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.function.Supplier;
 
-@Modmenu(modId = "gadget")
 @Config(name = "gadget", wrapperName = "GadgetConfig")
 public class GadgetConfigModel {
     public boolean menuButtonEnabled = true;
@@ -18,6 +17,7 @@ public class GadgetConfigModel {
     @RestartRequired public boolean silenceStartupErrors = true;
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     @Nest public InternalSettings internalSettings = new InternalSettings();
+    public String quiltflowerVersion = "LATEST";
 
     public static class InternalSettings {
         public boolean debugMatrixStackDebugging = false;
