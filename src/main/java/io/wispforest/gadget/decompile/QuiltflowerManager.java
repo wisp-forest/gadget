@@ -75,23 +75,17 @@ public final class QuiltflowerManager {
                 cl = new OpenedURLClassLoader(new URL[] {
                     installedPath().toUri().toURL(),
                     dirUrl
-                }, Gadget.class.getClassLoader());
-
-                cl.findClass("io.wispforest.gadget.decompile.handle.ClassContextSource");
-                cl.findClass("io.wispforest.gadget.decompile.handle.GadgetFernflowerLogger");
-                cl.findClass("io.wispforest.gadget.decompile.handle.GadgetResultSaver");
-                cl.findClass("io.wispforest.gadget.decompile.handle.GadgetOutputSink");
-                cl.findClass("io.wispforest.gadget.decompile.handle.QuiltflowerHandlerImpl");
+                }, Gadget.class.getClassLoader(), "io.wispforest.gadget.decompile.handle.");
 
                 CLASSLOADER = new SoftReference<>(cl);
-            } catch (MalformedURLException | ClassNotFoundException e) {
+            } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
         }
 
         try {
             var implClass = cl.loadClass("io.wispforest.gadget.decompile.handle.QuiltflowerHandlerImpl");
-            return (QuiltflowerHandler) implClass.getField("INSTANCE").get(null);
+            return (QuiltflowerHandler) implClass.getConstructor().newInstance();
         } catch (ReflectiveOperationException roe) {
             throw new RuntimeException(roe);
         }

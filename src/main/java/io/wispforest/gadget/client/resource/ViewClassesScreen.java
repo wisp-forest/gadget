@@ -3,6 +3,7 @@ package io.wispforest.gadget.client.resource;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.asm.GadgetMixinExtension;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
+import io.wispforest.gadget.decompile.QuiltflowerHandler;
 import io.wispforest.gadget.decompile.QuiltflowerManager;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     private final Screen parent;
     private VerticalFlowLayout contents;
+    private final QuiltflowerHandler decompiler = QuiltflowerManager.loadHandler();
 
     public ViewClassesScreen(Screen parent) {
         this.parent = parent;
@@ -88,7 +90,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             contents.clearChildren();
 
             try {
-                var text = QuiltflowerManager.loadHandler().decompileClass(Class.forName(fullPath.replace(".class", "").replace('/', '.')));
+                var text = decompiler.decompileClass(Class.forName(fullPath.replace(".class", "").replace('/', '.')));
                 var lines = text.lines().toList();
                 int i = 0;
                 int maxWidth = Integer.toString(lines.size() - 1).length();

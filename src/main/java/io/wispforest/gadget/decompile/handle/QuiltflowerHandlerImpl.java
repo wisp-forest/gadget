@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.QuiltflowerHandler {
-    public static QuiltflowerHandlerImpl INSTANCE = new QuiltflowerHandlerImpl();
-
     private final Map<String, byte[]> classBytecodeStash = new HashMap<>();
 
     public QuiltflowerHandlerImpl() {
