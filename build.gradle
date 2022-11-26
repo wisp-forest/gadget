@@ -28,8 +28,9 @@ repositories {
 	maven { url 'https://maven.terraformersmc.com/releases' }
 	maven { url 'https://maven.blamejared.com' }
 	maven { url "https://maven.shedaniel.me/" }
-	maven { url = "https://ladysnake.jfrog.io/artifactory/mods" }
-	maven { url = "https://maven.quiltmc.org/repository/release" }
+	maven { url "https://ladysnake.jfrog.io/artifactory/mods" }
+	maven { url "https://maven.quiltmc.org/repository/release" }
+	maven { url "https://jitpack.io" }
 	maven {
 		url "https://maven.jamieswhiteshirt.com/libs-release"
 		content {
@@ -60,6 +61,8 @@ dependencies {
 	modImplementation include('me.lucko:fabric-permissions-api:0.1-SNAPSHOT')
 
 	implementation include('net.fabricmc:mapping-io:0.3.0')
+
+	implementation annotationProcessor(include("com.github.LlamaLad7:MixinExtras:0.1.1"))
 
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:9.1.530"
 

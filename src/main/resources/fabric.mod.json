@@ -20,6 +20,9 @@
         ],
         "client": [
             "io.wispforest.gadget.client.GadgetClient"
+        ],
+        "preLaunch": [
+            "io.wispforest.gadget.asm.GadgetPrelaunch"
         ]
     },
     "mixins": [
