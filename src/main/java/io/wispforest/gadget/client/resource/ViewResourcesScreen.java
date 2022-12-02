@@ -140,104 +140,106 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             prevTexture = null;
         }
 
-        try {
-            var is = isGetter.call();
-            contents.clearChildren();
+        contents.configure(unused -> {
+            try {
+                var is = isGetter.call();
+                contents.clearChildren();
 
-            if (id.getPath().endsWith(".png")) {
-                prevTexture = new NativeImageBackedTexture(NativeImage.read(is));
-                client.getTextureManager().registerTexture(FILE_TEXTURE_ID, prevTexture);
+                if (id.getPath().endsWith(".png")) {
+                    prevTexture = new NativeImageBackedTexture(NativeImage.read(is));
+                    client.getTextureManager().registerTexture(FILE_TEXTURE_ID, prevTexture);
 
-                contents
-                    .child(Components.texture(
-                        FILE_TEXTURE_ID,
-                        0,
-                        0,
-                        prevTexture.getImage().getWidth(),
-                        prevTexture.getImage().getHeight(),
-                        prevTexture.getImage().getWidth(),
-                        prevTexture.getImage().getHeight()))
-                    .child(Components.label(
-                        Text.translatable(
-                            "text.gadget.image_size",
+                    contents
+                        .child(Components.texture(
+                            FILE_TEXTURE_ID,
+                            0,
+                            0,
                             prevTexture.getImage().getWidth(),
                             prevTexture.getImage().getHeight(),
-                            "PNG"
-                        )));
+                            prevTexture.getImage().getWidth(),
+                            prevTexture.getImage().getHeight()))
+                        .child(Components.label(
+                            Text.translatable(
+                                "text.gadget.image_size",
+                                prevTexture.getImage().getWidth(),
+                                prevTexture.getImage().getHeight(),
+                                "PNG"
+                            )));
 
-                return;
-            }
+                    return;
+                }
 
-            is = new BufferedInputStream(is);
+                is = new BufferedInputStream(is);
 
-            boolean isText = id.getPath().endsWith(".txt")
-                || id.getPath().endsWith(".json")
-                || id.getPath().endsWith(".fsh")
-                || id.getPath().endsWith(".vsh")
-                || id.getPath().endsWith(".snbt");
+                boolean isText = id.getPath().endsWith(".txt")
+                    || id.getPath().endsWith(".json")
+                    || id.getPath().endsWith(".fsh")
+                    || id.getPath().endsWith(".vsh")
+                    || id.getPath().endsWith(".snbt");
 
-            if (!isText) {
-                try {
-                    is.mark(128);
-                    byte[] bytes = is.readNBytes(128);
+                if (!isText) {
+                    try {
+                        is.mark(128);
+                        byte[] bytes = is.readNBytes(128);
 
-                    var chars = StandardCharsets.UTF_8
-                        .newDecoder()
-                        .onUnmappableCharacter(CodingErrorAction.REPORT)
-                        .onMalformedInput(CodingErrorAction.REPORT)
-                        .decode(ByteBuffer.wrap(bytes));
+                        var chars = StandardCharsets.UTF_8
+                            .newDecoder()
+                            .onUnmappableCharacter(CodingErrorAction.REPORT)
+                            .onMalformedInput(CodingErrorAction.REPORT)
+                            .decode(ByteBuffer.wrap(bytes));
 
-                    isText = true;
+                        isText = true;
 
-                    for (int i = 0; i < chars.length(); i++) {
-                        int codepoint = chars.charAt(i);
+                        for (int i = 0; i < chars.length(); i++) {
+                            int codepoint = chars.charAt(i);
 
-                        if (codepoint > 127) continue;
+                            if (codepoint > 127) continue;
 
-                        if (!Character.isDigit(codepoint)
-                         && !Character.isAlphabetic(codepoint)
-                         && !Character.isSpaceChar(codepoint)) {
-                            isText = false;
-                            break;
+                            if (!Character.isDigit(codepoint)
+                                && !Character.isAlphabetic(codepoint)
+                                && !Character.isSpaceChar(codepoint)) {
+                                isText = false;
+                                break;
+                            }
                         }
+                    } catch (CharacterCodingException cce) {
+                        // ...
                     }
-                } catch (CharacterCodingException cce) {
-                    // ...
+
+                    is.reset();
                 }
 
-                is.reset();
-            }
+                if (isText) {
+                    var reader = new InputStreamReader(is);
+                    var lines = IOUtils.readLines(reader);
+                    int i = 0;
+                    int maxWidth = Integer.toString(lines.size() - 1).length();
+                    for (var line : lines) {
+                        contents.child(Components.label(
+                                Text.literal(" ")
+                                    .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
+                                        .formatted(Formatting.GRAY))
+                                    .append(Text.literal(line.replace("\t", "    "))
+                                        .styled(x -> x.withFont(Gadget.id("monocraft")))))
+                            .horizontalSizing(Sizing.fill(74)));
 
-            if (isText) {
-                var reader = new InputStreamReader(is);
-                var lines = IOUtils.readLines(reader);
-                int i = 0;
-                int maxWidth = Integer.toString(lines.size() - 1).length();
-                for (var line : lines) {
-                    contents.child(Components.label(
-                            Text.literal(" ")
-                                .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
-                                    .formatted(Formatting.GRAY))
-                                .append(Text.literal(line.replace("\t", "    "))
-                                    .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                        .horizontalSizing(Sizing.fill(74)));
-
-                    i++;
+                        i++;
+                    }
+                    return;
                 }
-                return;
-            }
 
-            // Display as bytes.
-            contents.child(GuiUtil.hexDump(is.readAllBytes(), false));
-        } catch (Exception e) {
-            CharArrayWriter writer = new CharArrayWriter();
-            e.printStackTrace(new PrintWriter(writer));
-            String fullExceptionText = writer.toString();
-            contents.child(Components.label(
-                Text.literal(fullExceptionText.replace("\t", "    "))
-                    .styled(x -> x.withFont(Gadget.id("monocraft")))
-                    .formatted(Formatting.RED)));
-        }
+                // Display as bytes.
+                contents.child(GuiUtil.hexDump(is.readAllBytes(), false));
+            } catch (Exception e) {
+                CharArrayWriter writer = new CharArrayWriter();
+                e.printStackTrace(new PrintWriter(writer));
+                String fullExceptionText = writer.toString();
+                contents.child(Components.label(
+                    Text.literal(fullExceptionText.replace("\t", "    "))
+                        .styled(x -> x.withFont(Gadget.id("monocraft")))
+                        .formatted(Formatting.RED)));
+            }
+        });
     }
 
     @Override
