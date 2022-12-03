@@ -63,7 +63,7 @@ public class ProgressToastImpl implements Toast, ProgressToast {
         this.adapter.render(matrices, 0, 0, client.getTickDelta());
 
         if (stopTime == -1)
-            stopTime = startTime;
+            stopTime = startTime + 1;
         else if (stopTime == -2)
             return Visibility.HIDE;
 

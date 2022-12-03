@@ -11,8 +11,11 @@
         "NamespaceResourceManagerMixin",
         "NbtTypesAccessor",
         "ZipResourcePackMixin",
+        "owo.BaseComponentMixin",
+        "owo.BaseParentComponentMixin",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",
+        "owo.OwoUIAdapterMixin",
         "owo.ParentComponentMixin",
         "owo.ParticleSystemAccessor"
     ],

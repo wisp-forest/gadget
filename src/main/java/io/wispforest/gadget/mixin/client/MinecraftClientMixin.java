@@ -31,7 +31,7 @@ public class MinecraftClientMixin {
         }
     }
 
-    @WrapWithCondition(method = "createUserApiService", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Throwable;)V"))
+    @WrapWithCondition(method = "createUserApiService", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Throwable;)V", remap = false))
     private boolean shhhh(Logger logger, String text, Throwable throwable) {
         return !Gadget.CONFIG.silenceStartupErrors();
     }

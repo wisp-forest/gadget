@@ -18,6 +18,7 @@ public class GadgetConfigModel {
     @RestartRequired public boolean silenceStartupErrors = true;
     @PredicateConstraint("isQuiltflowerVersionValid") public String quiltflowerVersion = "LATEST";
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
+    public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
     @Nest public InternalSettings internalSettings = new InternalSettings();
 
     public static boolean isQuiltflowerVersionValid(String version) {
@@ -46,5 +47,11 @@ public class GadgetConfigModel {
         public Supplier<Mappings> factory() {
             return factory;
         }
+    }
+
+    public enum UICounterMode {
+        OFF,
+        LOG_ON_LONG_UPDATE,
+        LOG_ALWAYS
     }
 }

@@ -60,7 +60,7 @@ public final class GuiUtil {
     }
 
     public static ParentComponent root(Component component) {
-        ParentComponent root = component.parent();
+        ParentComponent root = component instanceof ParentComponent parent ? parent : component.parent();
 
         if (root == null)
             throw new IllegalStateException();

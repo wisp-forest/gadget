@@ -165,6 +165,10 @@
     "text.config.gadget.option.mappings.value.mojang": "Mojang",
     "text.config.gadget.option.mappings.value.quilt": "Quilt",
     "text.gadget.latest_version": "Latest",
+    "text.config.gadget.option.uiCounterMode": "UI Update Counter",
+    "text.config.gadget.enum.uICounterMode.off": "Off",
+    "text.config.gadget.enum.uICounterMode.log_on_long_update": "Log On Long Update",
+    "text.config.gadget.enum.uICounterMode.log_always": "Always Log",
 
     "text.gadget.nbt.compound": {"text": "c", "color": "#0197F6"},
     "text.gadget.nbt.compound.full": ["", {"text": "c", "color": "#0197F6"}, "ompound"],
