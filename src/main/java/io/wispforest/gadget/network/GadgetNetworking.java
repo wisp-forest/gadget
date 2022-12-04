@@ -92,14 +92,6 @@ public final class GadgetNetworking {
             }
 
             packet.path().set(target, packet.data());
-
-            var parentPath = packet.path().parent();
-
-            Object o = parentPath.follow(target);
-
-            var fields = FieldObjects.collectAllData(parentPath, o);
-
-            CHANNEL.serverHandle(access.player()).send(new DataS2CPacket(packet.target(), fields));
         });
 
         CHANNEL.registerServerbound(ReplaceStackC2SPacket.class, (packet, access) -> {
