@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.field;
 
+import io.wispforest.gadget.client.gui.search.SearchGui;
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
@@ -29,6 +30,8 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         this.isClient = isClient;
 
         this.island = new FieldDataIsland();
+
+        this.island.generateSearchAnchors(true);
 
         if (isClient) {
             this.island.targetObject(target.resolve(MinecraftClient.getInstance().world), true);
@@ -114,6 +117,11 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
             .child(switchButton)
             .positioning(Positioning.absolute(0, 0))
             .padding(Insets.of(5));
+
+        SearchGui search = new SearchGui(scroll);
+        verticalFlowLayout
+            .child(search.createSearchComponent()
+                .positioning(Positioning.relative(0, 100)));
 
         verticalFlowLayout.child(sidebar);
     }

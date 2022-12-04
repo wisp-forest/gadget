@@ -3,6 +3,7 @@ package io.wispforest.gadget.client.field;
 import io.wispforest.gadget.client.gui.ComponentAdditionRound;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
+import io.wispforest.gadget.client.gui.search.SearchAnchorComponent;
 import io.wispforest.gadget.client.nbt.KeyAdderWidget;
 import io.wispforest.gadget.client.nbt.NbtDataIsland;
 import io.wispforest.gadget.client.nbt.NbtPath;
@@ -32,6 +33,7 @@ public class FieldDataIsland {
     private Consumer<ObjectPath> pathRequester = path -> {};
     private boolean shortenNames = false;
     private ComponentAdditionRound currentRound = null;
+    private boolean generateSearchAnchors;
     BiConsumer<ObjectPath, PrimitiveEditData> primitiveSetter = null;
     BiConsumer<ObjectPath, NbtCompound> nbtCompoundSetter = null;
 
@@ -49,6 +51,10 @@ public class FieldDataIsland {
 
     public void nbtCompoundSetter(BiConsumer<ObjectPath, NbtCompound> nbtCompoundSetter) {
         this.nbtCompoundSetter = nbtCompoundSetter;
+    }
+
+    public void generateSearchAnchors(boolean generateSearchAnchors) {
+        this.generateSearchAnchors = generateSearchAnchors;
     }
 
     public void targetObject(Object obj, boolean settable) {
@@ -102,6 +108,11 @@ public class FieldDataIsland {
         data.containerComponent = rowContainer;
 
         rowContainer.child(row);
+
+        if (generateSearchAnchors) {
+            SearchAnchorComponent anchor = new SearchAnchorComponent(row, path::name);
+            row.child(anchor);
+        }
 
         var nameText = Text.literal(path.name());
 
