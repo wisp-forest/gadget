@@ -42,7 +42,6 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
@@ -174,10 +173,6 @@ public class GadgetClient implements ClientModInitializer {
                     var slot = ((HandledScreenAccessor) handled).callGetSlotAt(mouseX, mouseY);
 
                     if (slot == null) return true;
-
-                    ItemStack stack = slot.getStack();
-
-                    if (!stack.hasNbt()) return true;
 
                     client.setScreen(new StackNbtDataScreen(handled, slot));
 

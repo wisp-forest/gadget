@@ -41,8 +41,12 @@ public class StackNbtDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
             };
         }
 
+        NbtCompound tag = stack.getNbt();
+
+        if (tag == null) tag = new NbtCompound();
+
         this.parent = parent;
-        this.island = new NbtDataIsland(stack.getNbt(), reloader);
+        this.island = new NbtDataIsland(tag, reloader);
     }
 
     @Override
