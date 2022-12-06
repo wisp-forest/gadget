@@ -37,6 +37,7 @@ repositories {
 			includeGroup "com.jamieswhiteshirt"
 		}
 	}
+	maven { url 'https://basique.top/maven' }
 	mavenLocal()
 }
 
@@ -75,6 +76,7 @@ dependencies {
 	modLocalRuntime "dev.emi:trinkets:3.4.0"
 	modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:9.1.530"
 	modLocalRuntime "dev.architectury:architectury-fabric:6.3.49"
+	modLocalRuntime "com.glisco:things:0.2.20+1.19"
 
 	testmodImplementation sourceSets.main.output
 }
