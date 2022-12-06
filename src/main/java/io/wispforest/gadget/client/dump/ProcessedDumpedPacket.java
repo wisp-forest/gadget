@@ -36,20 +36,26 @@ public final class ProcessedDumpedPacket {
                 .surface(Surface.outline(packet.color()))
                 .margins(Insets.bottom(5));
 
-            String name = ReflectionUtil.nameWithoutPackage(packet.packet().getClass());
 
-            MutableText typeText = Text.literal(name);
 
-            if (packet.channelId() != null)
-                typeText.append(Text.literal(" " + packet.channelId())
-                    .formatted(Formatting.GRAY));
+            MutableText typeText = Text.literal("");
+
+            if (packet.packet() instanceof ErrorPacket errorPacket) {
+                typeText.append(Text.translatable("text.gadget.packet_read_error", errorPacket.getPacketId()));
+            } else {
+                typeText.append(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
+
+                if (packet.channelId() != null)
+                    typeText.append(Text.literal(" " + packet.channelId())
+                        .formatted(Formatting.GRAY));
+            }
 
             view.child(new BasedLabelComponent(typeText)
                 .margins(Insets.bottom(3)));
 
             DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);
 
-            if (!packet.drawErrors().isEmpty() || !packet.searchTextErrors().isEmpty()) {
+            if (!packet.drawErrors().isEmpty() || !packet.searchTextErrors().isEmpty() || packet.packet() instanceof ErrorPacket) {
                 CollapsibleContainer errors = Containers.collapsible(
                     Sizing.content(),
                     Sizing.content(),
@@ -63,6 +69,11 @@ public final class ProcessedDumpedPacket {
 
                 ((FlowLayout) errors.children().get(0))
                     .padding(Insets.of(2, 2, 2, 0));
+
+                if (packet.packet() instanceof ErrorPacket error) {
+                    GuiUtil.showException(errors, error.getException())
+                        .margins(Insets.bottom(2));
+                }
 
                 for (var e : packet.searchTextErrors()) {
                     GuiUtil.showException(errors, e)

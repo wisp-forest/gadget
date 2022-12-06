@@ -56,7 +56,7 @@ public class PacketDumpReader {
                 };
                 int packetId = buf.readVarInt();
                 int size = buf.readableBytes();
-                Packet<?> packet = state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
+                Packet<?> packet = readPacket(packetId, state, outbound, buf);
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof LoginQueryRequestS2CPacket req) {
@@ -120,7 +120,7 @@ public class PacketDumpReader {
                 long sentAt = buf.readLong();
                 int packetId = buf.readVarInt();
                 int size = buf.readableBytes();
-                Packet<?> packet = state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
+                Packet<?> packet = readPacket(packetId, state, outbound, buf);
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof LoginQueryRequestS2CPacket req) {
@@ -134,6 +134,17 @@ public class PacketDumpReader {
             }
         } catch (EOFException e) {
             return list;
+        }
+    }
+
+    private static Packet<?> readPacket(int packetId, NetworkState state, boolean outbound, PacketByteBuf buf) {
+        int startOfData = buf.readerIndex();
+
+        try {
+            return state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
+        } catch (Exception e) {
+            buf.readerIndex(startOfData);
+            return new ErrorPacket(buf, packetId, e);
         }
     }
 }
