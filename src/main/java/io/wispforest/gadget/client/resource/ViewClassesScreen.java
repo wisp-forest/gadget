@@ -2,6 +2,7 @@ package io.wispforest.gadget.client.resource;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.asm.GadgetMixinExtension;
+import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.decompile.QuiltflowerHandler;
 import io.wispforest.gadget.decompile.QuiltflowerManager;
@@ -106,13 +107,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                     i++;
                 }
             } catch (ClassNotFoundException e) {
-                CharArrayWriter writer = new CharArrayWriter();
-                e.printStackTrace(new PrintWriter(writer));
-                String fullExceptionText = writer.toString();
-                contents.child(Components.label(
-                    Text.literal(fullExceptionText.replace("\t", "    "))
-                        .styled(x -> x.withFont(Gadget.id("monocraft")))
-                        .formatted(Formatting.RED)));
+                GuiUtil.showException(contents, e);
             }
 
             return true;

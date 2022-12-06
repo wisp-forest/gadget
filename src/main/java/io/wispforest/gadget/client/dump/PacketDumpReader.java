@@ -65,7 +65,8 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size,
+                    new ArrayList<>(), new ArrayList<>()));
             }
         } catch (EOFException e) {
             return list;
@@ -128,7 +129,8 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size,
+                    new ArrayList<>(), new ArrayList<>()));
             }
         } catch (EOFException e) {
             return list;

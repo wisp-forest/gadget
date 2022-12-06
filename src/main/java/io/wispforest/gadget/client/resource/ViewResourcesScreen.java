@@ -231,13 +231,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 // Display as bytes.
                 contents.child(GuiUtil.hexDump(is.readAllBytes(), false));
             } catch (Exception e) {
-                CharArrayWriter writer = new CharArrayWriter();
-                e.printStackTrace(new PrintWriter(writer));
-                String fullExceptionText = writer.toString();
-                contents.child(Components.label(
-                    Text.literal(fullExceptionText.replace("\t", "    "))
-                        .styled(x -> x.withFont(Gadget.id("monocraft")))
-                        .formatted(Formatting.RED)));
+                GuiUtil.showException(contents, e);
             }
         });
     }

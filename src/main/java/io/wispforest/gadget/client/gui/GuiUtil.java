@@ -99,6 +99,18 @@ public final class GuiUtil {
             text -> textField.setEditableColor(verifier.test(text) ? VALID_COLOR : INVALID_COLOR));
     }
 
+    public static LabelComponent showException(VerticalFlowLayout container, Exception e) {
+        CharArrayWriter writer = new CharArrayWriter();
+        e.printStackTrace(new PrintWriter(writer));
+        String fullExceptionText = writer.toString();
+        LabelComponent label = Components.label(
+            Text.literal(fullExceptionText.replace("\t", "    "))
+                .formatted(Formatting.RED));
+        container.child(label);
+
+        return label;
+    }
+
     public static VerticalFlowLayout hexDump(byte[] bytes, boolean doEllipsis) {
         VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 

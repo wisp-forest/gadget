@@ -205,6 +205,10 @@
 
     "text.gadget.hide_field": "Hide field",
     "text.gadget.join_with_dump": "Join and start dumping packets",
+    "text.gadget.packet_errors": {
+        "text": "Packet errors",
+        "color": "red"
+    },
 
     "commands.gadget.reload_mappings.success": [
         {"translate": "message.gadget.header"},

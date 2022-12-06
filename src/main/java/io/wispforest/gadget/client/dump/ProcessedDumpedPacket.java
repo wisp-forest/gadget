@@ -3,11 +3,10 @@ package io.wispforest.gadget.client.dump;
 import io.wispforest.gadget.client.dump.handler.DrawPacketHandler;
 import io.wispforest.gadget.client.dump.handler.SearchTextPacketHandler;
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
+import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -49,6 +48,34 @@ public final class ProcessedDumpedPacket {
                 .margins(Insets.bottom(3)));
 
             DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);
+
+            if (!packet.drawErrors().isEmpty() || !packet.searchTextErrors().isEmpty()) {
+                CollapsibleContainer errors = Containers.collapsible(
+                    Sizing.content(),
+                    Sizing.content(),
+                    Text.translatable("text.gadget.packet_errors"),
+                    false
+                );
+
+                errors
+                    .padding(Insets.of(2))
+                    .margins(Insets.bottom(5));
+
+                ((FlowLayout) errors.children().get(0))
+                    .padding(Insets.of(2, 2, 2, 0));
+
+                for (var e : packet.searchTextErrors()) {
+                    GuiUtil.showException(errors, e)
+                        .margins(Insets.bottom(2));
+                }
+
+                for (var e : packet.drawErrors()) {
+                    GuiUtil.showException(errors, e)
+                        .margins(Insets.bottom(2));
+                }
+
+                view.child(1, errors);
+            }
 
             HorizontalFlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 
