@@ -53,4 +53,8 @@ public record ObjectPath(PathStep[] steps) implements Comparable<ObjectPath> {
 
         return steps.length - o.steps.length;
     }
+
+    public PathStep last() {
+        return steps[steps.length - 1];
+    }
 }

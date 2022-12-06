@@ -6,13 +6,19 @@ import io.wispforest.gadget.util.ReflectionUtil;
 
 import java.lang.reflect.Field;
 
-public record FieldPathStep(String fieldName) implements PathStep {
+public record FieldPathStep(String className, String fieldName) implements PathStep {
     public static FieldPathStep forField(Field field) {
-        return new FieldPathStep(MappingsManager.unmapField(field));
+        return new FieldPathStep(MappingsManager.unmapClass(ReflectionUtil.prettyName(field.getDeclaringClass())), MappingsManager.unmapField(field));
     }
 
     public String runtimeName() {
         return LocalMappings.INSTANCE.mapField(fieldName);
+    }
+
+    public String fieldId() {
+        return MappingsManager.displayMappings().mapClass(className)
+            + "#"
+            + MappingsManager.displayMappings().mapField(fieldName);
     }
 
     @Override

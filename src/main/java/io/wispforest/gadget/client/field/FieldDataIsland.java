@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.field;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.ComponentAdditionRound;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
@@ -9,6 +10,8 @@ import io.wispforest.gadget.client.nbt.NbtDataIsland;
 import io.wispforest.gadget.client.nbt.NbtPath;
 import io.wispforest.gadget.desc.*;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
+import io.wispforest.gadget.path.FieldPathStep;
+import io.wispforest.gadget.util.WeakObservableDispatcher;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
@@ -21,13 +24,22 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FieldDataIsland {
+    private static final WeakObservableDispatcher<List<String>> HIDDEN_FIELDS = new WeakObservableDispatcher<>();
+
+    static {
+        Gadget.CONFIG.subscribeToHiddenFields(HIDDEN_FIELDS::handle);
+    }
+
     protected final Map<ObjectPath, ClientFieldData> fields = new TreeMap<>();
     private final VerticalFlowLayout mainContainer;
     private Consumer<ObjectPath> pathRequester = path -> {};
@@ -196,6 +208,31 @@ public class FieldDataIsland {
             row.child(plusLabel);
         }
 
+        if (path.last() instanceof FieldPathStep step) {
+            rowLabel.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
+
+                GuiUtil.contextMenu(rowLabel, mouseX, mouseY)
+                    .button(Text.translatable("text.gadget.hide_field"), unused -> {
+                        container.removeChild(rowContainer);
+                        ArrayList<String> hiddenFields = new ArrayList<>(Gadget.CONFIG.hiddenFields());
+                        hiddenFields.add(step.fieldId());
+                        Gadget.CONFIG.hiddenFields(hiddenFields);
+                    });
+
+                return true;
+            });
+
+            HIDDEN_FIELDS.register(value -> {
+                if (value.contains(step.fieldId())) {
+                    container.removeChild(rowContainer);
+                    return true;
+                }
+
+                return false;
+            });
+        }
+
         row
             .margins(Insets.both(0, 2))
             .allowOverflow(true);
@@ -204,6 +241,11 @@ public class FieldDataIsland {
     }
 
     public void addFieldData(ObjectPath path, FieldData data) {
+        if (path.last() instanceof FieldPathStep step
+         && Gadget.CONFIG.hiddenFields().contains(step.fieldId())) {
+            return;
+        }
+
         if (mainContainer == null) {
             fields.put(path, new ClientFieldData(data));
             return;

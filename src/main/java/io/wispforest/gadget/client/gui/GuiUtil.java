@@ -2,8 +2,10 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.DropdownComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
@@ -13,6 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -69,6 +73,22 @@ public final class GuiUtil {
             root = root.parent();
 
         return root;
+    }
+
+    public static DropdownComponent contextMenu(Component at, double mouseX, double mouseY) {
+        FlowLayout root = (FlowLayout) root(at);
+        var dropdown = Components.dropdown(Sizing.content());
+
+        dropdown.positioning(Positioning.absolute((int) mouseX + at.x(), (int) mouseY + at.y()));
+
+        ((ParentComponent) dropdown.children().get(0)).padding(Insets.of(3));
+
+        dropdown.focusLost().subscribe(() -> dropdown.queue(() -> root.removeChild(dropdown)));
+
+        root.child(dropdown);
+        root.focusHandler().focus(dropdown, Component.FocusSource.MOUSE_CLICK);
+
+        return dropdown;
     }
 
     private static final int INVALID_COLOR = 0xEB1D36;

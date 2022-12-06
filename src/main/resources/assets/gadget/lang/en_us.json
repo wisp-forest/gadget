@@ -169,6 +169,8 @@
     "text.config.gadget.enum.uICounterMode.off": "Off",
     "text.config.gadget.enum.uICounterMode.log_on_long_update": "Log On Long Update",
     "text.config.gadget.enum.uICounterMode.log_always": "Always Log",
+    "text.config.gadget.option.hiddenFields": "Hidden Fields",
+    "text.config.gadget.option.hiddenFields.tooltip": "Fields hidden in field inspections.",
 
     "text.gadget.nbt.compound": {"text": "c", "color": "#0197F6"},
     "text.gadget.nbt.compound.full": ["", {"text": "c", "color": "#0197F6"}, "ompound"],
@@ -201,6 +203,7 @@
 
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
+    "text.gadget.hide_field": "Hide field",
     "text.gadget.join_with_dump": "Join and start dumping packets",
 
     "commands.gadget.reload_mappings.success": [

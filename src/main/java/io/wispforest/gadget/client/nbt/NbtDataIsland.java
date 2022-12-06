@@ -6,7 +6,6 @@ import io.wispforest.gadget.mixin.NbtTypesAccessor;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
@@ -204,22 +203,12 @@ public class NbtDataIsland extends VerticalFlowLayout {
     }
 
     public void typeSelector(int mouseX, int mouseY, Consumer<NbtType<?>> consumer) {
-        var dropdown = Components.dropdown(Sizing.content());
-        var root = (FlowLayout) GuiUtil.root(this);
-
-        dropdown.positioning(Positioning.absolute(mouseX, mouseY));
-
-        ((ParentComponent) dropdown.children().get(0)).padding(Insets.of(3));
-
-        dropdown.focusLost().subscribe(() -> dropdown.queue(() -> root.removeChild(dropdown)));
+        var dropdown = GuiUtil.contextMenu(GuiUtil.root(this), mouseX, mouseY);
 
         for (NbtType<?> type : NbtTypesAccessor.getVALUES()) {
             dropdown.button(typeText(type, ".full"),
                 unused -> consumer.accept(type));
         }
-
-        root.child(dropdown);
-        root.focusHandler().focus(dropdown, FocusSource.MOUSE_CLICK);
     }
 
     MutableText typeText(NbtType<?> type, String suffix) {

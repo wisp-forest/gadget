@@ -5,6 +5,8 @@ import io.wispforest.gadget.mappings.*;
 import io.wispforest.owo.config.annotation.*;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 @Config(name = "gadget", wrapperName = "GadgetConfig")
@@ -19,6 +21,7 @@ public class GadgetConfigModel {
     @PredicateConstraint("isQuiltflowerVersionValid") public String quiltflowerVersion = "LATEST";
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
+    @Hook public List<String> hiddenFields = new ArrayList<>();
     @Nest public InternalSettings internalSettings = new InternalSettings();
 
     public static boolean isQuiltflowerVersionValid(String version) {
