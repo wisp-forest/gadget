@@ -2,13 +2,13 @@ package io.wispforest.gadget.path;
 
 import io.wispforest.gadget.mappings.LocalMappings;
 import io.wispforest.gadget.mappings.MappingsManager;
-import io.wispforest.gadget.util.ReflectionUtil;
+import net.auoeke.reflect.Accessor;
 
 import java.lang.reflect.Field;
 
 public record FieldPathStep(String className, String fieldName) implements PathStep {
     public static FieldPathStep forField(Field field) {
-        return new FieldPathStep(MappingsManager.unmapClass(ReflectionUtil.prettyName(field.getDeclaringClass())), MappingsManager.unmapField(field));
+        return new FieldPathStep(MappingsManager.unmapClass(field.getDeclaringClass()), MappingsManager.unmapField(field));
     }
 
     public String runtimeName() {
@@ -23,30 +23,12 @@ public record FieldPathStep(String className, String fieldName) implements PathS
 
     @Override
     public Object follow(Object o) {
-        try {
-            var field = ReflectionUtil.findField(o.getClass(), runtimeName());
-
-            if (!field.canAccess(o))
-                field.setAccessible(true);
-
-            return field.get(o);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return Accessor.get(o, runtimeName());
     }
 
     @Override
     public void set(Object o, Object to) {
-        try {
-            var field = ReflectionUtil.findField(o.getClass(), runtimeName());
-
-            if (!field.canAccess(o))
-                field.setAccessible(true);
-
-            field.set(o, to);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        Accessor.put(o, runtimeName(), to);
     }
 
     @Override

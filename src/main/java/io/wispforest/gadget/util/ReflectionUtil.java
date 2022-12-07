@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.gadget.mappings.MappingsManager;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public final class ReflectionUtil {
@@ -36,7 +35,7 @@ public final class ReflectionUtil {
     }
 
     public static String nameWithoutPackage(Class<?> klass) {
-        String full = MappingsManager.remapClassToDisplay(klass.getName());
+        String full = MappingsManager.remapClassToDisplay(klass);
         return full.substring(full.lastIndexOf('.') + 1);
     }
 
@@ -57,29 +56,6 @@ public final class ReflectionUtil {
             return null;
 
         return findFor(klass.getSuperclass(), map);
-    }
-
-    public static Field findField(Class<?> klass, String name) {
-        try {
-            return klass.getDeclaredField(name);
-        } catch (NoSuchFieldException e) {
-            if (klass == Object.class)
-                return null;
-
-            return findField(klass.getSuperclass(), name);
-        }
-    }
-
-    public static Iterable<Field> allFields(Class<?> klass) {
-        TreeSet<Field> fields = new TreeSet<>(Comparator.comparing(Field::getName));
-
-        while (klass != Object.class) {
-            fields.addAll(List.of(klass.getDeclaredFields()));
-
-            klass = klass.getSuperclass();
-        }
-
-        return fields;
     }
 
     public static String getCallingMethodData(int depth) {

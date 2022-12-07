@@ -4,10 +4,14 @@ import com.google.common.collect.Iterators;
 
 import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Map;
 
 public record IndexPathStep(int idx) implements PathStep {
     @Override
     public Object follow(Object o) {
+        if (o instanceof Map<?, ?> map)
+            o = map.entrySet();
+
         if (o.getClass().isArray()) {
             return Array.get(o, idx);
         } else if (o instanceof Iterable<?> iter) {
@@ -20,6 +24,9 @@ public record IndexPathStep(int idx) implements PathStep {
     @SuppressWarnings("unchecked")
     @Override
     public void set(Object o, Object to) {
+        if (o instanceof Map<?, ?> map)
+            o = map.entrySet();
+
         if (o.getClass().isArray()) {
             Array.set(o, idx, to);
         } else if (o instanceof List<?> list) {

@@ -3,6 +3,7 @@ package io.wispforest.gadget.mappings;
 import com.google.common.base.Suppliers;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.util.GadgetConfigModel;
+import io.wispforest.gadget.util.ReflectionUtil;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.tree.MappingTreeView;
@@ -95,8 +96,17 @@ public final class MappingsManager {
         return DISPLAY_MAPPINGS;
     }
 
-    public static String remapClassToDisplay(String name) {
-        return displayMappings().mapClass(unmapClass(name));
+    public static String remapClassToDisplay(Class<?> klass) {
+        return displayMappings().mapClass(unmapClass(klass));
+    }
+
+    public static String unmapClass(Class<?> klass) {
+        String name = ReflectionUtil.prettyName(klass);
+
+        if (name.contains("/"))
+            return name;
+
+        return unmapClass(name);
     }
 
     public static String unmapClass(String name) {

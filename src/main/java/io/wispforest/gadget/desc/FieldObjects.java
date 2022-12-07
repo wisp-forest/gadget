@@ -7,13 +7,14 @@ import io.wispforest.gadget.path.*;
 import io.wispforest.gadget.util.HiddenFields;
 import io.wispforest.gadget.util.PrettyPrinters;
 import io.wispforest.gadget.util.ReflectionUtil;
+import net.auoeke.reflect.Accessor;
+import net.auoeke.reflect.Fields;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InaccessibleObjectException;
-import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +56,16 @@ public final class FieldObjects {
 
                     fields.put(path, new FieldData(obj, false, isFinal));
                 }
+            } else {
+                int i = 0;
+                for (Object sub : map.entrySet()) {
+                    int idx = i++;
+                    var path = basePath.then(new IndexPathStep(idx));
+
+                    FieldObject obj = FieldObjects.fromObject(sub);
+
+                    fields.put(path, new FieldData(obj, false, isFinal));
+                }
             }
         }
 
@@ -72,33 +83,23 @@ public final class FieldObjects {
             return fields;
         }
 
-        for (Field field : ReflectionUtil.allFields(o.getClass())) {
-            if (Modifier.isStatic(field.getModifiers())) continue;
-            if (HiddenFields.isHidden(field)) continue;
-            if (field.isSynthetic()) continue;
+        Fields.allInstance(o.getClass())
+            .filter(x -> !x.isSynthetic() && !HiddenFields.isHidden(x))
+            .forEach(field -> {
+                var path = basePath.then(FieldPathStep.forField(field));
 
-            var path = basePath.then(FieldPathStep.forField(field));
+                FieldObject obj;
 
-            FieldObject obj;
-
-            try {
-                if (!field.canAccess(o)) {
-                    field.setAccessible(true);
+                try {
+                    obj = FieldObjects.fromObject(Accessor.get(o, field));
+                } catch (Exception e) {
+                    obj = ErrorFieldObject.fromException(e);
                 }
 
-                Object value = field.get(o);
+                boolean isMixin = field.getAnnotation(MixinMerged.class) != null;
 
-                obj = FieldObjects.fromObject(value);
-            } catch (InaccessibleObjectException unused) {
-                continue;
-            } catch (Exception e) {
-                obj = ErrorFieldObject.fromException(e);
-            }
-
-            boolean isMixin = field.getAnnotation(MixinMerged.class) != null;
-
-            fields.put(path, new FieldData(obj, isMixin, false));
-        }
+                fields.put(path, new FieldData(obj, isMixin, false));
+            });
 
         return fields;
     }
@@ -113,11 +114,19 @@ public final class FieldObjects {
         if (pretty != null)
             return new PrimitiveFieldObject(pretty, Optional.ofNullable(PrimitiveEditData.forObject(o)));
 
-        String unmappedClass = MappingsManager.unmapClass(ReflectionUtil.prettyName(o.getClass()));
+        String tag;
 
-        if (o.getClass().isEnum())
-            return new ComplexFieldObject(unmappedClass, "#" + ((Enum<?>) o).name());
+        if (o instanceof ItemStack stack) {
+            tag = "{" + stack.getCount() + " " + Registry.ITEM.getId(stack.getItem()) + "}";
+        } else if (o.getClass().isEnum()) {
+            tag = "#" + ((Enum<?>) o).name();
+        } else {
+            tag = "@" + Integer.toHexString(System.identityHashCode(o));
+        }
 
-        return new ComplexFieldObject(unmappedClass, "");
+        return new ComplexFieldObject(
+            MappingsManager.unmapClass(o.getClass()),
+            tag
+        );
     }
 }
