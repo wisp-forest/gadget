@@ -196,16 +196,18 @@ public class FieldDataIsland {
                 .child(subContainer.getSpinnyBoi()
                     .sizing(Sizing.fixed(10), Sizing.content()));
 
-            var plusLabel = Components.label(Text.of("+"));
+            if (nbtCompoundSetter != null) {
+                var plusLabel = Components.label(Text.of("+"));
 
-            GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
-                island.typeSelector(
-                    (int) (plusLabel.x() + mouseX),
-                    (int) (plusLabel.y() + mouseY),
-                    type -> data.subObjectContainer.child(new KeyAdderWidget(island, NbtPath.EMPTY, type, unused -> true)))
-            );
+                GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
+                    island.typeSelector(
+                        (int) (plusLabel.x() + mouseX),
+                        (int) (plusLabel.y() + mouseY),
+                        type -> data.subObjectContainer.child(new KeyAdderWidget(island, NbtPath.EMPTY, type, unused -> true)))
+                );
 
-            row.child(plusLabel);
+                row.child(plusLabel);
+            }
         }
 
         if (path.last() instanceof FieldPathStep step) {

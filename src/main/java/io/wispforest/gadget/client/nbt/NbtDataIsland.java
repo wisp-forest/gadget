@@ -121,16 +121,18 @@ public class NbtDataIsland extends VerticalFlowLayout {
                 makeComponent(subPath, sub);
             }
 
-            var plusLabel = Components.label(Text.of("+ "));
+            if (reloader != null) {
+                var plusLabel = Components.label(Text.of("+ "));
 
-            GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
-                typeSelector(
-                    (int) (plusLabel.x() + mouseX),
-                    (int) (plusLabel.y() + mouseY),
-                    type -> widgetData.subContainer.child(new KeyAdderWidget(this, path, type, unused -> true)))
-            );
+                GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->
+                    typeSelector(
+                        (int) (plusLabel.x() + mouseX),
+                        (int) (plusLabel.y() + mouseY),
+                        type -> widgetData.subContainer.child(new KeyAdderWidget(this, path, type, unused -> true)))
+                );
 
-            row.child(plusLabel);
+                row.child(plusLabel);
+            }
         } else if (element instanceof AbstractNbtList<?> list) {
             widgetData.subContainer = new SubObjectContainer(unused -> {}, unused -> {});
 
@@ -145,41 +147,43 @@ public class NbtDataIsland extends VerticalFlowLayout {
                 makeComponent(subPath, sub);
             }
 
-            var plusLabel = Components.label(Text.of("+ "));
-            Predicate<String> nameVerifier = name -> {
-                try {
-                    var index = Integer.parseInt(name);
+            if (reloader != null) {
+                var plusLabel = Components.label(Text.of("+ "));
+                Predicate<String> nameVerifier = name -> {
+                    try {
+                        var index = Integer.parseInt(name);
 
-                    return index <= list.size();
-                } catch (NumberFormatException nfe) {
-                    return false;
-                }
-            };
-
-            GuiUtil.semiButton(plusLabel, (mouseX, mouseY) -> {
-                if (list instanceof NbtList) {
-                    if (list.isEmpty()) {
-                        typeSelector(
-                            (int) (plusLabel.x() + mouseX),
-                            (int) (plusLabel.y() + mouseY),
-                            type -> widgetData.subContainer.child(new KeyAdderWidget(this, path, type, nameVerifier)));
-                    } else {
-                        widgetData.subContainer.child(
-                            new KeyAdderWidget(this, path, NbtTypes.byId(list.getHeldType()), nameVerifier));
+                        return index <= list.size();
+                    } catch (NumberFormatException nfe) {
+                        return false;
                     }
-                } else if (list instanceof NbtByteArray) {
-                    widgetData.subContainer.child(
-                        new KeyAdderWidget(this, path, NbtByte.TYPE, nameVerifier));
-                } else if (list instanceof NbtIntArray) {
-                    widgetData.subContainer.child(
-                        new KeyAdderWidget(this, path, NbtInt.TYPE, nameVerifier));
-                } else if (list instanceof NbtLongArray) {
-                    widgetData.subContainer.child(
-                        new KeyAdderWidget(this, path, NbtLong.TYPE, nameVerifier));
-                }
-            });
+                };
 
-            row.child(plusLabel);
+                GuiUtil.semiButton(plusLabel, (mouseX, mouseY) -> {
+                    if (list instanceof NbtList) {
+                        if (list.isEmpty()) {
+                            typeSelector(
+                                (int) (plusLabel.x() + mouseX),
+                                (int) (plusLabel.y() + mouseY),
+                                type -> widgetData.subContainer.child(new KeyAdderWidget(this, path, type, nameVerifier)));
+                        } else {
+                            widgetData.subContainer.child(
+                                new KeyAdderWidget(this, path, NbtTypes.byId(list.getHeldType()), nameVerifier));
+                        }
+                    } else if (list instanceof NbtByteArray) {
+                        widgetData.subContainer.child(
+                            new KeyAdderWidget(this, path, NbtByte.TYPE, nameVerifier));
+                    } else if (list instanceof NbtIntArray) {
+                        widgetData.subContainer.child(
+                            new KeyAdderWidget(this, path, NbtInt.TYPE, nameVerifier));
+                    } else if (list instanceof NbtLongArray) {
+                        widgetData.subContainer.child(
+                            new KeyAdderWidget(this, path, NbtLong.TYPE, nameVerifier));
+                    }
+                });
+
+                row.child(plusLabel);
+            }
         }
 
         VerticalFlowLayout target = subContainerOf(path.parent());
