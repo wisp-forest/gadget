@@ -48,6 +48,7 @@ public class YarnMappings implements Mappings {
 
     private volatile Map<String, String> intermediaryToFieldMap = Collections.emptyMap();
     private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
+    private volatile Map<String, String> fieldIdToIntermediaryMap = Collections.emptyMap();
 
     public YarnMappings() {
         ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
@@ -67,6 +68,7 @@ public class YarnMappings implements Mappings {
 
             intermediaryToFieldMap = fieldMap;
             intermediaryToClassMap = classMap;
+            fieldIdToIntermediaryMap = MappingUtils.createFieldIdUnmap(tree, "named");
         }), false);
     }
 
@@ -125,6 +127,11 @@ public class YarnMappings implements Mappings {
     @Override
     public String mapField(String src) {
         return intermediaryToFieldMap.getOrDefault(src, src);
+    }
+
+    @Override
+    public String unmapFieldId(String dst) {
+        return fieldIdToIntermediaryMap.getOrDefault(dst, dst);
     }
 
     private static class YarnVersion {

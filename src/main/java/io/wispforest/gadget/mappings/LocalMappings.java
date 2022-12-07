@@ -1,6 +1,8 @@
 package io.wispforest.gadget.mappings;
 
 import com.google.common.base.Suppliers;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +15,15 @@ public final class LocalMappings implements Mappings {
 
     }
 
-    private final Supplier<Map<String, String>> intermediaryToClassMap = Suppliers.memoize(() -> {
+    private final Supplier<BiMap<String, String>> intermediaryToClassMap = Suppliers.memoize(() -> {
         var mappings = MappingsManager.runtimeMappings();
-        Map<String, String> inverse = new HashMap<>();
+        BiMap<String, String> inverse = HashBiMap.create();
 
         for (var def : mappings.getClasses()) {
-            inverse.put(def.getName("intermediary"), def.getName(MappingsManager.runtimeNamespace()));
+            inverse.put(
+                def.getName("intermediary").replace('/', '.'),
+                def.getName(MappingsManager.runtimeNamespace()).replace('/', '.')
+            );
         }
 
         return inverse;
@@ -37,15 +42,21 @@ public final class LocalMappings implements Mappings {
         return map;
     });
 
+    private final Supplier<Map<String, String>> fieldIdToIntermediary = Suppliers.memoize(
+        () -> MappingUtils.createFieldIdUnmap(MappingsManager.runtimeMappings(), MappingsManager.runtimeNamespace()));
+
     @Override
     public String mapClass(String src) {
-        src = src.replace('.', '/');
-
-        return intermediaryToClassMap.get().getOrDefault(src, src).replace('/', '.');
+        return intermediaryToClassMap.get().getOrDefault(src, src);
     }
 
     @Override
     public String mapField(String src) {
         return intermediaryToFieldMap.get().getOrDefault(src, src);
+    }
+
+    @Override
+    public String unmapFieldId(String dst) {
+        return fieldIdToIntermediary.get().getOrDefault(dst, dst);
     }
 }

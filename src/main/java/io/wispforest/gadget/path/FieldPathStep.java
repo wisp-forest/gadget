@@ -16,9 +16,7 @@ public record FieldPathStep(String className, String fieldName) implements PathS
     }
 
     public String fieldId() {
-        return MappingsManager.displayMappings().mapClass(className)
-            + "#"
-            + MappingsManager.displayMappings().mapField(fieldName);
+        return className + "#" + fieldName;
     }
 
     @Override
@@ -34,5 +32,19 @@ public record FieldPathStep(String className, String fieldName) implements PathS
     @Override
     public String toString() {
         return MappingsManager.displayMappings().mapField(fieldName);
+    }
+
+    public static String remapFieldId(String id) {
+        if (!id.contains("#"))
+            return id;
+
+        int hashIdx = id.lastIndexOf('#');
+        String klass = id.substring(0, hashIdx);
+        String field = id.substring(hashIdx + 1);
+
+        return
+            MappingsManager.displayMappings().mapClass(klass)
+            + "#"
+            + MappingsManager.displayMappings().mapField(field);
     }
 }

@@ -4,7 +4,6 @@ import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.*;
-import io.wispforest.gadget.util.HiddenFields;
 import io.wispforest.gadget.util.PrettyPrinters;
 import io.wispforest.gadget.util.ReflectionUtil;
 import net.auoeke.reflect.Accessor;
@@ -84,7 +83,7 @@ public final class FieldObjects {
         }
 
         Fields.allInstance(o.getClass())
-            .filter(x -> !x.isSynthetic() && !HiddenFields.isHidden(x))
+            .filter(x -> !x.isSynthetic())
             .forEach(field -> {
                 var path = basePath.then(FieldPathStep.forField(field));
 

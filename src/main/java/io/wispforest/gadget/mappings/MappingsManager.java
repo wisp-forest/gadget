@@ -101,15 +101,15 @@ public final class MappingsManager {
     }
 
     public static String unmapClass(Class<?> klass) {
-        String name = ReflectionUtil.prettyName(klass);
-
-        if (name.contains("/"))
-            return name;
-
-        return unmapClass(name);
+        return unmapClass(ReflectionUtil.prettyName(klass));
     }
 
     public static String unmapClass(String name) {
+        if (name.contains("/")) {
+            int slashIdx = name.lastIndexOf("/");
+            return unmapClass(name.substring(0, slashIdx)) + name.substring(slashIdx);
+        }
+
         return FabricLoader.getInstance().getMappingResolver().unmapClassName("intermediary", name);
     }
 

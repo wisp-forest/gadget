@@ -21,7 +21,46 @@ public class GadgetConfigModel {
     @PredicateConstraint("isQuiltflowerVersionValid") public String quiltflowerVersion = "LATEST";
     @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
-    @Hook public List<String> hiddenFields = new ArrayList<>();
+    @Hook public List<String> hiddenFields = new ArrayList<>(List.of(
+        "java.lang.Enum#name",
+
+        "java.util.ArrayList#elementData",
+        "java.util.ArrayList#size",
+        "java.util.AbstractList#modCount",
+
+        "java.util.AbstractMap#keySet",
+        "java.util.AbstractMap#values",
+        "java.util.EnumMap#entrySet",
+        "java.util.EnumMap#size",
+        "java.util.EnumMap#vals",
+        "java.util.HashMap#table",
+        "java.util.HashMap#size",
+        "java.util.HashMap#modCount",
+        "java.util.HashMap#loadFactor",
+        "java.util.HashMap#threshold",
+        "java.util.HashMap#entrySet",
+        "java.util.HashMap$Node#hash",
+        "java.util.HashMap$Node#next",
+        "java.util.LinkedHashMap#accessOrder",
+        "java.util.LinkedHashMap#head",
+        "java.util.LinkedHashMap#tail",
+        "java.util.LinkedHashMap$Entry#before",
+        "java.util.LinkedHashMap$Entry#after",
+        "java.util.IdentityHashMap#table",
+        "java.util.IdentityHashMap#size",
+        "java.util.IdentityHashMap#modCount",
+        "java.util.IdentityHashMap#entrySet",
+        "java.util.HashSet#map",
+        "java.util.RegularEnumSet#elements",
+        "java.util.EnumSet#elementType",
+        "java.util.EnumSet#universe",
+
+        "net.minecraft.class_2586#field_11866",
+        "net.minecraft.class_2586#field_11865",
+        "net.minecraft.class_2586#field_11864",
+
+        "net.minecraft.class_1297#field_5961"
+    ));
     @Nest public InternalSettings internalSettings = new InternalSettings();
 
     public static boolean isQuiltflowerVersionValid(String version) {
