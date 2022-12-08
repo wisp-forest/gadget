@@ -91,12 +91,6 @@ public class FieldDataIsland {
 
             this.nbtCompoundSetter = (path, data) -> {
                 path.set(obj, data);
-
-                var parentPath = path.parent();
-
-                FieldObjects.collectAllData(parentPath, parentPath.follow(obj))
-                    .forEach(this::addFieldData);
-                commitAdditions();
             };
         }
 
