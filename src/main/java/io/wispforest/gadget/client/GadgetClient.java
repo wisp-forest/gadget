@@ -42,6 +42,8 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
@@ -115,9 +117,13 @@ public class GadgetClient implements ClientModInitializer {
 
             if (!perspective.isFirstPerson() && client.player != null) {
                 GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new EntityTarget(client.player.getId()), ObjectPath.EMPTY));
+                return;
             }
 
-            HitResult target = client.crosshairTarget;
+            Entity camera = client.getCameraEntity();
+            if (camera == null) camera = client.player;
+
+            HitResult target = raycast(camera, client.getTickDelta());
 
             if (target == null) return;
 
@@ -202,5 +208,25 @@ public class GadgetClient implements ClientModInitializer {
 
         FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)
             .forEach(GadgetClientEntrypoint::onGadgetClientInit);
+    }
+
+    // 100% not stolen from owo-whats-this
+    // https://github.com/wisp-forest/owo-whats-this/blob/master/src/main/java/io/wispforest/owowhatsthis/OwoWhatsThis.java#L155-L171.
+    public static HitResult raycast(Entity entity, float tickDelta) {
+        var blockTarget = entity.raycast(5, tickDelta, false);
+
+        var maxReach = entity.getRotationVec(tickDelta).multiply(5);
+        var entityTarget = ProjectileUtil.raycast(
+            entity,
+            entity.getEyePos(),
+            entity.getEyePos().add(maxReach),
+            entity.getBoundingBox().stretch(maxReach),
+            candidate -> true,
+            5 * 5
+        );
+
+        return entityTarget != null && entityTarget.squaredDistanceTo(entity) < blockTarget.squaredDistanceTo(entity)
+            ? entityTarget
+            : blockTarget;
     }
 }
