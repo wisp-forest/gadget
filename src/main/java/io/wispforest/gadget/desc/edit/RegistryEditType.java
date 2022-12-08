@@ -1,7 +1,7 @@
 package io.wispforest.gadget.desc.edit;
 
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class RegistryEditType<T> implements PrimitiveEditType<T> {
     private final Registry<T> registry;

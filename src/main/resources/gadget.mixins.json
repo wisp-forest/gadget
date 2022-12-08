@@ -32,7 +32,7 @@
         "client.MultiplayerServerEntryMixin",
         "client.NarratorLinuxMixin",
         "client.NarratorWindowsMixin",
-        "client.ProfileKeysMixin",
+        "client.ProfileKeysImplMixin",
         "client.TextFieldWidgetMixin",
         "client.WorldListWidgetWorldEntryMixin",
         "client.WorldRendererMixin",

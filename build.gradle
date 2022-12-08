@@ -8,7 +8,7 @@ sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version
+version = "${project.mod_version}+${rootProject.minecraft_base_version}"
 group = project.maven_group
 
 repositories {
@@ -23,6 +23,7 @@ repositories {
 			includeGroup "maven.modrinth"
 		}
 	}
+	mavenLocal()
 	maven { url 'https://maven.wispforest.io' }
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 	maven { url 'https://maven.terraformersmc.com/releases' }
@@ -38,7 +39,6 @@ repositories {
 		}
 	}
 	maven { url 'https://basique.top/maven' }
-	mavenLocal()
 }
 
 sourceSets {

@@ -28,14 +28,19 @@ public class BasedSliderComponent extends SliderComponent {
 
     @Override
     public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, x, y, width, height);
+        OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, getX(), getY(), width, height);
 
         (hovered ? OwoNinePatchRenderers.HOVERED_BUTTON : OwoNinePatchRenderers.ACTIVE_BUTTON)
-            .draw(matrices, this.x + (int)(this.value * (double)(this.width - 8)), y, 8, 20);
+            .draw(matrices, this.getX() + (int)(this.value * (double)(this.width - 8)), getY(), 8, 20);
 
         int textColor = this.active ? 16777215 : 10526880;
         drawCenteredText(
-            matrices, MinecraftClient.getInstance().textRenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, textColor | MathHelper.ceil(this.alpha * 255.0F) << 24
+            matrices,
+            MinecraftClient.getInstance().textRenderer,
+            this.getMessage(),
+            this.getX() + this.width / 2,
+            this.getY() + (this.height - 8) / 2,
+            textColor | MathHelper.ceil(this.alpha * 255.0F) << 24
         );
     }
 
@@ -54,7 +59,7 @@ public class BasedSliderComponent extends SliderComponent {
         if (!shouldDrawTooltip(mouseX, mouseY)) return;
         if (tooltipFactory == null) return;
 
-        double tooltipValue = MathHelper.clamp((mouseX - (double)(this.x + 4)) / (double)(this.width - 8), 0, 1);
+        double tooltipValue = MathHelper.clamp((mouseX - (double)(this.getX() + 4)) / (double)(this.width - 8), 0, 1);
 
         List<TooltipComponent> tooltip = new ArrayList<>();
         tooltip.add(TooltipComponent.of(tooltipFactory.apply(tooltipValue).asOrderedText()));

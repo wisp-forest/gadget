@@ -21,12 +21,14 @@ public abstract class KeyboardMixin {
     @Shadow protected abstract boolean processF3(int key);
 
     @Inject(method = "method_1454(ILnet/minecraft/client/gui/screen/Screen;[ZIII)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;keyPressed(III)Z", shift = At.Shift.BY, by = 2))
-    private void afterKeyPressed(int code, Screen screen, boolean[] resultHack, int key, int scancode, int modifiers, CallbackInfo ci) {
+    private static void afterKeyPressed(int code, Screen screen, boolean[] resultHack, int key, int scancode, int modifiers, CallbackInfo ci) {
+        var client = MinecraftClient.getInstance();
+
         if (resultHack[0]) return;
         if (!Gadget.CONFIG.debugKeysInScreens()) return;
         if (!InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_F3)) return;
 
-        resultHack[0] = processF3(key);
+        resultHack[0] = ((KeyboardMixin)(Object) client.keyboard).processF3(key);
     }
 
     @Inject(method = "processF3", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;player:Lnet/minecraft/client/network/ClientPlayerEntity;"), cancellable = true)

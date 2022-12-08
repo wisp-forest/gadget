@@ -10,7 +10,7 @@ import net.auoeke.reflect.Accessor;
 import net.auoeke.reflect.Fields;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Array;
@@ -116,7 +116,7 @@ public final class FieldObjects {
         String tag;
 
         if (o instanceof ItemStack stack) {
-            tag = "{" + stack.getCount() + " " + Registry.ITEM.getId(stack.getItem()) + "}";
+            tag = "{" + stack.getCount() + " " + Registries.ITEM.getId(stack.getItem()) + "}";
         } else if (o.getClass().isEnum()) {
             tag = "#" + ((Enum<?>) o).name();
         } else {
