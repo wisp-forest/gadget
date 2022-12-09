@@ -12,6 +12,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -60,10 +61,9 @@ public class SearchGui extends HorizontalFlowLayout {
         searchBox.setSuggestion(searchHint);
         searchBox.onChanged().subscribe(s -> {
             searchBox.setSuggestion(s.isEmpty() ? searchHint : "");
-//            if (!s.equals(this.lastSearchFieldText)) {
-//                searchField.setEditableColor(TextFieldWidget.DEFAULT_EDITABLE_COLOR);
-//                matchIndicator.text(Text.empty());
-//            }
+
+            searchBox.setEditableColor(TextFieldWidget.DEFAULT_EDITABLE_COLOR);
+            matchIndicator.text(Text.empty());
         });
 
         searchBox.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
