@@ -54,6 +54,7 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 public class GadgetClient implements ClientModInitializer {
     public static KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.MISC_CATEGORY);
@@ -146,12 +147,14 @@ public class GadgetClient implements ClientModInitializer {
             }
         });
 
+        List<String> alignToButtons = List.of(
+            "menu.multiplayer",
+            "menu.shareToLan",
+            "menu.playerReporting"
+        );
+
         Layers.add(Containers::verticalFlow, instance -> {
             if (!Gadget.CONFIG.menuButtonEnabled()) return;
-
-            var translationKey = instance.screen instanceof TitleScreen
-                ? "menu.multiplayer"
-                : "menu.shareToLan";
 
             instance.adapter.rootComponent.child(
                 Components.button(
@@ -161,7 +164,8 @@ public class GadgetClient implements ClientModInitializer {
                     button.margins(Insets.left(4)).sizing(Sizing.fixed(20));
                     instance.alignComponentToWidget(widget -> {
                         if (!(widget instanceof ButtonWidget daButton)) return false;
-                        return daButton.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals(translationKey);
+                        return daButton.getMessage().getContent() instanceof TranslatableTextContent translatable
+                            && alignToButtons.contains(translatable.getKey());
                     }, Layer.Instance.AnchorSide.RIGHT, 0, button);
                 })
             );

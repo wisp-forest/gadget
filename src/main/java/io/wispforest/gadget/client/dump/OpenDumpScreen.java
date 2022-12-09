@@ -97,6 +97,18 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         searchBox.onChanged().subscribe(text -> rebuild(text, currentTime()));
         searchBox.margins(Insets.bottom(3));
 
+        rootComponent.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
+            if (keyCode != GLFW.GLFW_KEY_F || (modifiers & GLFW.GLFW_MOD_CONTROL) == 0)
+                return false;
+
+            uiAdapter.rootComponent.focusHandler().focus(
+                searchBox,
+                Component.FocusSource.MOUSE_CLICK
+            );
+
+            return true;
+        });
+
         timeSlider = new BasedSliderComponent(Sizing.fill(95));
         timeSlider
             .tooltipFactory(value -> Text.of(

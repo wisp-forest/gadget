@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.resource.language.I18n;
@@ -18,21 +19,20 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
-public class SearchGui {
+public class SearchGui extends HorizontalFlowLayout {
     private final ScrollContainer<?> scroll;
 
     protected @Nullable SearchMatches currentMatches = null;
     private int currentMatchIndex;
+    private final TextBoxComponent searchBox;
 
     public SearchGui(ScrollContainer<?> scroll) {
+        super(Sizing.content(), Sizing.content());
         this.scroll = scroll;
-    }
 
-    public Component createSearchComponent() {
-        var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         var searchRow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 
-        TextBoxComponent searchBox = Components.textBox(Sizing.fill(50));
+        searchBox = Components.textBox(Sizing.fill(50));
         searchBox.setDrawsBackground(false);
         searchBox.verticalSizing(Sizing.fixed(9));
         LabelComponent matchIndicator = Components.label(Text.empty());
@@ -44,16 +44,16 @@ public class SearchGui {
             .surface(Surface.VANILLA_TRANSLUCENT)
             .padding(Insets.of(3));
 
-        row
+        this
             .child(Components.texture(
-                new Identifier("owo", "textures/gui/config_search.png"),
-                0,
-                0,
-                16,
-                16,
-                16,
-                16)
-                    .margins(Insets.of(2)))
+                    new Identifier("owo", "textures/gui/config_search.png"),
+                    0,
+                    0,
+                    16,
+                    16,
+                    16,
+                    16)
+                .margins(Insets.of(2)))
             .child(searchRow);
 
         var searchHint = I18n.translate("text.owo.config.search");
@@ -73,7 +73,11 @@ public class SearchGui {
             if (query.isBlank()) return false;
 
             if (this.currentMatches != null && this.currentMatches.query().equals(query)) {
-                this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches().size();
+                if (this.currentMatches.matches().isEmpty()) {
+                    this.currentMatchIndex = -1;
+                } else {
+                    this.currentMatchIndex = (this.currentMatchIndex + 1) % this.currentMatches.matches().size();
+                }
             } else {
                 var splitQuery = query.split(" ");
 
@@ -105,8 +109,10 @@ public class SearchGui {
 
             return true;
         });
+    }
 
-        return row;
+    public TextBoxComponent searchBox() {
+        return searchBox;
     }
 
     protected List<SearchAnchorComponent> collectSearchAnchors() {
