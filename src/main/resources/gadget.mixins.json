@@ -10,6 +10,7 @@
         "CustomPayloadC2SPacketMixin",
         "NamespaceResourceManagerMixin",
         "NbtTypesAccessor",
+        "PathUtilMixin",
         "ZipResourcePackMixin",
         "owo.BaseComponentMixin",
         "owo.BaseParentComponentMixin",
