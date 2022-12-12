@@ -1,33 +1,29 @@
 package io.wispforest.gadget.decompile.handle;
 
 import org.jetbrains.java.decompiler.main.extern.IContextSource;
-import org.jetbrains.java.decompiler.main.extern.IResultSaver;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassContextSource implements IContextSource {
+public class EverythingContextSource implements IContextSource {
     private final QuiltflowerHandlerImpl handler;
-    private final Class<?>[] classes;
 
-    public ClassContextSource(QuiltflowerHandlerImpl handler, Class<?> klass) {
+    public EverythingContextSource(QuiltflowerHandlerImpl handler) {
         this.handler = handler;
-
-        classes = klass.getNestHost().getNestMembers();
     }
 
     @Override
     public String getName() {
-        return "Class";
+        return "Everything";
     }
 
     @Override
     public Entries getEntries() {
         var klasses = new ArrayList<Entry>();
-        for (var klass : classes) {
-            klasses.add(Entry.parse(handler.mapClass(klass.getName().replace('.', '/'))));
+        for (var klass : handler.fs.getAllClasses()) {
+            klasses.add(Entry.parse(klass));
         }
 
         return new Entries(klasses, List.of(), List.of());
@@ -38,10 +34,5 @@ public class ClassContextSource implements IContextSource {
         var bytes = handler.getClassBytes(handler.mapClass(resource.replace(".class", "")));
 
         return new ByteArrayInputStream(bytes);
-    }
-
-    @Override
-    public IOutputSink createOutputSink(IResultSaver saver) {
-        return new GadgetOutputSink((GadgetResultSaver) saver);
     }
 }

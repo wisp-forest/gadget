@@ -10,7 +10,6 @@ import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.format.ProGuardReader;
 import net.fabricmc.mappingio.format.Tiny2Reader;
 import net.fabricmc.mappingio.format.Tiny2Writer;
-import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
@@ -20,41 +19,12 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
-public class MojangMappings implements Mappings {
+public class MojangMappings extends LoadingMappings {
     public static final String VERSION_MANIFEST_ENDPOINT = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 
-    private volatile Map<String, String> intermediaryToFieldMap = Collections.emptyMap();
-    private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
-    private volatile Map<String, String> fieldIdToIntermediaryMap = Collections.emptyMap();
-
-    public MojangMappings() {
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
-        toast.follow(CompletableFuture.runAsync(() -> {
-            var tree = load(toast);
-
-            var classMap = new HashMap<String, String>();
-            var fieldMap = new HashMap<String, String>();
-
-            for (var def : tree.getClasses()) {
-                classMap.put(def.getName("intermediary"), def.getName("named"));
-
-                for (var field : def.getFields()) {
-                    fieldMap.put(field.getName("intermediary"), field.getName("named"));
-                }
-            }
-
-            intermediaryToFieldMap = fieldMap;
-            intermediaryToClassMap = classMap;
-            fieldIdToIntermediaryMap = MappingUtils.createFieldIdUnmap(tree, "named");
-        }), false);
-    }
-
-    private MappingTree load(ProgressToast toast) {
+    @Override
+    protected void load(ProgressToast toast, MappingVisitor visitor) {
         try {
             Path mappingsDir = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("mappings");
 
@@ -64,11 +34,8 @@ public class MojangMappings implements Mappings {
 
             if (Files.exists(mojPath)) {
                 try (BufferedReader br = Files.newBufferedReader(mojPath)) {
-                    var tree = new MemoryMappingTree();
-
-                    Tiny2Reader.read(br, tree);
-
-                    return tree;
+                    Tiny2Reader.read(br, visitor);
+                    return;
                 }
             }
 
@@ -106,7 +73,7 @@ public class MojangMappings implements Mappings {
                 tree.accept(new Tiny2Writer(bw, false));
             }
 
-            return tree;
+            tree.accept(visitor);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -116,22 +83,5 @@ public class MojangMappings implements Mappings {
         try (var is = toast.loadWithProgress(new URL(url))) {
             ProGuardReader.read(new InputStreamReader(new BufferedInputStream(is)), "named", "official", visitor);
         }
-    }
-
-    @Override
-    public String mapClass(String src) {
-        src = src.replace('.', '/');
-
-        return intermediaryToClassMap.getOrDefault(src, src).replace('/', '.');
-    }
-
-    @Override
-    public String mapField(String src) {
-        return intermediaryToFieldMap.getOrDefault(src, src);
-    }
-
-    @Override
-    public String unmapFieldId(String dst) {
-        return fieldIdToIntermediaryMap.getOrDefault(dst, dst);
     }
 }

@@ -116,7 +116,11 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
                 () -> {
                     QuiltflowerManager.ensureInstalled()
                         .thenRunAsync(
-                            () -> client.setScreen(new ViewClassesScreen(this)), client);
+                            () -> client.setScreen(new ViewClassesScreen(this)), client)
+                        .exceptionally(t -> {
+                            Gadget.LOGGER.error("Failed to load View Classes Screen", t);
+                            return null;
+                        });
                 });
 
             main.child(inspectClasses);

@@ -221,7 +221,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                                         .formatted(Formatting.GRAY))
                                     .append(Text.literal(line.replace("\t", "    "))
                                         .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                            .horizontalSizing(Sizing.fill(74)));
+                            .horizontalSizing(Sizing.fill(99)));
 
                         i++;
                     }

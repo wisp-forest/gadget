@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +59,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         TreeEntry root = new TreeEntry("", tree);
 
         for (var name : GadgetMixinExtension.DUMPED_CLASSES) {
-            String fullPath = name.replace('.', '/') + ".class";
+            String fullPath = decompiler.mapClass(name.replace('.', '/')) + ".class";
             String[] split = fullPath.split("/");
             TreeEntry parent = root;
 
@@ -88,27 +87,34 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
 
             UISounds.playInteractionSound();
 
-            contents.clearChildren();
+            contents.configure(unused -> {
+                contents.clearChildren();
 
-            try {
-                var text = decompiler.decompileClass(Class.forName(fullPath.replace(".class", "").replace('/', '.')));
-                var lines = text.lines().toList();
-                int i = 0;
-                int maxWidth = Integer.toString(lines.size() - 1).length();
-                for (var line : lines) {
-                    contents.child(Components.label(
-                            Text.literal(" ")
-                                .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
-                                    .formatted(Formatting.GRAY))
-                                .append(Text.literal(line.replace("\t", "    "))
-                                    .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                        .horizontalSizing(Sizing.fill(74)));
+                try {
+                    var text = decompiler.decompileClass(Class.forName(
+                        decompiler.unmapClass(
+                            fullPath
+                                .replace(".class", "")
+                                .replace('/', '.')))
+                    );
+                    var lines = text.lines().toList();
+                    int i = 0;
+                    int maxWidth = Integer.toString(lines.size() - 1).length();
+                    for (var line : lines) {
+                        contents.child(Components.label(
+                                Text.literal(" ")
+                                    .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
+                                        .formatted(Formatting.GRAY))
+                                    .append(Text.literal(line.replace("\t", "    "))
+                                        .styled(x -> x.withFont(Gadget.id("monocraft")))))
+                            .horizontalSizing(Sizing.fill(99)));
 
-                    i++;
+                        i++;
+                    }
+                } catch (ClassNotFoundException e) {
+                    GuiUtil.showException(contents, e);
                 }
-            } catch (ClassNotFoundException e) {
-                GuiUtil.showException(contents, e);
-            }
+            });
 
             return true;
         });
