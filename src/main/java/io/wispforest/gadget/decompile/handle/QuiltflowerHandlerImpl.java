@@ -55,6 +55,7 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
         return LocalMappings.INSTANCE.mapClass(MappingsManager.displayMappings().unmapClass(name));
     }
 
+    @Override
     public byte[] getClassBytes(String name) {
         return classBytecodeStash.computeIfAbsent(name, unused -> {
             String remapped = unmapClass(name);

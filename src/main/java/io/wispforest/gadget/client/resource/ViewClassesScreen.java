@@ -2,6 +2,7 @@ package io.wispforest.gadget.client.resource;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.asm.GadgetMixinExtension;
+import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.decompile.QuiltflowerHandler;
@@ -15,12 +16,17 @@ import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +34,9 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     private final Screen parent;
     private VerticalFlowLayout contents;
     private final QuiltflowerHandler decompiler = QuiltflowerManager.loadHandler();
+    private String currentFileName = null;
+    private String currentFileContents = null;
+
 
     public ViewClassesScreen(Screen parent) {
         this.parent = parent;
@@ -71,6 +80,32 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         }
     }
 
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_S && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+            if (currentFileContents == null) return false;
+
+            String path = DialogUtil.saveFileDialog(
+                I18n.translate("text.gadget.save_as_java"),
+                currentFileName.replace(".class", ".java"),
+                List.of("*.java"),
+                "Java source files"
+            );
+
+            if (path != null) {
+                try {
+                    Files.writeString(Path.of(path), currentFileContents, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
     private HorizontalFlowLayout makeRecipeRow(String name, String fullPath) {
         var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         var fileLabel = Components.label(Text.literal(name));
@@ -83,40 +118,86 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             () -> row.surface(Surface.BLANK));
 
         row.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                UISounds.playInteractionSound();
 
-            UISounds.playInteractionSound();
+                contents.configure(unused -> {
+                    contents.clearChildren();
 
-            contents.configure(unused -> {
-                contents.clearChildren();
+                    try {
+                        var text = decompiler.decompileClass(Class.forName(
+                            decompiler.unmapClass(
+                                fullPath
+                                    .replace(".class", "")
+                                    .replace('/', '.')))
+                        );
 
-                try {
-                    var text = decompiler.decompileClass(Class.forName(
-                        decompiler.unmapClass(
-                            fullPath
-                                .replace(".class", "")
-                                .replace('/', '.')))
-                    );
-                    var lines = text.lines().toList();
-                    int i = 0;
-                    int maxWidth = Integer.toString(lines.size() - 1).length();
-                    for (var line : lines) {
-                        contents.child(Components.label(
-                                Text.literal(" ")
-                                    .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
-                                        .formatted(Formatting.GRAY))
-                                    .append(Text.literal(line.replace("\t", "    "))
-                                        .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                            .horizontalSizing(Sizing.fill(99)));
+                        currentFileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+                        currentFileContents = text;
 
-                        i++;
+                        var lines = text.lines().toList();
+                        int i = 0;
+                        int maxWidth = Integer.toString(lines.size() - 1).length();
+                        for (var line : lines) {
+                            contents.child(Components.label(
+                                    Text.literal(" ")
+                                        .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
+                                            .formatted(Formatting.GRAY))
+                                        .append(Text.literal(line.replace("\t", "    "))
+                                            .styled(x -> x.withFont(Gadget.id("monocraft")))))
+                                .horizontalSizing(Sizing.fill(99)));
+
+                            i++;
+                        }
+                    } catch (ClassNotFoundException e) {
+                        GuiUtil.showException(contents, e);
                     }
-                } catch (ClassNotFoundException e) {
-                    GuiUtil.showException(contents, e);
-                }
-            });
+                });
 
-            return true;
+                return true;
+            } else {
+                String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+
+                GuiUtil.contextMenu(row, mouseX, mouseY)
+                    .button(Text.translatable("text.gadget.save_as_java"), unused -> {
+                        String path = DialogUtil.saveFileDialog(
+                            I18n.translate("text.gadget.save_as_java"),
+                            filename.replace(".class", ".java"),
+                            List.of("*.java"),
+                            "Java source files"
+                        );
+
+                        if (path != null) {
+                            try {
+                                Files.writeString(Path.of(path), currentFileContents, StandardCharsets.UTF_8);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    })
+                    .button(Text.translatable("text.gadget.save_as_class"), unused -> {
+                        String path = DialogUtil.saveFileDialog(
+                            I18n.translate("text.gadget.save_as_class"),
+                            filename,
+                            List.of("*.class"),
+                            "JVM class files"
+                        );
+
+                        if (path != null) {
+                            try {
+                                Files.write(
+                                    Path.of(path),
+                                    decompiler.getClassBytes(fullPath.replace(".class", ""))
+                                );
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    });
+
+                return true;
+            }
+
         });
 
         return row;

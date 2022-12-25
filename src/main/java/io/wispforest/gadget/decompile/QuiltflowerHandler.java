@@ -5,5 +5,7 @@ public interface QuiltflowerHandler {
 
     String unmapClass(String name);
 
+    byte[] getClassBytes(String name);
+
     String decompileClass(Class<?> klass);
 }
