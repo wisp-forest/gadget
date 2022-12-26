@@ -28,6 +28,7 @@
     "mixins": [
         "gadget.mixins.json"
     ],
+    "accessWidener": "gadget.accesswidener",
 
     "custom": {
         "modmenu": {

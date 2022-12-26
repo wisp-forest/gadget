@@ -39,6 +39,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
@@ -183,6 +184,8 @@ public class GadgetClient implements ClientModInitializer {
                     var slot = ((HandledScreenAccessor) handled).callGetSlotAt(mouseX, mouseY);
 
                     if (slot == null) return true;
+                    if (slot instanceof CreativeInventoryScreen.LockableSlot) return true;
+                    if (slot.getStack().isEmpty()) return true;
 
                     client.setScreen(new StackNbtDataScreen(handled, slot));
 
