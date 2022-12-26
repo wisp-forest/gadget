@@ -7,7 +7,6 @@ import io.wispforest.gadget.client.dump.OpenDumpScreen;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.resource.ViewClassesScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
-import io.wispforest.gadget.decompile.QuiltflowerManager;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.network.packet.c2s.ListResourcesC2SPacket;
 import io.wispforest.gadget.util.FileUtil;
@@ -27,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,6 +36,7 @@ import java.util.List;
 
 public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
     private final Screen parent;
+    private LabelComponent inspectClasses;
 
     public GadgetScreen(Screen parent) {
         this.parent = parent;
@@ -101,27 +102,17 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
             inspectServerData.margins(Insets.bottom(4));
             GuiUtil.semiButton(inspectServerData,
-                () -> {
-                    GadgetNetworking.CHANNEL.clientHandle().send(new ListResourcesC2SPacket());
-                });
+                () -> GadgetNetworking.CHANNEL.clientHandle().send(new ListResourcesC2SPacket()));
 
             main.child(inspectServerData);
         }
 
-        if (Gadget.CONFIG.internalSettings.inspectClasses()) {
-            LabelComponent inspectClasses = Components.label(Text.translatable("text.gadget.inspect_classes"));
+        if (Gadget.CONFIG.inspectClasses()) {
+            inspectClasses = Components.label(Text.translatable("text.gadget.inspect_exported_classes"));
 
             inspectClasses.margins(Insets.bottom(4));
             GuiUtil.semiButton(inspectClasses,
-                () -> {
-                    QuiltflowerManager.ensureInstalled()
-                        .thenRunAsync(
-                            () -> client.setScreen(new ViewClassesScreen(this)), client)
-                        .exceptionally(t -> {
-                            Gadget.LOGGER.error("Failed to load View Classes Screen", t);
-                            return null;
-                        });
-                });
+                () -> ViewClassesScreen.openWithProgress(this));
 
             main.child(inspectClasses);
         }
@@ -156,6 +147,24 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) {
+            inspectClasses.text(Text.translatable("text.gadget.inspect_all_classes"));
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) {
+            inspectClasses.text(Text.translatable("text.gadget.inspect_exported_classes"));
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override

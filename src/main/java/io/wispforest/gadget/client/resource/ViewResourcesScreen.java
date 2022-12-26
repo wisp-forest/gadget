@@ -15,10 +15,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -210,28 +207,14 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 }
 
                 if (isText) {
-                    var reader = new InputStreamReader(is);
-                    var lines = IOUtils.readLines(reader);
-                    int i = 0;
-                    int maxWidth = Integer.toString(lines.size() - 1).length();
-                    for (var line : lines) {
-                        contents.child(Components.label(
-                                Text.literal(" ")
-                                    .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
-                                        .formatted(Formatting.GRAY))
-                                    .append(Text.literal(line.replace("\t", "    "))
-                                        .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                            .horizontalSizing(Sizing.fill(99)));
-
-                        i++;
-                    }
+                    contents.child(GuiUtil.showMonospaceText(new String(is.readAllBytes(), StandardCharsets.UTF_8)));
                     return;
                 }
 
                 // Display as bytes.
                 contents.child(GuiUtil.hexDump(is.readAllBytes(), false));
             } catch (Exception e) {
-                GuiUtil.showException(contents, e);
+                contents.child(GuiUtil.showException(e));
             }
         });
     }

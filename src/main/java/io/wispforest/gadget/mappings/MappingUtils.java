@@ -1,7 +1,10 @@
 package io.wispforest.gadget.mappings;
 
+import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.util.ProgressToast;
 import net.fabricmc.mappingio.tree.MappingTreeView;
 import net.fabricmc.tinyremapper.IMappingProvider;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,42 +39,77 @@ public final class MappingUtils {
         return map;
     }
 
-    public static void feedMappings(IMappingProvider.MappingAcceptor acceptor, MappingTreeView tree, String from,
-                                    String to) {
+    private static String tryGetName(MappingTreeView.ElementMappingView view, String... froms) {
+        for (String from : froms) {
+            String text = view.getName(from);
+
+            if (text != null)
+                return text;
+        }
+
+        return null;
+    }
+
+    private static String tryGetDesc(MappingTreeView.MemberMappingView view, String... froms) {
+        return view.getDesc(froms[0]);
+    }
+
+    public static void feedMappings(IMappingProvider.MappingAcceptor acceptor, MappingTreeView tree,
+                                    ProgressToast toast, String to, String... froms) {
+        int elements = 0;
         for (var c : tree.getClasses()) {
-            if (c.getName(from) == null) continue;
+            elements += 1 + c.getFields().size() + c.getMethods().size();
+        }
+
+        MutableInt progress = new MutableInt(0);
+        toast.followProgress(progress::getValue, elements);
+
+        if (Gadget.CONFIG.internalSettings.dumpTRMappings())
+            acceptor = new SavingMappingAcceptor(acceptor);
+
+        for (var c : tree.getClasses()) {
+            String cFrom = tryGetName(c, froms);
+            if (cFrom == null) continue;
 
             String cTo = c.getName(to);
 
-            if (cTo != null) acceptor.acceptClass(c.getName(from), cTo);
+            if (cTo != null) acceptor.acceptClass(cFrom, cTo);
 
             for (var f : c.getFields()) {
-                if (f.getName(from) == null) continue;
+                String fFrom = tryGetName(f, froms);
+                if (fFrom == null) continue;
 
                 var member = new IMappingProvider.Member(
-                    c.getName(from),
-                    f.getName(from),
-                    f.getDesc(from)
+                    cFrom,
+                    fFrom,
+                    tryGetDesc(f, froms)
                 );
 
                 String fTo = f.getName(to);
 
                 if (fTo != null) acceptor.acceptField(member, fTo);
+
+                progress.add(1);
             }
 
             for (var m : c.getMethods()) {
-                if (m.getName(from) == null) continue;
+                String mFrom = tryGetName(m, froms);
+                if (mFrom == null) continue;
 
                 var member = new IMappingProvider.Member(
-                    c.getName(from),
-                    m.getName(from),
-                    m.getDesc(from)
+                    cFrom,
+                    mFrom,
+                    tryGetDesc(m, froms)
                 );
 
                 String mTo = m.getName(to);
 
                 if (mTo != null) acceptor.acceptMethod(member, mTo);
+
+                progress.add(1);
             }
+
+            progress.add(1);
         }
     }
 }

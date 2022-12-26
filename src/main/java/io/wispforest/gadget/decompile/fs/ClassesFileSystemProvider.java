@@ -29,7 +29,7 @@ public class ClassesFileSystemProvider extends FileSystemProvider {
     }
 
     @Override
-    public FileSystem newFileSystem(URI uri, Map<String, ?> env) throws IOException {
+    public FileSystem newFileSystem(URI uri, Map<String, ?> env) {
         throw new RuntimeException("mald");
     }
 
@@ -46,74 +46,80 @@ public class ClassesFileSystemProvider extends FileSystemProvider {
 
     @Override
     public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) throws IOException {
-        return new SeekableInMemoryByteChannel(
-            ((ClassesFileSystem) path.getFileSystem()).getBytes(((ClassesPath) path).path));
+        String rawPath = ((ClassesPath) path).path;
+
+        if (rawPath.startsWith("/"))
+            rawPath = rawPath.substring(1);
+
+        byte[] data = ((ClassesFileSystem) path.getFileSystem()).getBytes(rawPath);
+        if (data == null)
+            throw new FileNotFoundException();
+        return new SeekableInMemoryByteChannel(data);
     }
 
     @Override
-    public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) throws IOException {
+    public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) {
         if (!dir.isAbsolute()) throw new UnsupportedOperationException("bruh");
 
         String startPath = ((ClassesPath) dir).path.substring(1);
-        if (!startPath.endsWith("/"))
-            startPath = startPath + "/";
+        if (startPath.endsWith("/"))
+            startPath = startPath.substring(0, startPath.length() - 1);
 
-        String finalStartPath = startPath;
         ClassesFileSystem fs = (ClassesFileSystem) dir.getFileSystem();
-        var classes = fs.getAllClasses()
+
+        ClassesFileSystem.TreeElement el = fs.getTreeRoot().follow(startPath);
+        String finalStartPath = startPath;
+        List<Path> children = el.children
             .stream()
-            .filter(x -> x.startsWith(finalStartPath))
-            .map(x -> x.substring(x.indexOf('/', finalStartPath.length())))
-            .distinct()
-            .map(x -> new ClassesPath(fs, "/" + x))
+            .map(x -> new ClassesPath(fs, ("/" + finalStartPath + "/" + x.name).replace("//", "/")))
             .map(x -> (Path) x)
             .toList();
 
         return new DirectoryStream<>() {
             @Override
             public Iterator<Path> iterator() {
-                return classes.iterator();
+                return children.iterator();
             }
 
             @Override
-            public void close() throws IOException {
+            public void close() {
 
             }
         };
     }
 
     @Override
-    public void createDirectory(Path dir, FileAttribute<?>... attrs) throws IOException {
+    public void createDirectory(Path dir, FileAttribute<?>... attrs) {
         throw new UnsupportedOperationException("bruh");
     }
 
     @Override
-    public void delete(Path path) throws IOException {
+    public void delete(Path path) {
         throw new UnsupportedOperationException("bruh");
     }
 
     @Override
-    public void copy(Path source, Path target, CopyOption... options) throws IOException {
+    public void copy(Path source, Path target, CopyOption... options) {
         throw new UnsupportedOperationException("bruh");
     }
 
     @Override
-    public void move(Path source, Path target, CopyOption... options) throws IOException {
+    public void move(Path source, Path target, CopyOption... options) {
         throw new UnsupportedOperationException("bruh");
     }
 
     @Override
-    public boolean isSameFile(Path path, Path path2) throws IOException {
+    public boolean isSameFile(Path path, Path path2) {
         return path.equals(path2);
     }
 
     @Override
-    public boolean isHidden(Path path) throws IOException {
+    public boolean isHidden(Path path) {
         return false;
     }
 
     @Override
-    public FileStore getFileStore(Path path) throws IOException {
+    public FileStore getFileStore(Path path) {
         throw new UnsupportedOperationException("bruh");
     }
 
@@ -136,26 +142,13 @@ public class ClassesFileSystemProvider extends FileSystemProvider {
         ClassesFileSystem fs = (ClassesFileSystem) path.getFileSystem();
         String rawPath = ((ClassesPath) path).path;
 
-        boolean isRegularFile = false;
-        boolean isDirectory = false;
+        var el = fs.getTreeRoot().follow(rawPath);
 
-        if (rawPath == "/") {
-            isDirectory = true;
-        } else if (rawPath.endsWith(".class"))
-            isRegularFile = fs.getAllClasses().contains(rawPath.replace(".class", ""));
-        else {
-            String proper = (rawPath + "/").replace("//", "/");
-            isDirectory = fs
-                .getAllClasses()
-                .stream()
-                .anyMatch(x -> x.startsWith(proper));
-        }
+        if (el == null)
+            throw new FileNotFoundException();
 
-        if (!isRegularFile && !isDirectory)
-            throw new FileNotFoundException("bruh");
+        boolean isFile = el.name.endsWith(".class");
 
-        boolean finalIsDirectory = isDirectory;
-        boolean finalIsRegularFile = isRegularFile;
         return (A) new BasicFileAttributes() {
 
             @Override
@@ -175,12 +168,12 @@ public class ClassesFileSystemProvider extends FileSystemProvider {
 
             @Override
             public boolean isRegularFile() {
-                return finalIsRegularFile;
+                return isFile;
             }
 
             @Override
             public boolean isDirectory() {
-                return finalIsDirectory;
+                return !isFile;
             }
 
             @Override
@@ -206,12 +199,12 @@ public class ClassesFileSystemProvider extends FileSystemProvider {
     }
 
     @Override
-    public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) throws IOException {
+    public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) {
         throw new UnsupportedOperationException("bruh");
     }
 
     @Override
-    public void setAttribute(Path path, String attribute, Object value, LinkOption... options) throws IOException {
+    public void setAttribute(Path path, String attribute, Object value, LinkOption... options) {
         throw new UnsupportedOperationException("bruh");
     }
 }

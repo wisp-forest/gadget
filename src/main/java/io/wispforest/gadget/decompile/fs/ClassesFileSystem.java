@@ -1,8 +1,6 @@
 package io.wispforest.gadget.decompile.fs;
 
 import io.wispforest.gadget.decompile.KnotUtil;
-import net.auoeke.reflect.Reflect;
-import net.fabricmc.tinyremapper.api.TrRemapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -14,18 +12,17 @@ import java.util.*;
 public class ClassesFileSystem extends FileSystem {
     private final Map<String, byte[]> classBytecodeStash = new HashMap<>();
     private final List<String> classNames;
-    private final TrRemapper remapper;
+    private TreeElement root;
 
-    public ClassesFileSystem(TrRemapper remapper) {
-        classNames = Arrays.stream(Reflect.instrument()
-                .valueOr(null)
-                .getAllLoadedClasses())
-            .filter(x -> !x.isHidden())
-            .map(Class::getName)
-            .map(remapper::map)
-            .map(x -> x.replace('.', '/'))
-            .toList();
-        this.remapper = remapper;
+    public ClassesFileSystem() {
+        classNames = new ArrayList<>();
+
+        for (Class<?> klass : KnotUtil.INSTRUMENTATION.getInitiatedClasses(ClassesFileSystem.class.getClassLoader())) {
+            if (klass.isHidden()) continue;
+            if (klass.isArray()) continue;
+
+            classNames.add(klass.getName().replace('.', '/'));
+        }
     }
 
     @Override
@@ -90,13 +87,70 @@ public class ClassesFileSystem extends FileSystem {
     }
 
     public byte[] getBytes(String path) {
-        return classBytecodeStash.computeIfAbsent(remapper.map(path
-                .replace(".class", ""))
+        return classBytecodeStash.computeIfAbsent(path
+                .replace(".class", "")
                 .replace('/', '.'),
             name2 -> KnotUtil.getPostMixinClassByteArray(name2, true));
     }
 
     public List<String> getAllClasses() {
         return classNames;
+    }
+
+    public TreeElement getTreeRoot() {
+        if (root != null) return root;
+
+        root = new TreeElement();
+        classNames.forEach(root::populatePath);
+
+        return root;
+    }
+
+    public static class TreeElement {
+        public String name = "";
+        public List<TreeElement> children = new ArrayList<>();
+
+        public void populatePath(String path) {
+            TreeElement current = this;
+            String[] elements = path.split("/");
+
+            for (int i = 0; i < elements.length; i++) {
+                String el = elements[i];
+                if (el.equals("")) continue;
+
+                boolean found = false;
+                for (var possible : current.children) {
+                    if (possible.name.equals(el)) {
+                        found = true;
+                        current = possible;
+                    }
+                }
+
+                if (!found) {
+                    var child = new TreeElement();
+                    child.name = el + (i == elements.length - 1 ? ".class" : "");
+                    current.children.add(child);
+                    current = child;
+                }
+            }
+        }
+
+        public TreeElement follow(String path) {
+            TreeElement current = this;
+            String[] elements = path.split("/");
+
+            for (String el : elements) {
+                if (el.equals("")) continue;
+
+                for (var treeEl : current.children) {
+                    if (Objects.equals(treeEl.name, el)) {
+                        current = treeEl;
+                        break;
+                    }
+                }
+            }
+
+            return current;
+        }
     }
 }

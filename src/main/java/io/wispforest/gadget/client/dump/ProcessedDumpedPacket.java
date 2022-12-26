@@ -71,18 +71,18 @@ public final class ProcessedDumpedPacket {
                     .padding(Insets.of(2, 2, 2, 0));
 
                 if (packet.packet() instanceof ErrorPacket error) {
-                    GuiUtil.showException(errors, error.getException())
-                        .margins(Insets.bottom(2));
+                    errors.child(GuiUtil.showException(error.getException())
+                        .margins(Insets.bottom(2)));
                 }
 
                 for (var e : packet.searchTextErrors()) {
-                    GuiUtil.showException(errors, e)
-                        .margins(Insets.bottom(2));
+                    errors.child(GuiUtil.showException(e)
+                        .margins(Insets.bottom(2)));
                 }
 
                 for (var e : packet.drawErrors()) {
-                    GuiUtil.showException(errors, e)
-                        .margins(Insets.bottom(2));
+                    errors.child(GuiUtil.showException(e)
+                        .margins(Insets.bottom(2)));
                 }
 
                 view.child(1, errors);

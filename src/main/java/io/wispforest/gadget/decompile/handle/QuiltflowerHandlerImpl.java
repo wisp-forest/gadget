@@ -7,11 +7,13 @@ import io.wispforest.gadget.decompile.fs.ClassesFileSystem;
 import io.wispforest.gadget.mappings.LocalMappings;
 import io.wispforest.gadget.mappings.MappingUtils;
 import io.wispforest.gadget.mappings.MappingsManager;
+import io.wispforest.gadget.util.ProgressToast;
 import net.auoeke.reflect.Constructors;
 import net.auoeke.reflect.Invoker;
 import net.fabricmc.mappingio.adapter.MappingNsRenamer;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.tinyremapper.TinyRemapper;
+import net.minecraft.text.Text;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -22,27 +24,45 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.QuiltflowerHandler {
-    private final TinyRemapper tinyRemapper = TinyRemapper.newRemapper()
-        .withMappings(acceptor -> {
-            try {
-                MemoryMappingTree tree = new MemoryMappingTree();
-
-                MappingsManager.runtimeMappings().accept(tree);
-                MappingsManager.displayMappings()
-                    .load(new MappingNsRenamer(tree, Map.of(MappingsManager.runtimeNamespace(), "target")));
-
-                MappingUtils.feedMappings(acceptor, tree, MappingsManager.runtimeNamespace(), "target");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        })
-        .threads(1)
-        .build();
-    final ClassesFileSystem fs = new ClassesFileSystem(tinyRemapper.getEnvironment().getRemapper());
+    private final TinyRemapper tinyRemapper;
+    final ClassesFileSystem fs;
     private final Map<String, byte[]> classBytecodeStash = new HashMap<>();
 
-    public QuiltflowerHandlerImpl() {
-        tinyRemapper.readClassPath(fs.getRootDirectories().iterator().next());
+    public QuiltflowerHandlerImpl(ProgressToast toast) {
+        toast.step(Text.translatable("message.gadget.progress.loading_tr"));
+        tinyRemapper = TinyRemapper.newRemapper()
+            .withMappings(acceptor -> {
+                try {
+                    toast.step(Text.translatable("message.gadget.progress.loading_mappings"));
+                    MemoryMappingTree tree = new MemoryMappingTree();
+
+                    MappingsManager.runtimeMappings().accept(tree);
+                    MappingsManager.displayMappings()
+                        .load(new MappingNsRenamer(tree, Map.of(MappingsManager.runtimeNamespace(), "target")));
+
+                    MappingUtils.feedMappings(
+                        acceptor,
+                        tree,
+                        toast,
+                        "target",
+                        MappingsManager.runtimeNamespace(),
+                        "intermediary"
+                    );
+
+                    toast.step(Text.literal(""));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .threads(1)
+            .build();
+
+        fs = new ClassesFileSystem();
+
+        toast.step(Text.translatable("message.gadget.progress.reading_classpath"));
+        tinyRemapper.readClassPathAsync(fs.getRootDirectories().iterator().next());
+
+        tinyRemapper.getEnvironment();
     }
 
     @Override
@@ -60,6 +80,10 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
         return classBytecodeStash.computeIfAbsent(name, unused -> {
             String remapped = unmapClass(name);
             byte[] bytes = fs.getBytes(remapped);
+
+            if (name.startsWith("java/"))
+                return bytes;
+
             ClassReader reader = new ClassReader(bytes);
             ClassWriter cw = new ClassWriter(0);
 
@@ -76,7 +100,6 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
             } catch (Throwable cnfe) {
                 throw new RuntimeException(cnfe);
             }
-            Gadget.LOGGER.info("Remapped {}", name);
             return cw.toByteArray();
         });
     }

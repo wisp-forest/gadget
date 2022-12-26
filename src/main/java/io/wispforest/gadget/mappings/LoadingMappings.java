@@ -50,8 +50,13 @@ public abstract class LoadingMappings implements Mappings {
             var fieldMap = new HashMap<String, String>();
 
             for (var def : tree.getClasses()) {
-                classMap.put(def.getName("intermediary"), def.getName("named"));
-                classUnmap.put(def.getName("named"), def.getName("intermediary"));
+                String intermediary = def.getName("intermediary");
+                String named = def.getName("named");
+
+                if (intermediary != null && named != null) {
+                    classMap.put(intermediary, named);
+                    classUnmap.put(named, intermediary);
+                }
 
                 for (var field : def.getFields()) {
                     fieldMap.put(field.getName("intermediary"), field.getName("named"));
