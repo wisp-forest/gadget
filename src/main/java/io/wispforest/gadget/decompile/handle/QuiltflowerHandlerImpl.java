@@ -38,7 +38,7 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
 
                     MappingsManager.runtimeMappings().accept(tree);
                     MappingsManager.displayMappings()
-                        .load(new MappingNsRenamer(tree, Map.of(MappingsManager.runtimeNamespace(), "target")));
+                        .load(new MappingNsRenamer(tree, Map.of("named", "target")));
 
                     MappingUtils.feedMappings(
                         acceptor,

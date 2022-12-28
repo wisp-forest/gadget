@@ -22,7 +22,8 @@ public class GadgetConfigModel {
     public boolean uiInspector = true;
     @RestartRequired public boolean silenceStartupErrors = true;
     @PredicateConstraint("isQuiltflowerVersionValid") public String quiltflowerVersion = "LATEST";
-    @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
+    @PredicateConstraint("isMappingsValid") @Hook public MappingsType mappings =
+        FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
     public boolean inspectClasses = true;
     @Hook public List<String> hiddenFields = new ArrayList<>(List.of(
@@ -77,6 +78,11 @@ public class GadgetConfigModel {
         } catch (VersionParsingException e) {
             return false;
         }
+    }
+
+    public static boolean isMappingsValid(MappingsType type) {
+        return type != MappingsType.LOCAL
+            || FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace().equals("named");
     }
 
     public static class InternalSettings {
