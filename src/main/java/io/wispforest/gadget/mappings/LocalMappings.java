@@ -22,10 +22,15 @@ public final class LocalMappings implements Mappings {
         BiMap<String, String> inverse = HashBiMap.create();
 
         for (var def : mappings.getClasses()) {
-            inverse.put(
-                def.getName("intermediary").replace('/', '.'),
-                def.getName(MappingsManager.runtimeNamespace()).replace('/', '.')
-            );
+            String intermediary = def.getName("intermediary");
+            String target = def.getName(MappingsManager.runtimeNamespace());
+
+            if (intermediary != null && target != null) {
+                inverse.put(
+                    intermediary.replace('/', '.'),
+                    target.replace('/', '.')
+                );
+            }
         }
 
         return inverse;
@@ -36,10 +41,15 @@ public final class LocalMappings implements Mappings {
         BiMap<String, String> inverse = HashBiMap.create();
 
         for (var def : mappings.getClasses()) {
-            inverse.put(
-                def.getName(MappingsManager.runtimeNamespace()).replace('/', '.'),
-                def.getName("intermediary").replace('/', '.')
-            );
+            String intermediary = def.getName("intermediary");
+            String target = def.getName(MappingsManager.runtimeNamespace());
+
+            if (intermediary != null && target != null) {
+                inverse.put(
+                    target.replace('/', '.'),
+                    intermediary.replace('/', '.')
+                );
+            }
         }
 
         return inverse;

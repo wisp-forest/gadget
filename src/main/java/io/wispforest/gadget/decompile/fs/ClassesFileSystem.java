@@ -87,9 +87,10 @@ public class ClassesFileSystem extends FileSystem {
     }
 
     public byte[] getBytes(String path) {
-        return classBytecodeStash.computeIfAbsent(path
-                .replace(".class", "")
-                .replace('/', '.'),
+        if (path.endsWith(".class"))
+            path = path.substring(0, path.length() - 6);
+
+        return classBytecodeStash.computeIfAbsent(path.replace('/', '.'),
             name2 -> KnotUtil.getPostMixinClassByteArray(name2, true));
     }
 

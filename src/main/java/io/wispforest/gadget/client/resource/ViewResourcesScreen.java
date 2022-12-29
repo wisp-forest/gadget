@@ -207,7 +207,7 @@ public class ViewResourcesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 }
 
                 if (isText) {
-                    contents.child(GuiUtil.showMonospaceText(new String(is.readAllBytes(), StandardCharsets.UTF_8)));
+                    GuiUtil.showMonospaceText(contents, new String(is.readAllBytes(), StandardCharsets.UTF_8));
                     return;
                 }
 

@@ -105,32 +105,30 @@ public final class GuiUtil {
         e.printStackTrace(new PrintWriter(writer));
         String fullExceptionText = writer.toString();
 
-        return Components.label(
+        LabelComponent label = Components.label(
             Text.literal(fullExceptionText.replace("\t", "    "))
                 .formatted(Formatting.RED));
+        label.horizontalSizing(Sizing.fill(99));
+        return label;
     }
 
-    public static LabelComponent showMonospaceText(String all) {
-        MutableText text = Text.literal("");
+    public static void showMonospaceText(VerticalFlowLayout container, String all) {
         var lines = all.lines().toList();
         int maxWidth = Integer.toString(lines.size() - 1).length();
 
         int i = 0;
         for (String line : lines) {
-            text
-                .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
-                    .formatted(Formatting.GRAY)
-                    .styled(x -> x.withFont(Gadget.id("monocraft"))))
-                .append(Text.literal(line.replace("\t", "    "))
-                    .styled(x -> x.withFont(Gadget.id("monocraft"))))
-                .append("\n");
+            container.child(Components.label(
+                Text.literal("")
+                    .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
+                        .formatted(Formatting.GRAY)
+                        .styled(x -> x.withFont(Gadget.id("monocraft"))))
+                    .append(Text.literal(line.replace("\t", "    "))
+                        .styled(x -> x.withFont(Gadget.id("monocraft")))))
+                .horizontalSizing(Sizing.fill(99)));
 
             i++;
         }
-
-        LabelComponent label = Components.label(text);
-        label.horizontalSizing(Sizing.fill(99));
-        return label;
     }
 
     public static VerticalFlowLayout hexDump(byte[] bytes, boolean doEllipsis) {

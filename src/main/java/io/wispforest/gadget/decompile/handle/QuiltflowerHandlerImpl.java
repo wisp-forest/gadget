@@ -4,70 +4,81 @@ package io.wispforest.gadget.decompile.handle;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.decompile.OpenedURLClassLoader;
 import io.wispforest.gadget.decompile.fs.ClassesFileSystem;
+import io.wispforest.gadget.decompile.remap.RemapperStore;
 import io.wispforest.gadget.mappings.LocalMappings;
-import io.wispforest.gadget.mappings.MappingUtils;
 import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.util.ProgressToast;
-import net.auoeke.reflect.Constructors;
-import net.auoeke.reflect.Invoker;
 import net.fabricmc.mappingio.adapter.MappingNsRenamer;
+import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
-import net.fabricmc.tinyremapper.TinyRemapper;
 import net.minecraft.text.Text;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.commons.ClassRemapper;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.QuiltflowerHandler {
-    private final TinyRemapper tinyRemapper;
+    private final MemoryMappingTree mappings;
+    private final RemapperStore remapperStore;
     final ClassesFileSystem fs;
     private final Map<String, byte[]> classBytecodeStash = new HashMap<>();
+    final Consumer<Text> logConsumer;
 
-    public QuiltflowerHandlerImpl(ProgressToast toast) {
-        toast.step(Text.translatable("message.gadget.progress.loading_tr"));
-        tinyRemapper = TinyRemapper.newRemapper()
-            .withMappings(acceptor -> {
-                try {
-                    toast.step(Text.translatable("message.gadget.progress.loading_mappings"));
-                    MemoryMappingTree tree = new MemoryMappingTree();
+    public QuiltflowerHandlerImpl(ProgressToast toast, Consumer<Text> logConsumer) {
+        this.logConsumer = logConsumer;
+        this.fs = new ClassesFileSystem();
+        this.remapperStore = new RemapperStore(this.fs::getBytes);
 
-                    MappingsManager.runtimeMappings().accept(tree);
-                    MappingsManager.displayMappings()
-                        .load(new MappingNsRenamer(tree, Map.of("named", "target")));
+        toast.step(Text.translatable("message.gadget.progress.loading_mappings"));
+        mappings = new MemoryMappingTree(true);
 
-                    MappingUtils.feedMappings(
-                        acceptor,
-                        tree,
-                        toast,
-                        "target",
-                        MappingsManager.runtimeNamespace(),
-                        "intermediary"
-                    );
+        try {
+            MappingsManager.runtimeMappings().accept(mappings);
+            MappingsManager.displayMappings()
+                .load(new MappingNsRenamer(mappings, Map.of("named", "target")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-                    toast.step(Text.literal(""));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .threads(1)
-            .build();
+        mappings.visitNamespaces("intermediary", List.of("source"));
 
-        fs = new ClassesFileSystem();
+        for (MappingTree.ClassMapping c : mappings.getClasses()) {
+            String cName = c.getName("named");
+            if (cName == null) cName = c.getName("intermediary");
 
-        toast.step(Text.translatable("message.gadget.progress.reading_classpath"));
-        tinyRemapper.readClassPathAsync(fs.getRootDirectories().iterator().next());
+            c.setDstName(cName, mappings.getNamespaceId("source"));
 
-        tinyRemapper.getEnvironment();
+            for (MappingTree.FieldMapping f : c.getFields()) {
+                String fName = f.getName("named");
+                if (fName == null) fName = f.getName("intermediary");
+
+                f.setDstName(fName, mappings.getNamespaceId("source"));
+            }
+
+            for (MappingTree.MethodMapping m : c.getMethods()) {
+                String mName = m.getName("named");
+                if (mName == null) mName = m.getName("intermediary");
+
+                m.setDstName(mName, mappings.getNamespaceId("source"));
+            }
+        }
     }
 
     @Override
     public String mapClass(String name) {
-        return tinyRemapper.getEnvironment().getRemapper().map(name);
+        MappingTree.ClassMapping c = mappings.getClass(name, mappings.getNamespaceId("source"));
+
+        if (c == null) return name;
+
+        String mapped = c.getName("target");
+
+        return mapped == null ? name : mapped;
     }
 
     @Override
@@ -88,15 +99,8 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
             ClassWriter cw = new ClassWriter(0);
 
             try {
-                var mh = Constructors.of(Class.forName("net.fabricmc.tinyremapper.AsmClassRemapper"))
-                    .map(Invoker::unreflectConstructor)
-                    .findFirst()
-                    .orElseThrow();
-
-                reader.accept(
-                    (ClassVisitor) mh.invokeWithArguments(
-                        cw, tinyRemapper.getEnvironment().getRemapper(),
-                        false, false, false, false, null, false), 0);
+                var remapper = remapperStore.createRemapper(mappings, "source", "target");
+                reader.accept(new ClassRemapper(cw, remapper), 0);
             } catch (Throwable cnfe) {
                 throw new RuntimeException(cnfe);
             }
@@ -107,7 +111,7 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
     @Override
     public String decompileClass(Class<?> klass) {
         GadgetResultSaver resultSaver = new GadgetResultSaver();
-        Fernflower fernflower = new Fernflower(resultSaver, Map.of("ind", "    "), new GadgetFernflowerLogger());
+        Fernflower fernflower = new Fernflower(resultSaver, Map.of("ind", "    "), new GadgetFernflowerLogger(this));
 
         fernflower.addSource(new ClassContextSource(this, klass));
         fernflower.addLibrary(new EverythingContextSource(this));

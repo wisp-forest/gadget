@@ -29,12 +29,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     private final Screen parent;
     private final boolean showAll;
     private ProgressToast toast;
-    private VerticalFlowLayout contents;
+    private ScrollContainer<VerticalFlowLayout> contentsScroll;
+    private final VerticalFlowLayout contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
     private final QuiltflowerHandler decompiler;
     private String currentFileName = null;
     private String currentFileContents = null;
@@ -46,7 +48,15 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         this.toast = toast;
 
         toast.step(Text.translatable("message.gadget.progress.loading_quiltflower"));
-        decompiler = QuiltflowerManager.loadHandler(toast);
+        decompiler = QuiltflowerManager.loadHandler(toast, text -> {
+            assert client != null;
+
+            client.execute(() -> {
+                var label = Components.label(text);
+                contents.child(label);
+                contentsScroll.scrollTo(label);
+            });
+        });
     }
 
     public static void openWithProgress(Screen parent) {
@@ -82,8 +92,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         VerticalFlowLayout tree = Containers.verticalFlow(Sizing.content(), Sizing.content());
         ScrollContainer<VerticalFlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
-        contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
+        contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent
@@ -165,9 +174,9 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 UISounds.playInteractionSound();
 
-                contents.configure(unused -> {
-                    contents.clearChildren();
+                contents.clearChildren();
 
+                ForkJoinPool.commonPool().execute(() -> {
                     try {
                         var text = decompiler.decompileClass(Class.forName(
                             decompiler.unmapClass(
@@ -176,12 +185,24 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                                     .replace('/', '.')))
                         );
 
-                        currentFileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
-                        currentFileContents = text;
+                        client.execute(() -> {
+                            currentFileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+                            currentFileContents = text;
 
-                        contents.child(GuiUtil.showMonospaceText(text));
+                            contents.configure(unused -> {
+                                contents.clearChildren();
+                                GuiUtil.showMonospaceText(contents, text);
+                            });
+
+                            contentsScroll.scrollTo(contents);
+                        });
                     } catch (Exception e) {
-                        contents.child(GuiUtil.showException(e));
+                        client.execute(() -> {
+                            contents.configure(unused -> {
+                                contents.clearChildren();
+                                contents.child(GuiUtil.showException(e));
+                            });
+                        });
                     }
                 });
 
@@ -216,6 +237,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
 
                         if (path != null) {
                             try {
+                                contents.clearChildren();
                                 Files.write(
                                     Path.of(path),
                                     decompiler.getClassBytes(fullPath.replace(".class", ""))

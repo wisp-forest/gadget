@@ -52,8 +52,10 @@ public class ClassesFileSystemProvider extends FileSystemProvider {
             rawPath = rawPath.substring(1);
 
         byte[] data = ((ClassesFileSystem) path.getFileSystem()).getBytes(rawPath);
+
         if (data == null)
             throw new FileNotFoundException();
+
         return new SeekableInMemoryByteChannel(data);
     }
 

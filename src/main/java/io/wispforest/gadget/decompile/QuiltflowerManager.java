@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public final class QuiltflowerManager {
     private static final Path DLC_DIRECTORY = FabricLoader.getInstance().getGameDir()
@@ -63,7 +64,7 @@ public final class QuiltflowerManager {
         });
     }
 
-    public static QuiltflowerHandler loadHandler(ProgressToast toast) {
+    public static QuiltflowerHandler loadHandler(ProgressToast toast, Consumer<Text> logConsumer) {
         var cl = CLASSLOADER == null ? null : CLASSLOADER.get();
         if (cl == null) {
             try {
@@ -83,7 +84,7 @@ public final class QuiltflowerManager {
 
         try {
             var implClass = cl.loadClass("io.wispforest.gadget.decompile.handle.QuiltflowerHandlerImpl");
-            return (QuiltflowerHandler) implClass.getConstructors()[0].newInstance(toast);
+            return (QuiltflowerHandler) implClass.getConstructors()[0].newInstance(toast, logConsumer);
         } catch (ReflectiveOperationException roe) {
             throw new RuntimeException(roe);
         }

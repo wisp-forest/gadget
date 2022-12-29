@@ -212,6 +212,41 @@
     "text.gadget.nbt.unknown": {"text": "u", "color": "dark_gray"},
     "text.gadget.nbt.unknown.full": ["", {"text": "u", "color": "dark_gray"}, "nknown"],
 
+    "text.gadget.quiltflower_log.info": "[INFO] QF: %s",
+    "text.gadget.quiltflower_log.info.with_error": "[INFO] QF: %s\n%s",
+    "text.gadget.quiltflower_log.warn": [
+        {
+            "text": "[WARNING] QF: ",
+            "color": "yellow"
+        },
+        { "index": 0 }
+    ],
+    "text.gadget.quiltflower_log.warn.with_error": [
+        {
+            "text": "[WARNING] QF: ",
+            "color": "yellow"
+        },
+        { "index": 0 },
+        "\n",
+        { "index": 1 }
+    ],
+    "text.gadget.quiltflower_log.error": [
+        {
+            "text": "[ERROR] QF: ",
+            "color": "red"
+        },
+        { "index": 0 }
+    ],
+    "text.gadget.quiltflower_log.error.with_error": [
+        {
+            "text": "[ERROR] QF: ",
+            "color": "red"
+        },
+        { "index": 0 },
+        "\n",
+        { "index": 1 }
+    ],
+
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
     "text.gadget.hide_field": "Hide field",

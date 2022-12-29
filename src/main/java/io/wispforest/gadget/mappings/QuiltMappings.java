@@ -55,6 +55,7 @@ public class QuiltMappings extends LoadingMappings {
             if (Files.exists(qmPath)) {
                 try (BufferedReader br = Files.newBufferedReader(qmPath)) {
                     Tiny2Reader.read(br, visitor);
+                    return;
                 }
             }
 

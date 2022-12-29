@@ -1,9 +1,9 @@
 package io.wispforest.gadget.decompile;
 
+import io.wispforest.gadget.Gadget;
 import net.auoeke.reflect.ClassTransformer;
 import net.auoeke.reflect.Reflect;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
-import org.spongepowered.asm.mixin.transformer.throwables.IllegalClassLoadError;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
@@ -30,19 +30,7 @@ public final class KnotUtil {
             if (bytes != null)
                 return bytes;
         } catch (Throwable e) {
-            Throwable current = e;
-            boolean flagged = false;
-            while (current != null) {
-                if (current instanceof IllegalClassLoadError) {
-                    flagged = true;
-                    break;
-                }
-
-                current = current.getCause();
-            }
-
-            if (!flagged)
-                throw new RuntimeException(e);
+            Gadget.LOGGER.error("Got error while loading {}", name, e);
         }
 
         if (INSTRUMENTATION != null) {
@@ -69,7 +57,7 @@ public final class KnotUtil {
             } catch (ClassNotFoundException e) {
                 // ...
             } catch (UnmodifiableClassException e) {
-                throw new RuntimeException(e);
+                /// sadness...
             }
         }
 
