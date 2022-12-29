@@ -2,8 +2,8 @@ package io.wispforest.gadget.decompile.handle;
 
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.decompile.KnotUtil;
 import io.wispforest.gadget.decompile.OpenedURLClassLoader;
-import io.wispforest.gadget.decompile.fs.ClassesFileSystem;
 import io.wispforest.gadget.decompile.remap.RemapperStore;
 import io.wispforest.gadget.mappings.LocalMappings;
 import io.wispforest.gadget.mappings.MappingsManager;
@@ -18,6 +18,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.ClassRemapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +27,24 @@ import java.util.function.Consumer;
 public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.QuiltflowerHandler {
     private final MemoryMappingTree mappings;
     private final RemapperStore remapperStore;
-    final ClassesFileSystem fs;
+    private final Map<String, byte[]> unmappedClassBytecodeStash = new HashMap<>();
     private final Map<String, byte[]> classBytecodeStash = new HashMap<>();
+    private final List<String> allUnmappedClasses;
     final Consumer<Text> logConsumer;
 
     public QuiltflowerHandlerImpl(ProgressToast toast, Consumer<Text> logConsumer) {
         this.logConsumer = logConsumer;
-        this.fs = new ClassesFileSystem();
-        this.remapperStore = new RemapperStore(this.fs::getBytes, logConsumer);
+
+        allUnmappedClasses = new ArrayList<>();
+
+        for (Class<?> klass : KnotUtil.INSTRUMENTATION.getInitiatedClasses(Gadget.class.getClassLoader())) {
+            if (klass.isHidden()) continue;
+            if (klass.isArray()) continue;
+
+            allUnmappedClasses.add(klass.getName().replace('.', '/'));
+        }
+
+        this.remapperStore = new RemapperStore(this::getUnmappedClassBytes, logConsumer);
 
         toast.step(Text.translatable("message.gadget.progress.loading_mappings"));
         mappings = new MemoryMappingTree(true);
@@ -86,11 +97,23 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
         return LocalMappings.INSTANCE.mapClass(MappingsManager.displayMappings().unmapClass(name));
     }
 
+    public byte[] getUnmappedClassBytes(String path) {
+        if (path.endsWith(".class"))
+            path = path.substring(0, path.length() - 6);
+
+        return unmappedClassBytecodeStash.computeIfAbsent(path.replace('/', '.'),
+            name2 -> KnotUtil.getPostMixinClassByteArray(name2, true));
+    }
+
+    public List<String> allUnmappedClasses() {
+        return allUnmappedClasses;
+    }
+
     @Override
     public byte[] getClassBytes(String name) {
         return classBytecodeStash.computeIfAbsent(name, unused -> {
             String remapped = unmapClass(name);
-            byte[] bytes = fs.getBytes(remapped);
+            byte[] bytes = getUnmappedClassBytes(remapped);
 
             if (name.startsWith("java/"))
                 return bytes;
@@ -115,7 +138,6 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
 
         fernflower.addSource(new ClassContextSource(this, klass));
         fernflower.addLibrary(new EverythingContextSource(this));
-//        fernflower.addLibrary();
 
         fernflower.decompileContext();
         fernflower.clearContext();

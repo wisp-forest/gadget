@@ -164,7 +164,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
             inspectClasses.text(Text.translatable("text.gadget.inspect_exported_classes"));
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override

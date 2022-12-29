@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.resource;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.asm.GadgetMixinExtension;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.GuiUtil;
@@ -8,7 +9,6 @@ import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.decompile.KnotUtil;
 import io.wispforest.gadget.decompile.QuiltflowerHandler;
 import io.wispforest.gadget.decompile.QuiltflowerManager;
-import io.wispforest.gadget.decompile.fs.ClassesFileSystem;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -109,7 +109,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         if (showAll) {
             allClasses = new TreeSet<>();
 
-            for (Class<?> klass : KnotUtil.INSTRUMENTATION.getInitiatedClasses(ClassesFileSystem.class.getClassLoader())) {
+            for (Class<?> klass : KnotUtil.INSTRUMENTATION.getInitiatedClasses(Gadget.class.getClassLoader())) {
                 if (klass.isHidden()) continue;
                 if (klass.isArray()) continue;
 
