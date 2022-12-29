@@ -33,7 +33,7 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
     public QuiltflowerHandlerImpl(ProgressToast toast, Consumer<Text> logConsumer) {
         this.logConsumer = logConsumer;
         this.fs = new ClassesFileSystem();
-        this.remapperStore = new RemapperStore(this.fs::getBytes);
+        this.remapperStore = new RemapperStore(this.fs::getBytes, logConsumer);
 
         toast.step(Text.translatable("message.gadget.progress.loading_mappings"));
         mappings = new MemoryMappingTree(true);

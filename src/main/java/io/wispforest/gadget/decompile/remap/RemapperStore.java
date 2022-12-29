@@ -1,19 +1,23 @@
 package io.wispforest.gadget.decompile.remap;
 
 import net.fabricmc.mappingio.tree.MappingTree;
+import net.minecraft.text.Text;
 import org.objectweb.asm.ClassReader;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class RemapperStore {
     private final Map<String, AnalyzedClass> analyzedClasses = new HashMap<>();
     private final Function<String, byte[]> bytecodeProvider;
+    private final Consumer<Text> logConsumer;
 
-    public RemapperStore(Function<String, byte[]> bytecodeProvider) {
+    public RemapperStore(Function<String, byte[]> bytecodeProvider, Consumer<Text> logConsumer) {
         this.bytecodeProvider = bytecodeProvider;
+        this.logConsumer = logConsumer;
     }
 
     public GadgetRemapper createRemapper(MappingTree tree, String src, String dst) {
@@ -36,6 +40,8 @@ public class RemapperStore {
             return new AnalyzedClass(name, getClass("java/lang/Object"),
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
+
+        logConsumer.accept(Text.translatable("text.gadget.log.loading_class", name));
 
         byte[] bytes = bytecodeProvider.apply(name);
         if (bytes == null) return null;

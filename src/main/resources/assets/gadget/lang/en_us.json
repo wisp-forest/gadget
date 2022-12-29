@@ -246,6 +246,7 @@
         "\n",
         { "index": 1 }
     ],
+    "text.gadget.log.loading_class": "[INFO] Remapper: Loading %s",
 
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 

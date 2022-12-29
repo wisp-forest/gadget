@@ -3,6 +3,7 @@ package io.wispforest.gadget.client.resource;
 import io.wispforest.gadget.asm.GadgetMixinExtension;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.decompile.KnotUtil;
 import io.wispforest.gadget.decompile.QuiltflowerHandler;
@@ -53,7 +54,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
 
             client.execute(() -> {
                 var label = Components.label(text);
-                contents.child(label);
+                contents.child(new LayoutCacheWrapper<>(label));
                 contentsScroll.scrollTo(label);
             });
         });
