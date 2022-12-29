@@ -1,5 +1,6 @@
 package io.wispforest.gadget.mappings;
 
+import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MappingTreeView;
 
 import java.util.HashMap;
@@ -33,5 +34,35 @@ public final class MappingUtils {
         }
 
         return map;
+    }
+
+    public static String fieldTargetName(MappingTree tree, int srcId, int dstId, String owner, String name,
+                                         String desc, boolean defaultToOriginal) {
+        var treeC = tree.getClass(owner, srcId);
+
+        if (treeC == null) return defaultToOriginal ? name : null;
+
+        var treeF = treeC.getField(name, desc, srcId);
+
+        if (treeF == null) return defaultToOriginal ? name : null;
+
+        String targetName = treeF.getName(dstId);
+
+        return (targetName != null || !defaultToOriginal) ? targetName : name;
+    }
+
+    public static String methodTargetName(MappingTree tree, int srcId, int dstId, String owner, String name,
+                                         String desc, boolean defaultToOriginal) {
+        var treeC = tree.getClass(owner, srcId);
+
+        if (treeC == null) return defaultToOriginal ? name : null;
+
+        var treeM = treeC.getMethod(name, desc, srcId);
+
+        if (treeM == null) return defaultToOriginal ? name : null;
+
+        String targetName = treeM.getName(dstId);
+
+        return (targetName != null || !defaultToOriginal) ? targetName : name;
     }
 }

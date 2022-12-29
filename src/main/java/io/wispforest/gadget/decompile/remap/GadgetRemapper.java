@@ -1,5 +1,6 @@
 package io.wispforest.gadget.decompile.remap;
 
+import io.wispforest.gadget.mappings.MappingUtils;
 import net.fabricmc.mappingio.tree.MappingTree;
 import org.objectweb.asm.commons.Remapper;
 
@@ -9,11 +10,11 @@ public class GadgetRemapper extends Remapper {
     private final int srcId;
     private final int dstId;
 
-    public GadgetRemapper(RemapperStore store, MappingTree tree, String src, String dst) {
+    public GadgetRemapper(RemapperStore store, MappingTree tree, int srcId, int dstId) {
         this.store = store;
         this.tree = tree;
-        this.srcId = tree.getNamespaceId(src);
-        this.dstId = tree.getNamespaceId(dst);
+        this.srcId = srcId;
+        this.dstId = dstId;
     }
 
     @Override
@@ -35,17 +36,7 @@ public class GadgetRemapper extends Remapper {
 
         if (f == null) return name;
 
-        var treeC = tree.getClass(f.owner(), srcId);
-
-        if (treeC == null) return name;
-
-        var treeF = treeC.getField(name, descriptor, srcId);
-
-        if (treeF == null) return name;
-
-        String targetName = treeF.getName(dstId);
-
-        return targetName == null ? name : targetName;
+        return MappingUtils.fieldTargetName(tree, srcId, dstId, owner, name, descriptor, true);
 
     }
 
@@ -55,20 +46,10 @@ public class GadgetRemapper extends Remapper {
 
         if (c == null) return name;
 
-        var m = c.member(MemberType.FIELD, name, descriptor);
+        var m = c.member(MemberType.METHOD, name, descriptor);
 
         if (m == null) return name;
 
-        var treeC = tree.getClass(m.owner(), srcId);
-
-        if (treeC == null) return name;
-
-        var treeM = treeC.getMethod(name, descriptor, srcId);
-
-        if (treeM == null) return name;
-
-        String targetName = treeM.getName(dstId);
-
-        return targetName == null ? name : targetName;
+        return MappingUtils.methodTargetName(tree, srcId, dstId, owner, name, descriptor, true);
     }
 }

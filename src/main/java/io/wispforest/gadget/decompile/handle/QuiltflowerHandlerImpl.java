@@ -44,8 +44,6 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
             allUnmappedClasses.add(klass.getName().replace('.', '/'));
         }
 
-        this.remapperStore = new RemapperStore(this::getUnmappedClassBytes, logConsumer);
-
         toast.step(Text.translatable("message.gadget.progress.loading_mappings"));
         mappings = new MemoryMappingTree(true);
 
@@ -79,6 +77,9 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
                 m.setDstName(mName, mappings.getNamespaceId("source"));
             }
         }
+
+        this.remapperStore = new RemapperStore(this::getUnmappedClassBytes, logConsumer, mappings,
+            "source", "target");
     }
 
     @Override
@@ -122,7 +123,7 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
             ClassWriter cw = new ClassWriter(0);
 
             try {
-                var remapper = remapperStore.createRemapper(mappings, "source", "target");
+                var remapper = remapperStore.createRemapper();
                 reader.accept(new ClassRemapper(cw, remapper), 0);
             } catch (Throwable cnfe) {
                 throw new RuntimeException(cnfe);

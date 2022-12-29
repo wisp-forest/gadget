@@ -14,14 +14,21 @@ public class RemapperStore {
     private final Map<String, AnalyzedClass> analyzedClasses = new HashMap<>();
     private final Function<String, byte[]> bytecodeProvider;
     private final Consumer<Text> logConsumer;
+    final MappingTree tree;
+    final int srcId;
+    final int dstId;
 
-    public RemapperStore(Function<String, byte[]> bytecodeProvider, Consumer<Text> logConsumer) {
+    public RemapperStore(Function<String, byte[]> bytecodeProvider, Consumer<Text> logConsumer, MappingTree tree,
+                         String src, String dst) {
         this.bytecodeProvider = bytecodeProvider;
         this.logConsumer = logConsumer;
+        this.tree = tree;
+        this.srcId = tree.getNamespaceId(src);
+        this.dstId = tree.getNamespaceId(dst);
     }
 
-    public GadgetRemapper createRemapper(MappingTree tree, String src, String dst) {
-        return new GadgetRemapper(this, tree, src, dst);
+    public GadgetRemapper createRemapper() {
+        return new GadgetRemapper(this, tree, srcId, dstId);
     }
 
     public AnalyzedClass getClass(String internalName) {

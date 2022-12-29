@@ -38,14 +38,37 @@ public class ClassAnalyzer extends ClassVisitor {
 
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-        boolean isPrivate = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
-        declaredFields.add(new MemberData(MemberType.FIELD, this.name, name, descriptor, isPrivate));
+        boolean isClosed = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0
+            || (access & Opcodes.ACC_STATIC) != 0;
+
+        if (!isClosed) {
+            if (superclass != null && superclass.openMember(MemberType.FIELD, name, descriptor) != null)
+                return null;
+
+            for (var iface : interfaces) {
+                if (iface.openMember(MemberType.FIELD, name, descriptor) != null)
+                    return null;
+            }
+        }
+
+        declaredFields.add(new MemberData(MemberType.FIELD, this.name, name, descriptor, isClosed));
         return null;
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         boolean isPrivate = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
+
+        if (!isPrivate) {
+            if (superclass != null && superclass.openMember(MemberType.METHOD, name, descriptor) != null)
+                return null;
+
+            for (var iface : interfaces) {
+                if (iface.openMember(MemberType.METHOD, name, descriptor) != null)
+                    return null;
+            }
+        }
+
         declaredMethods.add(new MemberData(MemberType.METHOD, this.name, name, descriptor, isPrivate));
         return null;
     }
