@@ -180,6 +180,8 @@
     "text.config.gadget.enum.uICounterMode.log_always": "Always Log",
     "text.config.gadget.option.inspectClasses": "Inspect Classes",
     "text.config.gadget.option.inspectClasses.tooltip": "Allows you to inspect game classes",
+    "text.config.gadget.option.fullDecompilationContext": "Full Decompilation Context",
+    "text.config.gadget.option.fullDecompilationContext.tooltip": "Gives QF all classes for better decompiled sources\nMight result in slower decompiles",
     "text.config.gadget.option.hiddenFields": "Hidden Fields",
     "text.config.gadget.option.hiddenFields.tooltip": "Fields hidden in field inspections.",
 

@@ -36,7 +36,7 @@ public class GadgetRemapper extends Remapper {
 
         if (f == null) return name;
 
-        return MappingUtils.fieldTargetName(tree, srcId, dstId, owner, name, descriptor, true);
+        return MappingUtils.fieldTargetName(tree, srcId, dstId, f.owner(), f.name(), f.desc(), true);
 
     }
 
@@ -50,6 +50,11 @@ public class GadgetRemapper extends Remapper {
 
         if (m == null) return name;
 
-        return MappingUtils.methodTargetName(tree, srcId, dstId, owner, name, descriptor, true);
+        return MappingUtils.methodTargetName(tree, srcId, dstId, m.owner(), m.name(), m.desc(), true);
+    }
+
+    @Override
+    public String mapRecordComponentName(String owner, String name, String descriptor) {
+        return mapFieldName(owner, name, descriptor);
     }
 }

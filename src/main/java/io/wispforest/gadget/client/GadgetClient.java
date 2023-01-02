@@ -35,6 +35,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -213,8 +214,14 @@ public class GadgetClient implements ClientModInitializer {
             }
         });
 
-        FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)
-            .forEach(GadgetClientEntrypoint::onGadgetClientInit);
+        for (EntrypointContainer<GadgetClientEntrypoint> container : FabricLoader.getInstance().getEntrypointContainers("gadget:client_init", GadgetClientEntrypoint.class)) {
+            try {
+                container.getEntrypoint().onGadgetClientInit();
+            } catch (Exception e) {
+                Gadget.LOGGER.error("{}'s `gadget:client_init` entrypoint handler threw an exception",
+                    container.getProvider().getMetadata().getId(), e);
+            }
+        }
     }
 
     // 100% not stolen from owo-whats-this

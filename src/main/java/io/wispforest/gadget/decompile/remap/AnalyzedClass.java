@@ -23,7 +23,7 @@ public record AnalyzedClass(String name, AnalyzedClass superclass, List<Analyzed
 
     public MemberData openMember(MemberType type, String fName, String fDesc) {
         for (var id : declaredMembers(type)) {
-            if (id.isClosed()
+            if (!id.isClosed()
                 && id.name().equals(fName)
                 && id.desc().equals(fDesc)) {
                 return id;

@@ -49,33 +49,35 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
 
         try {
             MappingsManager.runtimeMappings().accept(mappings);
+
+            mappings.visitNamespaces("intermediary", List.of("source"));
+            int srcId = mappings.getNamespaceId("source");
+
+            for (MappingTree.ClassMapping c : mappings.getClasses()) {
+                String cName = c.getName("named");
+                if (cName == null) cName = c.getName("intermediary");
+
+                c.setDstName(cName, srcId);
+
+                for (MappingTree.FieldMapping f : c.getFields()) {
+                    String fName = f.getName("named");
+                    if (fName == null) fName = f.getName("intermediary");
+
+                    f.setDstName(fName, srcId);
+                }
+
+                for (MappingTree.MethodMapping m : c.getMethods()) {
+                    String mName = m.getName("named");
+                    if (mName == null) mName = m.getName("intermediary");
+
+                    m.setDstName(mName, srcId);
+                }
+            }
+
             MappingsManager.displayMappings()
                 .load(new MappingNsRenamer(mappings, Map.of("named", "target")));
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-
-        mappings.visitNamespaces("intermediary", List.of("source"));
-
-        for (MappingTree.ClassMapping c : mappings.getClasses()) {
-            String cName = c.getName("named");
-            if (cName == null) cName = c.getName("intermediary");
-
-            c.setDstName(cName, mappings.getNamespaceId("source"));
-
-            for (MappingTree.FieldMapping f : c.getFields()) {
-                String fName = f.getName("named");
-                if (fName == null) fName = f.getName("intermediary");
-
-                f.setDstName(fName, mappings.getNamespaceId("source"));
-            }
-
-            for (MappingTree.MethodMapping m : c.getMethods()) {
-                String mName = m.getName("named");
-                if (mName == null) mName = m.getName("intermediary");
-
-                m.setDstName(mName, mappings.getNamespaceId("source"));
-            }
         }
 
         this.remapperStore = new RemapperStore(this::getUnmappedClassBytes, logConsumer, mappings,
@@ -138,7 +140,9 @@ public class QuiltflowerHandlerImpl implements io.wispforest.gadget.decompile.Qu
         Fernflower fernflower = new Fernflower(resultSaver, Map.of("ind", "    "), new GadgetFernflowerLogger(this));
 
         fernflower.addSource(new ClassContextSource(this, klass));
-        fernflower.addLibrary(new EverythingContextSource(this));
+
+        if (Gadget.CONFIG.fullDecompilationContext())
+            fernflower.addLibrary(new EverythingContextSource(this));
 
         fernflower.decompileContext();
         fernflower.clearContext();

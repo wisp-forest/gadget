@@ -26,6 +26,7 @@ public class GadgetConfigModel {
         FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
     public boolean inspectClasses = true;
+    public boolean fullDecompilationContext = true;
     @Hook public List<String> hiddenFields = new ArrayList<>(List.of(
         "java.lang.Enum#name",
 

@@ -76,7 +76,7 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         verticalFlowLayout.child(scroll.child(main));
 
         main
-            .padding(Insets.of(15));
+            .padding(Insets.of(15, 22, 15, 15));
 
         main.child(island.mainContainer());
 

@@ -6,6 +6,7 @@ import io.wispforest.gadget.util.GadgetConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,13 @@ public class Gadget implements ModInitializer {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
             MappingsManager.init();
 
-        FabricLoader.getInstance().getEntrypoints("gadget:init", GadgetEntrypoint.class)
-            .forEach(GadgetEntrypoint::onGadgetInit);
+        for (EntrypointContainer<GadgetEntrypoint> container : FabricLoader.getInstance().getEntrypointContainers("gadget:init", GadgetEntrypoint.class)) {
+            try {
+                container.getEntrypoint().onGadgetInit();
+            } catch (Exception e) {
+                LOGGER.error("{}'s `gadget:init` entrypoint handler threw an exception",
+                    container.getProvider().getMetadata().getId(), e);
+            }
+        }
     }
 }

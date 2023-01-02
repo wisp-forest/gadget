@@ -41,16 +41,6 @@ public class ClassAnalyzer extends ClassVisitor {
         boolean isClosed = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0
             || (access & Opcodes.ACC_STATIC) != 0;
 
-        if (!isClosed) {
-            if (superclass != null && superclass.openMember(MemberType.FIELD, name, descriptor) != null)
-                return null;
-
-            for (var iface : interfaces) {
-                if (iface.openMember(MemberType.FIELD, name, descriptor) != null)
-                    return null;
-            }
-        }
-
         declaredFields.add(new MemberData(MemberType.FIELD, this.name, name, descriptor, isClosed));
         return null;
     }
