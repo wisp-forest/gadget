@@ -259,7 +259,7 @@
     "text.gadget.packet_read_error": [
         {"text": "Packet Read Error!", "color": "red"},
         [
-            {"text": "Type #", "color": "gray"},
+            {"text": " Type #", "color": "gray"},
             {"index": 0}
         ]
     ],
