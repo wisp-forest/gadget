@@ -30,6 +30,7 @@ public class PacketDumper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("gadget/PacketDumper");
     public static final Path DUMP_DIR = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("dumps");
+    private static final Object SYNC_LOCK = new Object();
 
     private static Path DUMP_PATH;
     private static WritableByteChannel OUTPUT_CHANNEL;
@@ -65,17 +66,18 @@ public class PacketDumper {
     }
 
     public static void stop() {
-        try {
-            LOGGER.info("Saved dump to {}", DUMP_PATH);
-            MinecraftClient.getInstance().getToastManager().add(new NotificationToast(Text.translatable("message.gadget.dump.stopped"), Text.literal(DUMP_PATH.getFileName().toString())));
+        synchronized (SYNC_LOCK) {
+            try {
+                LOGGER.info("Saved dump to {}", DUMP_PATH);
+                MinecraftClient.getInstance().getToastManager().add(new NotificationToast(Text.translatable("message.gadget.dump.stopped"), Text.literal(DUMP_PATH.getFileName().toString())));
 
-            OUTPUT_CHANNEL.close();
+                OUTPUT_CHANNEL.close();
 
-            OUTPUT_CHANNEL = null;
-            DUMP_PATH = null;
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                OUTPUT_CHANNEL = null;
+                DUMP_PATH = null;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -121,10 +123,14 @@ public class PacketDumper {
 
         ByteBuffer nioBuf = buf.nioBuffer();
 
-        try {
-            OUTPUT_CHANNEL.write(nioBuf);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        synchronized (SYNC_LOCK) {
+            if (OUTPUT_CHANNEL == null) return;
+
+            try {
+                OUTPUT_CHANNEL.write(nioBuf);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
