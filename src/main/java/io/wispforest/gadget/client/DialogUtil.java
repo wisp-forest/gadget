@@ -28,4 +28,21 @@ public final class DialogUtil {
             return TinyFileDialogs.tinyfd_openFileDialog(title, defaultPath, patternsBuf, filterDesc, allowMultipleSelections);
         }
     }
+
+    public static String saveFileDialog(String title, @Nullable String defaultPath, @Nullable List<String> patterns, @Nullable String filterDesc) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer patternsBuf = null;
+
+            if (patterns != null) {
+                patternsBuf = stack.mallocPointer(patterns.size());
+
+                for (int i = 0; i < patterns.size(); i++) {
+                    stack.nUTF8Safe(patterns.get(i), true);
+                    patternsBuf.put(i, stack.getPointerAddress());
+                }
+            }
+
+            return TinyFileDialogs.tinyfd_saveFileDialog(title, defaultPath, patternsBuf, filterDesc);
+        }
+    }
 }

@@ -22,6 +22,11 @@
     "message.gadget.progress.downloading_yarn": "Downloading Yarn",
     "message.gadget.progress.downloading_client_mappings": "Downloading client mappings",
     "message.gadget.progress.downloading_server_mappings": "Downloading server mappings",
+    "message.gadget.progress.loading_quiltflower": "Loading Quiltflower",
+    "message.gadget.progress.loading_tr": "Loading TR",
+    "message.gadget.progress.loading_mappings": "Loading Mappings",
+    "message.gadget.progress.reading_classpath": "Reading Classpath",
+    "message.gadget.progress.downloading_quiltflower": "Downloading Quiltflower",
 
     "message.gadget.progress.reading_packets": "Reading packet data",
     "message.gadget.progress.building_screen": "Building screen",
@@ -29,7 +34,7 @@
 
     "message.gadget.loading_mappings": "Loading mappings",
     "message.gadget.loading_dump": "Loading dump",
-    "message.gadget.loading_quiltflower": "Loading Quiltflower",
+    "message.gadget.loading_classes": "Loading Classes",
 
     "text.gadget.client_current": {
         "text": "C",
@@ -93,8 +98,12 @@
         "text": "Inspect server data",
         "underlined": "true"
     },
-    "text.gadget.inspect_classes": {
-        "text": "Inspect classes",
+    "text.gadget.inspect_exported_classes": {
+        "text": "Inspect exported classes",
+        "underlined": "true"
+    },
+    "text.gadget.inspect_all_classes": {
+        "text": "Inspect all classes",
         "underlined": "true"
     },
     "text.gadget.image_size": "%sx%s %s image.",
@@ -143,9 +152,9 @@
     "text.config.gadget.option.internalSettings.injectMatrixStackErrors": "Inject MatrixStack Errors",
     "text.config.gadget.option.internalSettings.injectMatrixStackErrors.tooltip": "Causes MatrixStack errors when Shift is pressed",
 
-    "text.config.gadget.option.internalSettings.inspectClasses": "Inspect Classes",
-    "text.config.gadget.option.internalSettings.inspectClasses.tooltip": "Allows you to inspect game classes",
+    "text.config.gadget.option.internalSettings.dumpTRMappings": "Dump TR Mappings",
     "text.config.gadget.option.quiltflowerVersion": "Quiltflower Version",
+    "text.config.gadget.option.quiltflowerVersion.tooltip": "Quiltflower version to use for classes.\nAny version after and including 1.9.0 is valid",
 
     "text.config.gadget.option.mappings": "Mappings",
     "text.config.gadget.option.mappings.tooltip": [
@@ -169,6 +178,10 @@
     "text.config.gadget.enum.uICounterMode.off": "Off",
     "text.config.gadget.enum.uICounterMode.log_on_long_update": "Log On Long Update",
     "text.config.gadget.enum.uICounterMode.log_always": "Always Log",
+    "text.config.gadget.option.inspectClasses": "Inspect Classes",
+    "text.config.gadget.option.inspectClasses.tooltip": "Allows you to inspect game classes",
+    "text.config.gadget.option.fullDecompilationContext": "Full Decompilation Context",
+    "text.config.gadget.option.fullDecompilationContext.tooltip": "Gives QF all classes for better decompiled sources\nMight result in slower decompiles",
     "text.config.gadget.option.hiddenFields": "Hidden Fields",
     "text.config.gadget.option.hiddenFields.tooltip": "Fields hidden in field inspections.",
 
@@ -201,10 +214,48 @@
     "text.gadget.nbt.unknown": {"text": "u", "color": "dark_gray"},
     "text.gadget.nbt.unknown.full": ["", {"text": "u", "color": "dark_gray"}, "nknown"],
 
+    "text.gadget.quiltflower_log.info": "[INFO] QF: %s",
+    "text.gadget.quiltflower_log.info.with_error": "[INFO] QF: %s\n%s",
+    "text.gadget.quiltflower_log.warn": [
+        {
+            "text": "[WARNING] QF: ",
+            "color": "yellow"
+        },
+        { "index": 0 }
+    ],
+    "text.gadget.quiltflower_log.warn.with_error": [
+        {
+            "text": "[WARNING] QF: ",
+            "color": "yellow"
+        },
+        { "index": 0 },
+        "\n",
+        { "index": 1 }
+    ],
+    "text.gadget.quiltflower_log.error": [
+        {
+            "text": "[ERROR] QF: ",
+            "color": "red"
+        },
+        { "index": 0 }
+    ],
+    "text.gadget.quiltflower_log.error.with_error": [
+        {
+            "text": "[ERROR] QF: ",
+            "color": "red"
+        },
+        { "index": 0 },
+        "\n",
+        { "index": 1 }
+    ],
+    "text.gadget.log.loading_class": "[INFO] Remapper: Loading %s",
+
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
     "text.gadget.hide_field": "Hide field",
     "text.gadget.join_with_dump": "Join and start dumping packets",
+    "text.gadget.save_as_java": "Save as .java",
+    "text.gadget.save_as_class": "Save as .class",
     "text.gadget.packet_read_error": [
         {"text": "Packet Read Error!", "color": "red"},
         [

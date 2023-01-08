@@ -25,9 +25,9 @@ package io.wispforest.gadget.mappings;
 import io.wispforest.gadget.util.DownloadUtil;
 import io.wispforest.gadget.util.ProgressToast;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.Tiny2Reader;
 import net.fabricmc.mappingio.format.Tiny2Writer;
-import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
@@ -38,42 +38,13 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
-public class QuiltMappings implements Mappings {
+public class QuiltMappings extends LoadingMappings {
     private static final String QM_API_ENTRYPOINT = "https://meta.quiltmc.org/v3/versions/quilt-mappings/" + SharedConstants.getGameVersion().getId();
 
-    private volatile Map<String, String> intermediaryToFieldMap = Collections.emptyMap();
-    private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
-    private volatile Map<String, String> fieldIdToIntermediaryMap = Collections.emptyMap();
-
-    public QuiltMappings() {
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
-        toast.follow(CompletableFuture.runAsync(() -> {
-            var tree = load(toast);
-
-            var classMap = new HashMap<String, String>();
-            var fieldMap = new HashMap<String, String>();
-
-            for (var def : tree.getClasses()) {
-                classMap.put(def.getName("intermediary"), def.getName("named"));
-
-                for (var field : def.getFields()) {
-                    fieldMap.put(field.getName("intermediary"), field.getName("named"));
-                }
-            }
-
-            intermediaryToFieldMap = fieldMap;
-            intermediaryToClassMap = classMap;
-            fieldIdToIntermediaryMap = MappingUtils.createFieldIdUnmap(tree, "named");
-        }), false);
-    }
-
-    private MappingTree load(ProgressToast toast) {
+    @Override
+    protected void load(ProgressToast toast, MappingVisitor visitor) {
         try {
             Path mappingsDir = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("mappings");
 
@@ -83,11 +54,8 @@ public class QuiltMappings implements Mappings {
 
             if (Files.exists(qmPath)) {
                 try (BufferedReader br = Files.newBufferedReader(qmPath)) {
-                    var tree = new MemoryMappingTree();
-
-                    Tiny2Reader.read(br, tree);
-
-                    return tree;
+                    Tiny2Reader.read(br, visitor);
+                    return;
                 }
             }
 
@@ -130,28 +98,10 @@ public class QuiltMappings implements Mappings {
                 tree.accept(new Tiny2Writer(bw, false));
             }
 
-            return tree;
-
+            tree.accept(visitor);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String mapClass(String src) {
-        src = src.replace('.', '/');
-
-        return intermediaryToClassMap.getOrDefault(src, src).replace('/', '.');
-    }
-
-    @Override
-    public String mapField(String src) {
-        return intermediaryToFieldMap.getOrDefault(src, src);
-    }
-
-    @Override
-    public String unmapFieldId(String dst) {
-        return fieldIdToIntermediaryMap.getOrDefault(dst, dst);
     }
 
     private static class QMVersion {

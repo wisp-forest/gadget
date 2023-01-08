@@ -35,10 +35,12 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
@@ -54,6 +56,7 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 public class GadgetClient implements ClientModInitializer {
     public static KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.MISC_CATEGORY);
@@ -146,12 +149,14 @@ public class GadgetClient implements ClientModInitializer {
             }
         });
 
+        List<String> alignToButtons = List.of(
+            "menu.multiplayer",
+            "menu.shareToLan",
+            "menu.playerReporting"
+        );
+
         Layers.add(Containers::verticalFlow, instance -> {
             if (!Gadget.CONFIG.menuButtonEnabled()) return;
-
-            var translationKey = instance.screen instanceof TitleScreen
-                ? "menu.multiplayer"
-                : "menu.shareToLan";
 
             instance.adapter.rootComponent.child(
                 Components.button(
@@ -161,7 +166,8 @@ public class GadgetClient implements ClientModInitializer {
                     button.margins(Insets.left(4)).sizing(Sizing.fixed(20));
                     instance.alignComponentToWidget(widget -> {
                         if (!(widget instanceof ButtonWidget daButton)) return false;
-                        return daButton.getMessage().getContent() instanceof TranslatableTextContent translatable && translatable.getKey().equals(translationKey);
+                        return daButton.getMessage().getContent() instanceof TranslatableTextContent translatable
+                            && alignToButtons.contains(translatable.getKey());
                     }, Layer.Instance.AnchorSide.RIGHT, 0, button);
                 })
             );
@@ -179,6 +185,8 @@ public class GadgetClient implements ClientModInitializer {
                     var slot = ((HandledScreenAccessor) handled).callGetSlotAt(mouseX, mouseY);
 
                     if (slot == null) return true;
+                    if (slot instanceof CreativeInventoryScreen.LockableSlot) return true;
+                    if (slot.getStack().isEmpty()) return true;
 
                     client.setScreen(new StackNbtDataScreen(handled, slot));
 
@@ -206,8 +214,14 @@ public class GadgetClient implements ClientModInitializer {
             }
         });
 
-        FabricLoader.getInstance().getEntrypoints("gadget:client_init", GadgetClientEntrypoint.class)
-                .forEach(GadgetClientEntrypoint::onGadgetClientInit);
+        for (EntrypointContainer<GadgetClientEntrypoint> container : FabricLoader.getInstance().getEntrypointContainers("gadget:client_init", GadgetClientEntrypoint.class)) {
+            try {
+                container.getEntrypoint().onGadgetClientInit();
+            } catch (Exception e) {
+                Gadget.LOGGER.error("{}'s `gadget:client_init` entrypoint handler threw an exception",
+                    container.getProvider().getMetadata().getId(), e);
+            }
+        }
     }
 
     // 100% not stolen from owo-whats-this

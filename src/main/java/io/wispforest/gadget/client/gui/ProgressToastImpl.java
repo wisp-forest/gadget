@@ -54,10 +54,13 @@ public class ProgressToastImpl implements Toast, ProgressToast {
 
     @Override
     public Visibility draw(MatrixStack matrices, ToastManager manager, long startTime) {
-        if (following == null) {
+        long value = following == null ? -1 : following.getAsLong();
+
+        if (value < 0) {
             progressBox.horizontalSizing(Sizing.fixed(0));
+            following = null;
         } else {
-            progressBox.horizontalSizing(Sizing.fixed((int) (following.getAsLong() * 140 / followingTotal)));
+            progressBox.horizontalSizing(Sizing.fixed((int) (value * 140 / followingTotal)));
         }
 
         this.adapter.render(matrices, 0, 0, client.getTickDelta());

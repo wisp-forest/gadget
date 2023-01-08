@@ -76,7 +76,7 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         verticalFlowLayout.child(scroll.child(main));
 
         main
-            .padding(Insets.of(15));
+            .padding(Insets.of(15, 22, 15, 15));
 
         main.child(island.mainContainer());
 
@@ -120,8 +120,19 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         SearchGui search = new SearchGui(scroll);
         verticalFlowLayout
-            .child(search.createSearchComponent()
+            .child(search
                 .positioning(Positioning.relative(0, 100)));
+        verticalFlowLayout.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
+            if (keyCode != GLFW.GLFW_KEY_F || (modifiers & GLFW.GLFW_MOD_CONTROL) == 0)
+                return false;
+
+            uiAdapter.rootComponent.focusHandler().focus(
+                search.searchBox(),
+                Component.FocusSource.MOUSE_CLICK
+            );
+
+            return true;
+        });
 
         verticalFlowLayout.child(sidebar);
     }

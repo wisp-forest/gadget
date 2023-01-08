@@ -99,6 +99,8 @@ loom {
 			source sourceSets.testmod
 		}
 	}
+
+	accessWidenerPath = file("src/main/resources/gadget.accesswidener")
 }
 
 processResources {

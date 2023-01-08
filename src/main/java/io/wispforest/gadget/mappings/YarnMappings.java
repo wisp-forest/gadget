@@ -25,9 +25,8 @@ package io.wispforest.gadget.mappings;
 import io.wispforest.gadget.util.DownloadUtil;
 import io.wispforest.gadget.util.ProgressToast;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.Tiny2Reader;
-import net.fabricmc.mappingio.tree.MappingTree;
-import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.SharedConstants;
 import net.minecraft.text.Text;
 import org.apache.commons.io.FileUtils;
@@ -38,41 +37,12 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
-public class YarnMappings implements Mappings {
+public class YarnMappings extends LoadingMappings {
     private static final String YARN_API_ENTRYPOINT = "https://meta.fabricmc.net/v2/versions/yarn/" + SharedConstants.getGameVersion().getId();
 
-    private volatile Map<String, String> intermediaryToFieldMap = Collections.emptyMap();
-    private volatile Map<String, String> intermediaryToClassMap = Collections.emptyMap();
-    private volatile Map<String, String> fieldIdToIntermediaryMap = Collections.emptyMap();
-
-    public YarnMappings() {
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_mappings"));
-        toast.follow(CompletableFuture.runAsync(() -> {
-            var tree = load(toast);
-
-            var classMap = new HashMap<String, String>();
-            var fieldMap = new HashMap<String, String>();
-
-            for (var def : tree.getClasses()) {
-                classMap.put(def.getName("intermediary"), def.getName("named"));
-
-                for (var field : def.getFields()) {
-                    fieldMap.put(field.getName("intermediary"), field.getName("named"));
-                }
-            }
-
-            intermediaryToFieldMap = fieldMap;
-            intermediaryToClassMap = classMap;
-            fieldIdToIntermediaryMap = MappingUtils.createFieldIdUnmap(tree, "named");
-        }), false);
-    }
-
-    private MappingTree load(ProgressToast toast) {
+    @Override
+    protected void load(ProgressToast toast, MappingVisitor visitor) {
         try {
             Path mappingsDir = FabricLoader.getInstance().getGameDir().resolve("gadget").resolve("mappings");
 
@@ -106,32 +76,13 @@ public class YarnMappings implements Mappings {
 
             try (FileSystem fs = FileSystems.newFileSystem(yarnPath, (ClassLoader) null)) {
                 try (var br = Files.newBufferedReader(fs.getPath("mappings/mappings.tiny"))) {
-                    MemoryMappingTree tree = new MemoryMappingTree();
-                    Tiny2Reader.read(br, tree);
-                    return tree;
+                    Tiny2Reader.read(br, visitor);
                 }
             }
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String mapClass(String src) {
-        src = src.replace('.', '/');
-
-        return intermediaryToClassMap.getOrDefault(src, src).replace('/', '.');
-    }
-
-    @Override
-    public String mapField(String src) {
-        return intermediaryToFieldMap.getOrDefault(src, src);
-    }
-
-    @Override
-    public String unmapFieldId(String dst) {
-        return fieldIdToIntermediaryMap.getOrDefault(dst, dst);
     }
 
     private static class YarnVersion {

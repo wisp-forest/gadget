@@ -34,10 +34,8 @@
         "client.NarratorLinuxMixin",
         "client.NarratorWindowsMixin",
         "client.ProfileKeysImplMixin",
-        "client.TextFieldWidgetMixin",
         "client.WorldListWidgetWorldEntryMixin",
-        "client.WorldRendererMixin",
-        "owo.TextBoxComponentAccessor"
+        "client.WorldRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1

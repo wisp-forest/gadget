@@ -69,7 +69,7 @@ public final class MappingsManager {
         if (runtimeMappings != null)
             return runtimeMappings;
 
-        URL url = MappingsManager.class.getClassLoader().getResource("mappings/mappings.tiny");
+        URL url = FabricLoader.class.getClassLoader().getResource("mappings/mappings.tiny");
 
         if (url == null) {
             return runtimeMappings = new MemoryMappingTree();

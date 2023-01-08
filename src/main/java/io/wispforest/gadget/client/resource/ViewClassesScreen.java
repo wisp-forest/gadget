@@ -2,10 +2,14 @@ package io.wispforest.gadget.client.resource;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.asm.GadgetMixinExtension;
+import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.client.gui.SubObjectContainer;
+import io.wispforest.gadget.decompile.KnotUtil;
 import io.wispforest.gadget.decompile.QuiltflowerHandler;
 import io.wispforest.gadget.decompile.QuiltflowerManager;
+import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -14,24 +18,65 @@ import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     private final Screen parent;
-    private VerticalFlowLayout contents;
-    private final QuiltflowerHandler decompiler = QuiltflowerManager.loadHandler();
+    private final boolean showAll;
+    private ProgressToast toast;
+    private ScrollContainer<VerticalFlowLayout> contentsScroll;
+    private final VerticalFlowLayout contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
+    private final QuiltflowerHandler decompiler;
+    private String currentFileName = null;
+    private String currentFileContents = null;
 
-    public ViewClassesScreen(Screen parent) {
+
+    public ViewClassesScreen(Screen parent, boolean showAll, ProgressToast toast) {
         this.parent = parent;
+        this.showAll = showAll;
+        this.toast = toast;
+
+        toast.step(Text.translatable("message.gadget.progress.loading_quiltflower"));
+        decompiler = QuiltflowerManager.loadHandler(toast, text -> {
+            assert client != null;
+
+            client.execute(() -> {
+                var label = Components.label(text);
+                contents.child(new LayoutCacheWrapper<>(label));
+                contentsScroll.scrollTo(label);
+            });
+        });
+    }
+
+    public static void openWithProgress(Screen parent) {
+        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_classes"));
+        MinecraftClient client = MinecraftClient.getInstance();
+        boolean showAll = Screen.hasShiftDown();
+
+        toast.follow(
+            QuiltflowerManager.ensureInstalled(toast)
+                .thenApplyAsync(unused -> {
+                    ViewClassesScreen screen = new ViewClassesScreen(parent, showAll, toast);
+
+                    screen.init(client, parent.width, parent.height);
+                    screen.toast = null;
+
+                    return screen;
+                })
+                .thenAcceptAsync(client::setScreen, client),
+            true);
     }
 
     @Override
@@ -48,8 +93,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         VerticalFlowLayout tree = Containers.verticalFlow(Sizing.content(), Sizing.content());
         ScrollContainer<VerticalFlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
-        contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
+        contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         rootComponent
@@ -57,10 +101,27 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
                 .margins(Insets.right(3)))
             .child(contentsScroll);
 
+        toast.step(Text.translatable("message.gadget.progress.building_screen"));
         TreeEntry root = new TreeEntry("", tree);
 
-        for (var name : GadgetMixinExtension.DUMPED_CLASSES) {
-            String fullPath = name.replace('.', '/') + ".class";
+        Set<String> allClasses;
+
+        if (showAll) {
+            allClasses = new TreeSet<>();
+
+            for (Class<?> klass : KnotUtil.INSTRUMENTATION.getInitiatedClasses(Gadget.class.getClassLoader())) {
+                if (klass.isHidden()) continue;
+                if (klass.isArray()) continue;
+
+                klass = klass.getNestHost();
+                allClasses.add(klass.getName());
+            }
+        } else {
+            allClasses = GadgetMixinExtension.DUMPED_CLASSES;
+        }
+
+        for (var name : allClasses) {
+            String fullPath = decompiler.mapClass(name.replace('.', '/')) + ".class";
             String[] split = fullPath.split("/");
             TreeEntry parent = root;
 
@@ -70,6 +131,33 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
 
             parent.container.child(makeRecipeRow(split[split.length - 1], fullPath));
         }
+        toast.step(Text.literal(""));
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_S && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+            if (currentFileContents == null) return false;
+
+            String path = DialogUtil.saveFileDialog(
+                I18n.translate("text.gadget.save_as_java"),
+                currentFileName.replace(".class", ".java"),
+                List.of("*.java"),
+                "Java source files"
+            );
+
+            if (path != null) {
+                try {
+                    Files.writeString(Path.of(path), currentFileContents, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private HorizontalFlowLayout makeRecipeRow(String name, String fullPath) {
@@ -84,33 +172,86 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             () -> row.surface(Surface.BLANK));
 
         row.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                UISounds.playInteractionSound();
 
-            UISounds.playInteractionSound();
+                contents.clearChildren();
 
-            contents.clearChildren();
+                ForkJoinPool.commonPool().execute(() -> {
+                    try {
+                        var text = decompiler.decompileClass(Class.forName(
+                            decompiler.unmapClass(
+                                fullPath
+                                    .replace(".class", "")
+                                    .replace('/', '.')))
+                        );
 
-            try {
-                var text = decompiler.decompileClass(Class.forName(fullPath.replace(".class", "").replace('/', '.')));
-                var lines = text.lines().toList();
-                int i = 0;
-                int maxWidth = Integer.toString(lines.size() - 1).length();
-                for (var line : lines) {
-                    contents.child(Components.label(
-                            Text.literal(" ")
-                                .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
-                                    .formatted(Formatting.GRAY))
-                                .append(Text.literal(line.replace("\t", "    "))
-                                    .styled(x -> x.withFont(Gadget.id("monocraft")))))
-                        .horizontalSizing(Sizing.fill(74)));
+                        client.execute(() -> {
+                            currentFileName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+                            currentFileContents = text;
 
-                    i++;
-                }
-            } catch (ClassNotFoundException e) {
-                GuiUtil.showException(contents, e);
+                            contents.configure(unused -> {
+                                contents.clearChildren();
+                                GuiUtil.showMonospaceText(contents, text);
+                            });
+
+                            contentsScroll.scrollTo(contents);
+                        });
+                    } catch (Exception e) {
+                        client.execute(() -> {
+                            contents.configure(unused -> {
+                                contents.clearChildren();
+                                contents.child(GuiUtil.showException(e));
+                            });
+                        });
+                    }
+                });
+
+                return true;
+            } else {
+                String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+
+                GuiUtil.contextMenu(row, mouseX, mouseY)
+                    .button(Text.translatable("text.gadget.save_as_java"), unused -> {
+                        String path = DialogUtil.saveFileDialog(
+                            I18n.translate("text.gadget.save_as_java"),
+                            filename.replace(".class", ".java"),
+                            List.of("*.java"),
+                            "Java source files"
+                        );
+
+                        if (path != null) {
+                            try {
+                                Files.writeString(Path.of(path), currentFileContents, StandardCharsets.UTF_8);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    })
+                    .button(Text.translatable("text.gadget.save_as_class"), unused -> {
+                        String path = DialogUtil.saveFileDialog(
+                            I18n.translate("text.gadget.save_as_class"),
+                            filename,
+                            List.of("*.class"),
+                            "JVM class files"
+                        );
+
+                        if (path != null) {
+                            try {
+                                contents.clearChildren();
+                                Files.write(
+                                    Path.of(path),
+                                    decompiler.getClassBytes(fullPath.replace(".class", ""))
+                                );
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    });
+
+                return true;
             }
 
-            return true;
         });
 
         return row;

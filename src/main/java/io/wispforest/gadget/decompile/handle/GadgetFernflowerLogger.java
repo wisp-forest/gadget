@@ -1,35 +1,44 @@
 package io.wispforest.gadget.decompile.handle;
 
+import net.minecraft.text.Text;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 
 public class GadgetFernflowerLogger extends IFernflowerLogger {
-    private static final Logger LOGGER = LoggerFactory.getLogger("gadget/Quiltflower");
+    private final QuiltflowerHandlerImpl handler;
+
+    public GadgetFernflowerLogger(QuiltflowerHandlerImpl handler) {
+        this.handler = handler;
+    }
 
     @Override
     public void writeMessage(String message, Severity severity) {
-        if (severity == Severity.TRACE) {
-            LOGGER.trace(message);
-        } else if (severity == Severity.INFO) {
-            LOGGER.info(message);
+        if (severity == Severity.INFO) {
+            handler.logConsumer.accept(Text.translatable("text.gadget.quiltflower_log.info", message));
         } else if (severity == Severity.WARN) {
-            LOGGER.warn(message);
+            handler.logConsumer.accept(Text.translatable("text.gadget.quiltflower_log.warn", message));
         } else if (severity == Severity.ERROR) {
-            LOGGER.error(message);
+            handler.logConsumer.accept(Text.translatable("text.gadget.quiltflower_log.error", message));
         }
     }
 
     @Override
     public void writeMessage(String message, Severity severity, Throwable t) {
-        if (severity == Severity.TRACE) {
-            LOGGER.trace(message, t);
-        } else if (severity == Severity.INFO) {
-            LOGGER.info(message, t);
+        CharArrayWriter writer = new CharArrayWriter();
+        t.printStackTrace(new PrintWriter(writer));
+        String fullExceptionText = writer.toString().replace("\t", "    ");
+
+        if (severity == Severity.INFO) {
+            handler.logConsumer.accept(
+                Text.translatable("text.gadget.quiltflower_log.info.with_error", message, fullExceptionText));
         } else if (severity == Severity.WARN) {
-            LOGGER.warn(message, t);
+            handler.logConsumer.accept(
+                Text.translatable("text.gadget.quiltflower_log.warn.with_error", message, fullExceptionText));
         } else if (severity == Severity.ERROR) {
-            LOGGER.error(message, t);
+            handler.logConsumer.accept(
+                Text.translatable("text.gadget.quiltflower_log.error.with_error", message, fullExceptionText));
         }
     }
 }

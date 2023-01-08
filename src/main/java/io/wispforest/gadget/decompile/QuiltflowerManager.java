@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public final class QuiltflowerManager {
     private static final Path DLC_DIRECTORY = FabricLoader.getInstance().getGameDir()
@@ -34,14 +35,12 @@ public final class QuiltflowerManager {
     }
 
 
-    public static CompletableFuture<Void> ensureInstalled() {
+    public static CompletableFuture<Void> ensureInstalled(ProgressToast toast) {
         if (isInstalled())
             return CompletableFuture.completedFuture(null);
 
-        ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_quiltflower"));
-
-        return toast.follow(CompletableFuture.runAsync(() -> {
-            toast.step(Text.literal(""));
+        return CompletableFuture.runAsync(() -> {
+            toast.step(Text.translatable("text.gadget.progress.downloading_quiltflower"));
 
             try {
                 if (!Files.isDirectory(DLC_DIRECTORY))
@@ -62,10 +61,10 @@ public final class QuiltflowerManager {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }), true);
+        });
     }
 
-    public static QuiltflowerHandler loadHandler() {
+    public static QuiltflowerHandler loadHandler(ProgressToast toast, Consumer<Text> logConsumer) {
         var cl = CLASSLOADER == null ? null : CLASSLOADER.get();
         if (cl == null) {
             try {
@@ -85,7 +84,7 @@ public final class QuiltflowerManager {
 
         try {
             var implClass = cl.loadClass("io.wispforest.gadget.decompile.handle.QuiltflowerHandlerImpl");
-            return (QuiltflowerHandler) implClass.getConstructor().newInstance();
+            return (QuiltflowerHandler) implClass.getConstructors()[0].newInstance(toast, logConsumer);
         } catch (ReflectiveOperationException roe) {
             throw new RuntimeException(roe);
         }

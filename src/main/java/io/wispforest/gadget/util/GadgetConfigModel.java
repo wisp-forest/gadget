@@ -4,6 +4,9 @@ import io.wispforest.gadget.decompile.QuiltflowerVersions;
 import io.wispforest.gadget.mappings.*;
 import io.wispforest.owo.config.annotation.*;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +22,11 @@ public class GadgetConfigModel {
     public boolean uiInspector = true;
     @RestartRequired public boolean silenceStartupErrors = true;
     @PredicateConstraint("isQuiltflowerVersionValid") public String quiltflowerVersion = "LATEST";
-    @Hook public MappingsType mappings = FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
+    @PredicateConstraint("isMappingsValid") @Hook public MappingsType mappings =
+        FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
+    public boolean inspectClasses = true;
+    public boolean fullDecompilationContext = true;
     @Hook public List<String> hiddenFields = new ArrayList<>(List.of(
         "java.lang.Enum#name",
 
@@ -64,13 +70,26 @@ public class GadgetConfigModel {
     @Nest public InternalSettings internalSettings = new InternalSettings();
 
     public static boolean isQuiltflowerVersionValid(String version) {
-        return version.equals("LATEST") || QuiltflowerVersions.versions().contains(version);
+        if (version.equals("LATEST")) return true;
+        if (!QuiltflowerVersions.versions().contains(version)) return false;
+
+        try {
+            var v = SemanticVersion.parse(version);
+            return v.compareTo((Version) SemanticVersion.parse("1.9.0")) >= 0;
+        } catch (VersionParsingException e) {
+            return false;
+        }
+    }
+
+    public static boolean isMappingsValid(MappingsType type) {
+        return type != MappingsType.LOCAL
+            || FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace().equals("named");
     }
 
     public static class InternalSettings {
         public boolean debugMatrixStackDebugging = false;
         public boolean injectMatrixStackErrors = false;
-        public boolean inspectClasses = false;
+        public boolean dumpTRMappings = false;
     }
 
     public enum MappingsType {

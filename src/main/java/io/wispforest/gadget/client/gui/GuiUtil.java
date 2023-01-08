@@ -13,6 +13,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.CharArrayWriter;
@@ -99,16 +100,35 @@ public final class GuiUtil {
             text -> textField.setEditableColor(verifier.test(text) ? VALID_COLOR : INVALID_COLOR));
     }
 
-    public static LabelComponent showException(VerticalFlowLayout container, Exception e) {
+    public static LabelComponent showException(Exception e) {
         CharArrayWriter writer = new CharArrayWriter();
         e.printStackTrace(new PrintWriter(writer));
         String fullExceptionText = writer.toString();
+
         LabelComponent label = Components.label(
             Text.literal(fullExceptionText.replace("\t", "    "))
                 .formatted(Formatting.RED));
-        container.child(label);
-
+        label.horizontalSizing(Sizing.fill(99));
         return label;
+    }
+
+    public static void showMonospaceText(VerticalFlowLayout container, String all) {
+        var lines = all.lines().toList();
+        int maxWidth = Integer.toString(lines.size() - 1).length();
+
+        int i = 0;
+        for (String line : lines) {
+            container.child(Components.label(
+                Text.literal("")
+                    .append(Text.literal(StringUtils.leftPad(Integer.toString(i), maxWidth) + " ")
+                        .formatted(Formatting.GRAY)
+                        .styled(x -> x.withFont(Gadget.id("monocraft"))))
+                    .append(Text.literal(line.replace("\t", "    "))
+                        .styled(x -> x.withFont(Gadget.id("monocraft")))))
+                .horizontalSizing(Sizing.fill(99)));
+
+            i++;
+        }
     }
 
     public static VerticalFlowLayout hexDump(byte[] bytes, boolean doEllipsis) {
