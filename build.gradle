@@ -38,7 +38,6 @@ repositories {
 			includeGroup "com.jamieswhiteshirt"
 		}
 	}
-	maven { url 'https://basique.top/maven' }
 }
 
 sourceSets {
