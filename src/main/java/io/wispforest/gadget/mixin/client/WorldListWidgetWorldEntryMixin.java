@@ -1,11 +1,7 @@
 package io.wispforest.gadget.mixin.client;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.pond.ContextMenuScreenAccess;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.DropdownComponent;
-import io.wispforest.owo.ui.core.Positioning;
-import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.gadget.client.gui.ContextMenuScreens;
 import io.wispforest.gadget.client.dump.DumpPrimer;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.gui.screen.world.WorldListWidget;
@@ -29,14 +25,11 @@ public abstract class WorldListWidgetWorldEntryMixin {
         if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
         if (!Gadget.CONFIG.rightClickDump()) return;
 
-        DropdownComponent dropdown = Components.dropdown(Sizing.content())
+        ContextMenuScreens.contextMenuAt(screen, mouseX, mouseY)
                 .button(Text.translatable("text.gadget.join_with_dump"), dropdown2 -> {
                     DumpPrimer.isPrimed = true;
                     play();
                 });
-        dropdown.positioning(Positioning.absolute((int) mouseX, (int) mouseY));
-
-        ((ContextMenuScreenAccess) screen).gadget$addDropdown(dropdown);
 
         cir.setReturnValue(true);
     }

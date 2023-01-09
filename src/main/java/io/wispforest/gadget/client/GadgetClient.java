@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
+import io.wispforest.gadget.client.gui.ContextMenuScreens;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
@@ -70,6 +71,7 @@ public class GadgetClient implements ClientModInitializer {
         PacketHandlers.init();
         UIInspector.init();
         ServerData.init();
+        ContextMenuScreens.init();
 
         ConfigScreen.registerProvider("gadget", GadgetConfigScreen::new);
 

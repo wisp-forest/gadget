@@ -21,7 +21,6 @@
         "owo.ParticleSystemAccessor"
     ],
     "client": [
-        "client.ContextMenuScreenMixin",
         "client.DisconnectedScreenMixin",
         "client.EntryListWidgetAccessor",
         "client.EntryListWidgetEntryAccessor",

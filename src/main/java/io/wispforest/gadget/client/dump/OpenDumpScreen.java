@@ -51,8 +51,12 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         rawPackets.forEach(packet -> packets.add(new ProcessedDumpedPacket(packet)));
 
-        startTime = rawPackets.get(0).sentAt();
-        endTime = rawPackets.get(rawPackets.size() - 1).sentAt();
+        if (rawPackets.size() > 0) {
+            startTime = rawPackets.get(0).sentAt();
+            endTime = rawPackets.get(rawPackets.size() - 1).sentAt();
+        } else {
+            startTime = endTime = 0;
+        }
     }
 
     public static void openWithProgress(Screen parent, Path path) {
