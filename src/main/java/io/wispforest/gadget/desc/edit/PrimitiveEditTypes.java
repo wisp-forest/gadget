@@ -5,6 +5,8 @@ import com.google.common.collect.HashBiMap;
 import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -13,6 +15,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 public final class PrimitiveEditTypes {
@@ -41,6 +44,7 @@ public final class PrimitiveEditTypes {
         return (PrimitiveEditType<T>) ReflectionUtil.findFor(klass, CLASS_TO_TYPE);
     }
 
+    @SuppressWarnings("unchecked")
     public static void init() {
         registerSimple("boolean", Boolean.class, Boolean::parseBoolean, Object::toString);
         registerSimple("int", Integer.class, Integer::parseInt, Object::toString);
@@ -49,9 +53,12 @@ public final class PrimitiveEditTypes {
         registerSimple("double", Double.class, Double::parseDouble, Object::toString);
         registerSimple("string", String.class, x -> x, String::toString);
         registerSimple("identifier", Identifier.class, Identifier::new, Identifier::toString);
+        registerSimple("uuid", UUID.class, UUID::fromString, UUID::toString);
 
         registerForRegistry(Block.class, Registries.BLOCK);
         registerForRegistry(Item.class, Registries.ITEM);
+        registerForRegistry((Class<EntityType<?>>)(Class<?>) EntityType.class, Registries.ENTITY_TYPE);
+        registerForRegistry((Class<BlockEntityType<?>>)(Class<?>) BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE);
         registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
 
         PacketBufSerializer.register(PrimitiveEditType.class, new PacketBufSerializer<>(
