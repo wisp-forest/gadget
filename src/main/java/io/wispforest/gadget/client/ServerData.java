@@ -4,9 +4,10 @@ import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
 import io.wispforest.gadget.network.GadgetNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import org.jetbrains.annotations.Nullable;
 
 public class ServerData {
-    public static AnnounceS2CPacket ANNOUNCE_PACKET;
+    private static @Nullable AnnounceS2CPacket ANNOUNCE_PACKET;
 
     public static void init() {
         GadgetNetworking.CHANNEL.registerClientbound(AnnounceS2CPacket.class,
@@ -17,5 +18,13 @@ public class ServerData {
 
         ClientLoginConnectionEvents.DISCONNECT.register(
             (handler, client) -> ANNOUNCE_PACKET = null);
+    }
+
+    public static boolean canReplaceStacks() {
+        return ANNOUNCE_PACKET != null && ANNOUNCE_PACKET.canReplaceStacks();
+    }
+
+    public static boolean canRequestServerData() {
+        return ANNOUNCE_PACKET != null && ANNOUNCE_PACKET.canRequestServerData();
     }
 }

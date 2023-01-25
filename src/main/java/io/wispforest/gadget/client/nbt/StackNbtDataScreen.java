@@ -28,7 +28,7 @@ public class StackNbtDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
         var stack = slot.getStack();
         Consumer<NbtCompound> reloader = null;
 
-        if (ServerData.ANNOUNCE_PACKET.canReplaceStacks()) {
+        if (ServerData.canReplaceStacks()) {
             reloader = newNbt -> {
                 stack.setNbt(newNbt);
 

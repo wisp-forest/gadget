@@ -97,7 +97,7 @@ public class GadgetScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         main.child(inspectResources);
 
-        if (ServerData.ANNOUNCE_PACKET != null && ServerData.ANNOUNCE_PACKET.canRequestServerData()) {
+        if (ServerData.canRequestServerData()) {
             LabelComponent inspectServerData = Components.label(Text.translatable("text.gadget.inspect_server_data"));
 
             inspectServerData.margins(Insets.bottom(4));
