@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Predicate;
 
-public class KeyAdderWidget extends HorizontalFlowLayout {
+public class KeyAdderWidget extends FlowLayout {
     private final NbtDataIsland island;
     private final NbtPath parentPath;
     private final NbtType<?> type;
@@ -25,7 +25,7 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
     private boolean wasMounted = false;
 
     public KeyAdderWidget(NbtDataIsland island, NbtPath parentPath, NbtType<?> type, Predicate<String> nameVerifier) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
 
         this.island = island;
         this.parentPath = parentPath;
@@ -75,7 +75,7 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
             wasMounted = true;
 
             island.focusHandler().focus(nameField, FocusSource.MOUSE_CLICK);
-            nameField.setTextFieldFocused(true);
+            nameField.setFocused(true);
         }
     }
 
@@ -138,7 +138,7 @@ public class KeyAdderWidget extends HorizontalFlowLayout {
                 commit();
             } else {
                 island.focusHandler().focus(valueField, FocusSource.MOUSE_CLICK);
-                valueField.setTextFieldFocused(true);
+                valueField.setFocused(true);
             }
 
             return true;

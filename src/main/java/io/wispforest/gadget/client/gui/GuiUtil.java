@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.component.DropdownComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -112,7 +111,7 @@ public final class GuiUtil {
         return label;
     }
 
-    public static void showMonospaceText(VerticalFlowLayout container, String all) {
+    public static void showMonospaceText(FlowLayout container, String all) {
         var lines = all.lines().toList();
         int maxWidth = Integer.toString(lines.size() - 1).length();
 
@@ -131,8 +130,8 @@ public final class GuiUtil {
         }
     }
 
-    public static VerticalFlowLayout hexDump(byte[] bytes, boolean doEllipsis) {
-        VerticalFlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
+    public static FlowLayout hexDump(byte[] bytes, boolean doEllipsis) {
+        FlowLayout view = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
         List<Component> expandedChildren = new ArrayList<>();
 

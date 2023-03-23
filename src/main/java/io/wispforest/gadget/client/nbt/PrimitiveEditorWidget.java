@@ -3,7 +3,7 @@ package io.wispforest.gadget.client.nbt;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Function;
 
-public class PrimitiveEditorWidget extends HorizontalFlowLayout {
+public class PrimitiveEditorWidget extends FlowLayout {
     private final NbtDataIsland island;
     private final NbtPath path;
     private final Object value;
@@ -25,7 +25,7 @@ public class PrimitiveEditorWidget extends HorizontalFlowLayout {
     private final TextFieldWidget editField;
 
     protected PrimitiveEditorWidget(NbtDataIsland island, NbtPath path, Object value, Function<String, NbtElement> parser) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
         this.island = island;
         this.path = path;
 
@@ -85,6 +85,6 @@ public class PrimitiveEditorWidget extends HorizontalFlowLayout {
         if (focusHandler() != null)
             focusHandler().focus(editField, FocusSource.MOUSE_CLICK);
 
-        editField.setTextFieldFocused(true);
+        editField.setFocused(true);
     }
 }

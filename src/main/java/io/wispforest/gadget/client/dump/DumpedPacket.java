@@ -1,7 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
 import net.minecraft.network.NetworkState;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.util.Identifier;
 
 import java.util.List;

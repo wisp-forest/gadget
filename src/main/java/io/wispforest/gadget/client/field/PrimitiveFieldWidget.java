@@ -4,7 +4,7 @@ import io.wispforest.gadget.desc.PrimitiveFieldObject;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.gadget.client.gui.GuiUtil;
@@ -14,7 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
-public class PrimitiveFieldWidget extends HorizontalFlowLayout {
+public class PrimitiveFieldWidget extends FlowLayout {
     private final PrimitiveEditData editData;
     private final FieldDataIsland island;
     private final ObjectPath fieldPath;
@@ -24,7 +24,7 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
     private final TextFieldWidget editField;
 
     protected PrimitiveFieldWidget(FieldDataIsland island, ObjectPath fieldPath, PrimitiveFieldObject pfo) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
         this.island = island;
         this.fieldPath = fieldPath;
 
@@ -80,6 +80,6 @@ public class PrimitiveFieldWidget extends HorizontalFlowLayout {
         if (focusHandler() != null)
             focusHandler().focus(editField, FocusSource.MOUSE_CLICK);
 
-        editField.setTextFieldFocused(true);
+        editField.setFocused(true);
     }
 }

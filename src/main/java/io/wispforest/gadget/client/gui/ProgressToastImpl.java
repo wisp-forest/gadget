@@ -5,7 +5,7 @@ import io.wispforest.owo.ui.component.BoxComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.Toast;
@@ -16,7 +16,7 @@ import net.minecraft.text.Text;
 import java.util.function.LongSupplier;
 
 public class ProgressToastImpl implements Toast, ProgressToast {
-    private final OwoUIAdapter<VerticalFlowLayout> adapter;
+    private final OwoUIAdapter<FlowLayout> adapter;
     private final MinecraftClient client = MinecraftClient.getInstance();
     private boolean attached = false;
 

@@ -3,6 +3,7 @@ package io.wispforest.gadget.mixin;
 import io.netty.channel.ChannelHandlerContext;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import net.minecraft.network.*;
+import net.minecraft.network.packet.Packet;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ClientConnectionMixin {
     @Shadow @Final private NetworkSide side;
 
-    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/Packet;)V", at = @At("HEAD"))
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"))
     private void readHook(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
         if (side == NetworkSide.SERVERBOUND) return;
 

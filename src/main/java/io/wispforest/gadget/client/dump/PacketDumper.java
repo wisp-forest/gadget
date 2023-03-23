@@ -7,7 +7,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
@@ -105,9 +105,10 @@ public class PacketDumper {
 
         buf.writeLong(System.currentTimeMillis());
 
-        Integer packetId = state.getPacketId(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packet);
+        int packetId = state.getPacketId(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packet);
 
-        if (packetId == null)
+        // TODO: fix bundle packets.
+        if (packetId == -1)
             throw new UnsupportedOperationException("Invalid packet: " + packet);
 
         buf.writeVarInt(packetId);

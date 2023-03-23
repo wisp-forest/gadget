@@ -9,7 +9,6 @@ import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -20,7 +19,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
-public class SearchGui extends HorizontalFlowLayout {
+public class SearchGui extends FlowLayout {
     private final ScrollContainer<?> scroll;
 
     protected @Nullable SearchMatches currentMatches = null;
@@ -28,7 +27,7 @@ public class SearchGui extends HorizontalFlowLayout {
     private final TextBoxComponent searchBox;
 
     public SearchGui(ScrollContainer<?> scroll) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
         this.scroll = scroll;
 
         var searchRow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
