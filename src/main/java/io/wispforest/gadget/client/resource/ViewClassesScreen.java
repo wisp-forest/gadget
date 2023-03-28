@@ -13,9 +13,8 @@ import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.MinecraftClient;
@@ -32,12 +31,12 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
-public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
+public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
     private final boolean showAll;
     private ProgressToast toast;
-    private ScrollContainer<VerticalFlowLayout> contentsScroll;
-    private final VerticalFlowLayout contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
+    private ScrollContainer<FlowLayout> contentsScroll;
+    private final FlowLayout contents = Containers.verticalFlow(Sizing.content(), Sizing.content());
     private final QuiltflowerHandler decompiler;
     private String currentFileName = null;
     private String currentFileContents = null;
@@ -80,18 +79,18 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     }
 
     @Override
-    protected @NotNull OwoUIAdapter<HorizontalFlowLayout> createAdapter() {
+    protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::horizontalFlow);
     }
 
     @Override
-    protected void build(HorizontalFlowLayout rootComponent) {
+    protected void build(FlowLayout rootComponent) {
         rootComponent
             .surface(Surface.VANILLA_TRANSLUCENT)
             .padding(Insets.of(5));
 
-        VerticalFlowLayout tree = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
+        FlowLayout tree = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        ScrollContainer<FlowLayout> treeScroll = Containers.verticalScroll(Sizing.fill(25), Sizing.fill(100), tree)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
         contentsScroll = Containers.verticalScroll(Sizing.fill(72), Sizing.fill(100), contents)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
@@ -160,7 +159,7 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private HorizontalFlowLayout makeRecipeRow(String name, String fullPath) {
+    private FlowLayout makeRecipeRow(String name, String fullPath) {
         var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         var fileLabel = Components.label(Text.literal(name));
 
@@ -265,9 +264,9 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
     private static class TreeEntry {
         private final String name;
         private final List<TreeEntry> children = new ArrayList<>();
-        private final VerticalFlowLayout container;
+        private final FlowLayout container;
 
-        private TreeEntry(String name, VerticalFlowLayout container) {
+        private TreeEntry(String name, FlowLayout container) {
             this.name = name;
             this.container = container;
         }
@@ -280,8 +279,8 @@ public class ViewClassesScreen extends BaseOwoScreen<HorizontalFlowLayout> {
             SubObjectContainer sub = new SubObjectContainer(unused -> {
             }, unused -> {
             });
-            VerticalFlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
-            HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
+            FlowLayout entryContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
+            FlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 
             container
                 .child(entryContainer

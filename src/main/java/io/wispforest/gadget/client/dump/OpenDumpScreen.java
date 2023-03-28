@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
+public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
     private ProgressToast toast;
     private final List<ProcessedDumpedPacket> packets;
-    private VerticalFlowLayout main;
+    private FlowLayout main;
     private FlowLayout infoButton;
     private BasedSliderComponent timeSlider;
     private final long startTime;
@@ -82,19 +82,19 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
     }
 
     @Override
-    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+    protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
-    protected void build(VerticalFlowLayout rootComponent) {
+    protected void build(FlowLayout rootComponent) {
         rootComponent
             .horizontalAlignment(HorizontalAlignment.CENTER)
             .verticalAlignment(VerticalAlignment.CENTER)
             .surface(Surface.VANILLA_TRANSLUCENT);
 
         this.main = new BasedVerticalFlowLayout(Sizing.fill(100), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main)
+        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         var searchBox = Components.textBox(Sizing.fill(95));
@@ -140,9 +140,9 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         rebuild("", startTime);
 
-        VerticalFlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
-        infoButton = new VerticalFlowLayout(Sizing.fixed(16), Sizing.fixed(16)) {
+        infoButton = new FlowLayout(Sizing.fixed(16), Sizing.fixed(16), FlowLayout.Algorithm.VERTICAL) {
             private int totalComponents = -1;
             private int frameNumber = 11;
 
@@ -191,7 +191,7 @@ public class OpenDumpScreen extends BaseOwoScreen<VerticalFlowLayout> {
         infoButton.mouseLeave().subscribe(
             () -> infoButton.surface(Surface.BLANK));
 
-        VerticalFlowLayout statsButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16));
+        FlowLayout statsButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16));
 
         statsButton
             .child(Components.label(Text.translatable("text.gadget.stats"))

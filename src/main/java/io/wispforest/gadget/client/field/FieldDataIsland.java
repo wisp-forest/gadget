@@ -14,7 +14,7 @@ import io.wispforest.gadget.path.FieldPathStep;
 import io.wispforest.gadget.util.WeakObservableDispatcher;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.gadget.network.FieldData;
@@ -41,7 +41,7 @@ public class FieldDataIsland {
     }
 
     protected final Map<ObjectPath, ClientFieldData> fields = new TreeMap<>();
-    private final VerticalFlowLayout mainContainer;
+    private final FlowLayout mainContainer;
     private Consumer<ObjectPath> pathRequester = path -> {};
     private boolean shortenNames = false;
     private ComponentAdditionRound currentRound = null;
@@ -103,11 +103,11 @@ public class FieldDataIsland {
         this.shortenNames = true;
     }
 
-    public VerticalFlowLayout mainContainer() {
+    public FlowLayout mainContainer() {
         return mainContainer;
     }
 
-    private void makeComponent(VerticalFlowLayout container, ObjectPath path, ClientFieldData data, ComponentAdditionRound round) {
+    private void makeComponent(FlowLayout container, ObjectPath path, ClientFieldData data, ComponentAdditionRound round) {
         var rowContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
         var row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
 
@@ -251,7 +251,7 @@ public class FieldDataIsland {
             currentRound = new ComponentAdditionRound();
 
         ClientFieldData old = fields.get(path);
-        VerticalFlowLayout container;
+        FlowLayout container;
 
         if (path.steps().length == 1) {
             container = mainContainer;

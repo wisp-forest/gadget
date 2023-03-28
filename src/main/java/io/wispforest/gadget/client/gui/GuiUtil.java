@@ -69,6 +69,7 @@ public final class GuiUtil {
         if (root == null)
             throw new IllegalStateException();
 
+        //noinspection DataFlowIssue
         while (root.hasParent())
             root = root.parent();
 
@@ -102,8 +103,10 @@ public final class GuiUtil {
     public static LabelComponent showException(Exception e) {
         CharArrayWriter writer = new CharArrayWriter();
         e.printStackTrace(new PrintWriter(writer));
-        String fullExceptionText = writer.toString();
+        return showExceptionText(writer.toString());
+    }
 
+    public static LabelComponent showExceptionText(String fullExceptionText) {
         LabelComponent label = Components.label(
             Text.literal(fullExceptionText.replace("\t", "    "))
                 .formatted(Formatting.RED));

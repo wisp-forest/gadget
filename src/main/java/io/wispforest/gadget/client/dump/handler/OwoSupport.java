@@ -9,7 +9,7 @@ import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.util.VectorSerializer;
 import io.wispforest.gadget.util.NetworkUtil;
@@ -156,7 +156,7 @@ public final class OwoSupport {
         // TODO: OwO handshake and config sync.
     }
 
-    private static void drawHandshakeMap(Map<Identifier, Integer> data, Text prefix, VerticalFlowLayout view) {
+    private static void drawHandshakeMap(Map<Identifier, Integer> data, Text prefix, FlowLayout view) {
         for (var entry : data.entrySet()) {
             view.child(Components.label(
                 Text.literal("")

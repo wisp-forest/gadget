@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.Toast;
@@ -11,7 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class NotificationToast implements Toast {
-    private final OwoUIAdapter<VerticalFlowLayout> adapter;
+    private final OwoUIAdapter<FlowLayout> adapter;
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     public NotificationToast(Text headText, Text messageText) {

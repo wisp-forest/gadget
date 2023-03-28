@@ -5,7 +5,7 @@ package io.wispforest.gadget.client.config;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.annotation.Expanded;
 import io.wispforest.owo.config.ui.component.ConfigTextBox;
-import io.wispforest.owo.config.ui.component.OptionComponent;
+import io.wispforest.owo.config.ui.component.OptionValueProvider;
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -29,7 +29,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 @SuppressWarnings("UnstableApiUsage")
-public class RemappingListOptionContainer extends CollapsibleContainer implements OptionComponent {
+public class RemappingListOptionContainer extends CollapsibleContainer implements Component, OptionValueProvider {
 
     protected final Option<List<String>> backingOption;
     protected final List<String> backingList;

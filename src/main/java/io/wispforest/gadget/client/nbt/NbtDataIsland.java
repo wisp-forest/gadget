@@ -6,8 +6,7 @@ import io.wispforest.gadget.mixin.NbtTypesAccessor;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
-import io.wispforest.owo.ui.container.HorizontalFlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.nbt.*;
 import net.minecraft.text.MutableText;
@@ -19,14 +18,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class NbtDataIsland extends VerticalFlowLayout {
+public class NbtDataIsland extends FlowLayout {
     private final Map<NbtPath, WidgetData> elements = new HashMap<>();
 
     final NbtCompound data;
     final Consumer<NbtCompound> reloader;
 
     public NbtDataIsland(NbtCompound data, Consumer<NbtCompound> reloader) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.VERTICAL);
 
         this.data = data;
         this.reloader = reloader;
@@ -37,9 +36,8 @@ public class NbtDataIsland extends VerticalFlowLayout {
     }
 
     void makeComponent(NbtPath path, NbtElement element) {
-        VerticalFlowLayout full = Containers.verticalFlow(Sizing.content(), Sizing.content());
-        HorizontalFlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-
+        FlowLayout full = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        FlowLayout row = Containers.horizontalFlow(Sizing.content(), Sizing.content());
         full.child(row);
 
         var parentContainer = subContainerOf(path.parent());
@@ -186,7 +184,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
             }
         }
 
-        VerticalFlowLayout target = subContainerOf(path.parent());
+        FlowLayout target = subContainerOf(path.parent());
 
         if (reloader != null) {
             var crossLabel = Components.label(Text.literal("❌"));
@@ -262,7 +260,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
         }
     }
 
-    private VerticalFlowLayout subContainerOf(NbtPath path) {
+    private FlowLayout subContainerOf(NbtPath path) {
         if (path.steps().length == 0)
             return this;
         else
@@ -270,7 +268,7 @@ public class NbtDataIsland extends VerticalFlowLayout {
     }
 
     private static class WidgetData {
-        private VerticalFlowLayout fullContainer;
+        private FlowLayout fullContainer;
         private SubObjectContainer subContainer;
 
     }

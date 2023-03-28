@@ -263,6 +263,13 @@
             {"index": 0}
         ]
     ],
+    "text.gadget.packet_write_error": [
+        {"text": "Packet Write Error!", "color": "red"},
+        [
+            {"text": " Type #", "color": "gray"},
+            {"index": 0}
+        ]
+    ],
     "text.gadget.packet_errors": {
         "text": "Packet errors",
         "color": "red"

@@ -51,7 +51,7 @@ public class GadgetConfigScreen extends ConfigScreen {
                 FieldPathStep::remapFieldId,
                 id -> MappingsManager.displayMappings().unmapFieldId(id)
             );
-            return new OptionComponentFactory.Result(layout, layout);
+            return new OptionComponentFactory.Result<>(layout, layout);
         });
     }
 }

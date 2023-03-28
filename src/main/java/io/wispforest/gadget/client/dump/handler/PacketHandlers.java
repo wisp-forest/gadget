@@ -1,8 +1,9 @@
 package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.client.dump.ErrorPacket;
+import io.wispforest.gadget.dump.GadgetReadErrorPacket;
 import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.dump.GadgetWriteErrorPacket;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.client.field.FieldDataIsland;
 import io.wispforest.gadget.util.ReflectionUtil;
@@ -33,10 +34,12 @@ public final class PacketHandlers {
 
         DrawPacketHandler.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
         DrawPacketHandler.EVENT.register(LAST_PHASE, (packet, view) -> {
-            if (packet.packet() instanceof ErrorPacket errorPacket) {
-                view.child(GuiUtil.hexDump(errorPacket.getData(), true));
+            if (packet.packet() instanceof GadgetReadErrorPacket errorPacket) {
+                view.child(GuiUtil.hexDump(errorPacket.data(), true));
                 return true;
             }
+
+            if (packet.packet() instanceof GadgetWriteErrorPacket) return true;
 
             if (packet.channelId() != null) {
                 var buf = NetworkUtil.unwrapCustom(packet.packet());

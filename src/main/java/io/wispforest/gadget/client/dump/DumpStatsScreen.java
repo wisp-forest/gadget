@@ -5,8 +5,8 @@ import io.wispforest.gadget.util.NumberUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.MutableText;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class DumpStatsScreen extends BaseOwoScreen<VerticalFlowLayout> {
+public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
     private final Map<String, PacketTypeData> packetTypes = new HashMap<>();
     private final Screen parent;
     private final List<ProcessedDumpedPacket> packets;
@@ -34,19 +34,19 @@ public class DumpStatsScreen extends BaseOwoScreen<VerticalFlowLayout> {
     }
 
     @Override
-    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+    protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
-    protected void build(VerticalFlowLayout rootComponent) {
+    protected void build(FlowLayout rootComponent) {
         rootComponent
             .horizontalAlignment(HorizontalAlignment.CENTER)
             .verticalAlignment(VerticalAlignment.CENTER)
             .surface(Surface.VANILLA_TRANSLUCENT);
 
-        VerticalFlowLayout main = new BasedVerticalFlowLayout(Sizing.fill(100), Sizing.content());
-        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), main)
+        FlowLayout main = new BasedVerticalFlowLayout(Sizing.fill(100), Sizing.content());
+        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         packetTypes

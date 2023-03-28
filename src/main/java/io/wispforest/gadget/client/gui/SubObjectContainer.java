@@ -2,7 +2,6 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 // Copied from owo-ui's CollapsibleContainer
-public class SubObjectContainer extends VerticalFlowLayout {
+public class SubObjectContainer extends FlowLayout {
 
     public static final Surface SURFACE = (matrices, component) -> Drawer.fill(matrices,
         component.x() + 5,
@@ -34,7 +33,7 @@ public class SubObjectContainer extends VerticalFlowLayout {
     protected final SpinnyBoiComponent spinnyBoi;
 
     public SubObjectContainer(Consumer<SubObjectContainer> loader, Consumer<SubObjectContainer> unloader) {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.VERTICAL);
         this.loader = loader;
         this.unloader = unloader;
         this.surface(SURFACE);

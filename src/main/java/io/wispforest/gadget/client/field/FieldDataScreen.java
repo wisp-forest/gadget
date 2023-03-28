@@ -8,8 +8,8 @@ import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.gadget.path.ObjectPath;
@@ -20,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 
-public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
+public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     private final InspectionTarget target;
     private final boolean isClient;
     public FieldDataIsland island;
@@ -56,21 +56,21 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
     }
 
     @Override
-    protected @NotNull OwoUIAdapter<VerticalFlowLayout> createAdapter() {
+    protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::verticalFlow);
     }
 
     @Override
-    protected void build(VerticalFlowLayout verticalFlowLayout) {
+    protected void build(FlowLayout verticalFlowLayout) {
         verticalFlowLayout
             .horizontalAlignment(HorizontalAlignment.CENTER)
             .verticalAlignment(VerticalAlignment.CENTER)
             .surface(Surface.VANILLA_TRANSLUCENT);
 
 
-        VerticalFlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
+        FlowLayout main = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-        ScrollContainer<VerticalFlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
+        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
         verticalFlowLayout.child(scroll.child(main));
@@ -80,7 +80,7 @@ public class FieldDataScreen extends BaseOwoScreen<VerticalFlowLayout> {
 
         main.child(island.mainContainer());
 
-        VerticalFlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
         var switchButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
             .child(Components.label(Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_current"))

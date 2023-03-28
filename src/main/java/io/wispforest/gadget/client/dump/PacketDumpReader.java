@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.dump;
 
+import io.wispforest.gadget.dump.PacketDumping;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import io.wispforest.gadget.util.NetworkUtil;
@@ -54,9 +55,8 @@ public class PacketDumpReader {
                     case 0b0110 -> NetworkState.LOGIN;
                     default -> throw new IllegalStateException();
                 };
-                int packetId = buf.readVarInt();
                 int size = buf.readableBytes();
-                Packet<?> packet = readPacket(packetId, state, outbound, buf);
+                Packet<?> packet = PacketDumping.readPacket(buf, state,  outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof LoginQueryRequestS2CPacket req) {
@@ -118,9 +118,8 @@ public class PacketDumpReader {
                     default -> throw new IllegalStateException();
                 };
                 long sentAt = buf.readLong();
-                int packetId = buf.readVarInt();
                 int size = buf.readableBytes();
-                Packet<?> packet = readPacket(packetId, state, outbound, buf);
+                Packet<?> packet = PacketDumping.readPacket(buf, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof LoginQueryRequestS2CPacket req) {
@@ -137,14 +136,4 @@ public class PacketDumpReader {
         }
     }
 
-    private static Packet<?> readPacket(int packetId, NetworkState state, boolean outbound, PacketByteBuf buf) {
-        int startOfData = buf.readerIndex();
-
-        try {
-            return state.getPacketHandler(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packetId, buf);
-        } catch (Exception e) {
-            buf.readerIndex(startOfData);
-            return new ErrorPacket(buf, packetId, e);
-        }
-    }
 }

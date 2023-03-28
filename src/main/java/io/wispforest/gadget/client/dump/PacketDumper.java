@@ -2,6 +2,8 @@ package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.NotificationToast;
+import io.wispforest.gadget.dump.PacketDumping;
+import io.wispforest.gadget.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -100,27 +102,13 @@ public class PacketDumper {
             case LOGIN -> flags |= 0b0110;
         }
 
-        buf.writeInt(0);
-        buf.writeShort(flags);
+        try (var lengthWriter = NetworkUtil.writeByteLength(buf)) {
+            buf.writeShort(flags);
 
-        buf.writeLong(System.currentTimeMillis());
+            buf.writeLong(System.currentTimeMillis());
 
-        int packetId = state.getPacketId(outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND, packet);
-
-        // TODO: fix bundle packets.
-        if (packetId == -1)
-            throw new UnsupportedOperationException("Invalid packet: " + packet);
-
-        buf.writeVarInt(packetId);
-
-        packet.write(buf);
-
-        int totalLength = buf.readableBytes();
-        int prevWriterIdx = buf.writerIndex();
-
-        buf.writerIndex(0);
-        buf.writeInt(totalLength - 4);
-        buf.writerIndex(prevWriterIdx);
+            PacketDumping.writePacket(buf, packet, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
+        }
 
         ByteBuffer nioBuf = buf.nioBuffer();
 

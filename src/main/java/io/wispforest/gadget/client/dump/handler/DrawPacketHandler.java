@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.client.dump.DumpedPacket;
 import io.wispforest.gadget.util.NetworkUtil;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -11,7 +11,7 @@ public interface DrawPacketHandler {
         packet.drawErrors().clear();
 
         for (var callback : callbacks) {
-            try (var reset = NetworkUtil.resetIndexes(packet.packet())) {
+            try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
                 boolean result = callback.onDrawPacket(packet, view);
                 if (result)
                     return true;
@@ -23,5 +23,5 @@ public interface DrawPacketHandler {
         return false;
     });
 
-    boolean onDrawPacket(DumpedPacket packet, VerticalFlowLayout view);
+    boolean onDrawPacket(DumpedPacket packet, FlowLayout view);
 }
