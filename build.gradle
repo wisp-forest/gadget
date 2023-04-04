@@ -89,13 +89,11 @@ loom {
 	runs {
 		testmodClient {
 			client()
-			ideConfigGenerated project.rootProject == project
 			name = "Testmod Client"
 			source sourceSets.testmod
 		}
 		testmodServer {
 			server()
-			ideConfigGenerated project.rootProject == project
 			name = "Testmod Server"
 			source sourceSets.testmod
 		}

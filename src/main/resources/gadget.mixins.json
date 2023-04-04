@@ -13,6 +13,7 @@
         "NbtTypesAccessor",
         "PathUtilMixin",
         "ZipResourcePackMixin",
+        "fabric.PacketTypeMixin",
         "owo.BaseComponentMixin",
         "owo.BaseParentComponentMixin",
         "owo.IndexedSerializerAccessor",
