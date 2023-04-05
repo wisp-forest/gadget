@@ -27,4 +27,9 @@ public interface FakeGadgetPacket extends Packet<PacketListener> {
     default void apply(PacketListener listener) {
         throw new IllegalStateException();
     }
+
+    @FunctionalInterface
+    interface Reader<T extends FakeGadgetPacket> {
+        T read(PacketByteBuf buf, NetworkState state, NetworkSide side);
+    }
 }

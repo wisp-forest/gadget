@@ -17,7 +17,7 @@ public record GadgetWriteErrorPacket(int packetId, String exceptionText) impleme
         return new GadgetWriteErrorPacket(packetId, fullExceptionText);
     }
 
-    public static GadgetWriteErrorPacket read(PacketByteBuf buf) {
+    public static GadgetWriteErrorPacket read(PacketByteBuf buf, NetworkState state, NetworkSide side) {
         return new GadgetWriteErrorPacket(buf.readVarInt(), buf.readString());
     }
 

@@ -1,15 +1,33 @@
 package io.wispforest.gadget.dump;
 
 import io.wispforest.gadget.Gadget;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.BundlePacket;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.SynchronizeRecipesS2CPacket;
 
 public final class PacketDumping {
+    private static final Int2ObjectMap<FakeGadgetPacket.Reader<?>> PACKETS = new Int2ObjectOpenHashMap<>();
+
     private PacketDumping() {
 
+    }
+
+    static {
+        register(GadgetWriteErrorPacket.ID, GadgetWriteErrorPacket::read);
+        register(GadgetBundlePacket.ID, GadgetBundlePacket::read);
+//        register(GadgetReadErrorPacket.ID, GadgetReadErrorPacket::read);
+        register(GadgetRecipesS2CPacket.ID, GadgetRecipesS2CPacket::read);
+    }
+
+    public static void register(int id, FakeGadgetPacket.Reader<?> reader) {
+        if (PACKETS.put(id, reader) != null) {
+            throw new IllegalStateException("This reader on " + id + " collides with another reader");
+        }
     }
 
     public static void writePacket(PacketByteBuf buf, Packet<?> packet, NetworkState state, NetworkSide side) {
@@ -19,6 +37,10 @@ public final class PacketDumping {
         try {
             if (packet instanceof BundlePacket<?> bundle) {
                 packet = GadgetBundlePacket.wrap(bundle);
+            }
+
+            if (packet instanceof SynchronizeRecipesS2CPacket recipes) {
+                packet = new GadgetRecipesS2CPacket(recipes.getRecipes());
             }
 
             if (packet instanceof FakeGadgetPacket fakePacket) {
@@ -52,14 +74,9 @@ public final class PacketDumping {
         int packetId = buf.readVarInt();
 
         try {
-            switch (packetId) {
-                case GadgetWriteErrorPacket.ID -> {
-                    return GadgetWriteErrorPacket.read(buf);
-                }
-                case GadgetBundlePacket.ID -> {
-                    return GadgetBundlePacket.read(buf, state, side).unwrap();
-                }
-                default -> { }
+            FakeGadgetPacket.Reader<?> fakeReader = PACKETS.get(packetId);
+            if (fakeReader != null) {
+                return fakeReader.read(buf, state, side).unwrap();
             }
 
             return state.getPacketHandler(side, packetId, buf);
