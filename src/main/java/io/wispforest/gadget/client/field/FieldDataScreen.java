@@ -1,10 +1,11 @@
 package io.wispforest.gadget.client.field;
 
 import io.wispforest.gadget.client.gui.search.SearchGui;
+import io.wispforest.gadget.field.FieldDataSource;
+import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.network.*;
-import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
-import io.wispforest.gadget.network.packet.c2s.SetNbtCompoundC2SPacket;
-import io.wispforest.gadget.network.packet.c2s.SetPrimitiveC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
+import io.wispforest.gadget.path.PathStep;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -12,39 +13,34 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
-import io.wispforest.gadget.path.ObjectPath;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 
 public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     private final InspectionTarget target;
+    private final FieldDataSource dataSource;
     private final boolean isClient;
     public FieldDataIsland island;
 
-    public FieldDataScreen(InspectionTarget target, boolean isClient) {
+    public FieldDataScreen(InspectionTarget target, boolean isClient, @Nullable FieldData rootData, @Nullable Map<PathStep, FieldData> initialFields) {
         this.target = target;
         this.isClient = isClient;
 
-        this.island = new FieldDataIsland();
+        if (!isClient)
+            dataSource = new RemoteFieldDataSource(target, rootData, initialFields);
+        else
+            dataSource = new LocalFieldDataSource(target.resolve(MinecraftClient.getInstance().world), true);
 
-        this.island.generateSearchAnchors(true);
-
-        if (isClient) {
-            this.island.targetObject(target.resolve(MinecraftClient.getInstance().world), true);
-        } else {
-            this.island.pathRequester(path ->
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(this.target, path)));
-
-            this.island.primitiveSetter((path, data) ->
-                GadgetNetworking.CHANNEL.clientHandle().send(new SetPrimitiveC2SPacket(this.target, path, data)));
-
-            this.island.nbtCompoundSetter((path, data) ->
-                GadgetNetworking.CHANNEL.clientHandle().send(new SetNbtCompoundC2SPacket(this.target, path, data)));
-        }
+        this.island = new FieldDataIsland(
+            dataSource,
+            false,
+            true
+        );
     }
 
     public InspectionTarget target() {
@@ -106,9 +102,14 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
             UISounds.playInteractionSound();
 
             if (isClient())
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(target, ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(new OpenFieldDataScreenC2SPacket(target));
             else
-                client.setScreen(new FieldDataScreen(target, true));
+                client.setScreen(new FieldDataScreen(
+                    target,
+                    true,
+                    null,
+                    null
+                ));
 
             return true;
         });
@@ -137,8 +138,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         verticalFlowLayout.child(sidebar);
     }
 
-    public void addFieldData(Map<ObjectPath, FieldData> data) {
-        data.forEach(island::addFieldData);
-        island.commitAdditions();
+    public FieldDataSource dataSource() {
+        return dataSource;
     }
 }

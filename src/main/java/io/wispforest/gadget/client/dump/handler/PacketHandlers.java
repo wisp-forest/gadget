@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.dump.GadgetReadErrorPacket;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.dump.GadgetWriteErrorPacket;
+import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.client.field.FieldDataIsland;
 import io.wispforest.gadget.util.ReflectionUtil;
@@ -49,10 +50,11 @@ public final class PacketHandlers {
                 return true;
             }
 
-            FieldDataIsland island = new FieldDataIsland();
-            island.shortenNames();
-            island.targetObject(packet.packet(), false);
-
+            FieldDataIsland island = new FieldDataIsland(
+                new LocalFieldDataSource(packet.packet(), false),
+                true,
+                false
+            );
             view.child(island.mainContainer());
             return true;
         });

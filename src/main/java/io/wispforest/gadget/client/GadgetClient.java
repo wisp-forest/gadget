@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
+import io.wispforest.gadget.client.field.RemoteFieldDataSource;
 import io.wispforest.gadget.client.gui.ContextMenuScreens;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
@@ -15,12 +16,12 @@ import io.wispforest.gadget.client.dump.handler.PacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
-import io.wispforest.gadget.network.packet.c2s.RequestDataC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.RequestResourceC2SPacket;
-import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.FieldDataResponseS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.OpenFieldDataScreenS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
-import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -75,15 +76,21 @@ public class GadgetClient implements ClientModInitializer {
 
         ConfigScreen.registerProvider("gadget", GadgetConfigScreen::new);
 
-        GadgetNetworking.CHANNEL.registerClientbound(DataS2CPacket.class, (packet, access) -> {
-            if (access.runtime().currentScreen instanceof FieldDataScreen gui && !gui.isClient() && gui.target().equals(packet.target())) {
-                gui.addFieldData(packet.fields());
-                return;
-            }
+        GadgetNetworking.CHANNEL.registerClientbound(OpenFieldDataScreenS2CPacket.class, (packet, access) -> {
+            access.runtime().setScreen(new FieldDataScreen(
+                packet.target(),
+                false,
+                packet.rootData(),
+                packet.rootChildren()
+            ));
+        });
 
-            var screen = new FieldDataScreen(packet.target(), false);
-            screen.addFieldData(packet.fields());
-            access.runtime().setScreen(screen);
+        GadgetNetworking.CHANNEL.registerClientbound(FieldDataResponseS2CPacket.class, (packet, access) -> {
+            if (access.runtime().currentScreen instanceof FieldDataScreen gui
+                && gui.target().equals(packet.target())
+                && gui.dataSource() instanceof RemoteFieldDataSource remote) {
+                remote.acceptPacket(packet);
+            }
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(ResourceListS2CPacket.class, (packet, access) -> {
@@ -113,7 +120,10 @@ public class GadgetClient implements ClientModInitializer {
 
             if (!GadgetNetworking.CHANNEL.canSendToServer()) {
                 if (client.player != null)
-                    client.player.sendMessage(Text.translatable("message.gadget.fail.noserversupport").formatted(Formatting.RED), true);
+                    client.player.sendMessage(
+                        Text.translatable("message.gadget.fail.noserversupport")
+                            .formatted(Formatting.RED),
+                        true);
 
                 return;
             }
@@ -121,7 +131,8 @@ public class GadgetClient implements ClientModInitializer {
             var perspective = client.options.getPerspective();
 
             if (!perspective.isFirstPerson() && client.player != null) {
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new EntityTarget(client.player.getId()), ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(
+                    new OpenFieldDataScreenC2SPacket(new EntityTarget(client.player.getId())));
                 return;
             }
 
@@ -133,11 +144,15 @@ public class GadgetClient implements ClientModInitializer {
             if (target == null) return;
 
             if (target instanceof EntityHitResult ehr) {
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new EntityTarget(ehr.getEntity().getId()), ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(
+                    new OpenFieldDataScreenC2SPacket(new EntityTarget(ehr.getEntity().getId())));
             } else {
-                BlockPos blockPos = target instanceof BlockHitResult blockHitResult ? blockHitResult.getBlockPos() : BlockPos.ofFloored(target.getPos());
+                BlockPos blockPos = target instanceof BlockHitResult blockHitResult
+                    ? blockHitResult.getBlockPos()
+                    : BlockPos.ofFloored(target.getPos());
 
-                GadgetNetworking.CHANNEL.clientHandle().send(new RequestDataC2SPacket(new BlockEntityTarget(blockPos), ObjectPath.EMPTY));
+                GadgetNetworking.CHANNEL.clientHandle().send(
+                    new OpenFieldDataScreenC2SPacket(new BlockEntityTarget(blockPos)));
             }
         });
 

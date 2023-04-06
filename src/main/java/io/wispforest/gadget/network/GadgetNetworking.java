@@ -3,10 +3,7 @@ package io.wispforest.gadget.network;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.desc.FieldObjects;
 import io.wispforest.gadget.network.packet.c2s.*;
-import io.wispforest.gadget.network.packet.s2c.AnnounceS2CPacket;
-import io.wispforest.gadget.network.packet.s2c.DataS2CPacket;
-import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
-import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.*;
 import io.wispforest.gadget.path.EnumMapPathStepType;
 import io.wispforest.gadget.path.SimpleMapPathStepType;
 import io.wispforest.gadget.util.ResourceUtil;
@@ -32,7 +29,31 @@ public final class GadgetNetworking {
         EnumMapPathStepType.init();
         PrimitiveEditTypes.init();
 
-        CHANNEL.registerServerbound(RequestDataC2SPacket.class, (packet, access) -> {
+        CHANNEL.registerServerbound(OpenFieldDataScreenC2SPacket.class, (packet, access) -> {
+            if (!Permissions.check(access.player(), "gadget.inspect", 4)) {
+                access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"), true);
+                return;
+            }
+
+
+            Object target = packet.target().resolve(access.player().world);
+
+            if (target == null) {
+                access.player().sendMessage(Text.translatable("message.gadget.fail.notfound"), true);
+                return;
+            }
+
+            var data = FieldObjects.fromObject(target);
+            var fields = FieldObjects.getData(target, 0, -1);
+
+            CHANNEL.serverHandle(access.player()).send(new OpenFieldDataScreenS2CPacket(
+                packet.target(),
+                new FieldData(data, false, true),
+                fields
+            ));
+        });
+
+        CHANNEL.registerServerbound(FieldDataRequestC2SPacket.class, (packet, access) -> {
             if (!Permissions.check(access.player(), "gadget.inspect", 4)) {
                 access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"), true);
                 return;
@@ -48,12 +69,12 @@ public final class GadgetNetworking {
 
             Object o = packet.path().follow(target);
 
-            var fields = FieldObjects.collectAllData(packet.path(), o);
+            var fields = FieldObjects.getData(o, packet.from(), packet.limit());
 
-            CHANNEL.serverHandle(access.player()).send(new DataS2CPacket(packet.target(), fields));
+            CHANNEL.serverHandle(access.player()).send(new FieldDataResponseS2CPacket(packet.target(), packet.path(), fields));
         });
 
-        CHANNEL.registerServerbound(SetPrimitiveC2SPacket.class, (packet, access) -> {
+        CHANNEL.registerServerbound(FieldDataSetPrimitiveC2SPacket.class, (packet, access) -> {
             if (!Permissions.check(access.player(), "gadget.inspect", 4)) {
                 access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"), true);
                 return;
@@ -68,17 +89,9 @@ public final class GadgetNetworking {
             }
 
             packet.path().set(target, packet.data().toObject());
-
-            var parentPath = packet.path().parent();
-
-            Object o = parentPath.follow(target);
-
-            var fields = FieldObjects.collectAllData(parentPath, o);
-
-            CHANNEL.serverHandle(access.player()).send(new DataS2CPacket(packet.target(), fields));
         });
 
-        CHANNEL.registerServerbound(SetNbtCompoundC2SPacket.class, (packet, access) -> {
+        CHANNEL.registerServerbound(FieldDataSetNbtCompoundC2SPacket.class, (packet, access) -> {
             if (!Permissions.check(access.player(), "gadget.inspect", 4)) {
                 access.player().sendMessage(Text.translatable("message.gadget.fail.permissions"), true);
                 return;
@@ -140,7 +153,8 @@ public final class GadgetNetworking {
             }
         });
 
-        CHANNEL.registerClientboundDeferred(DataS2CPacket.class);
+        CHANNEL.registerClientboundDeferred(OpenFieldDataScreenS2CPacket.class);
+        CHANNEL.registerClientboundDeferred(FieldDataResponseS2CPacket.class);
         CHANNEL.registerClientboundDeferred(AnnounceS2CPacket.class);
         CHANNEL.registerClientboundDeferred(ResourceListS2CPacket.class);
         CHANNEL.registerClientboundDeferred(ResourceDataS2CPacket.class);

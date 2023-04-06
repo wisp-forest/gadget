@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.client.field.FieldDataIsland;
+import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.network.FabricPacketHacks;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.util.ReflectionUtil;
@@ -53,10 +54,11 @@ public final class FapiSupport {
 
             view.child(Components.label(Text.literal(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()))));
 
-            FieldDataIsland island = new FieldDataIsland();
-
-            island.shortenNames();
-            island.targetObject(unwrapped, false);
+            FieldDataIsland island = new FieldDataIsland(
+                new LocalFieldDataSource(unwrapped, false),
+                true,
+                false
+            );
 
             view.child(island.mainContainer());
 

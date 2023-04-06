@@ -54,6 +54,19 @@ public record ObjectPath(PathStep[] steps) implements Comparable<ObjectPath> {
         return steps.length - o.steps.length;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < steps.length; i++) {
+            if (i > 0) sb.append('.');
+
+            sb.append(steps[i].toString());
+        }
+
+        return sb.toString();
+    }
+
     public PathStep last() {
         return steps[steps.length - 1];
     }

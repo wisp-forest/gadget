@@ -11,32 +11,53 @@ import net.auoeke.reflect.Fields;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Array;
-import java.util.LinkedHashMap;
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 
 public final class FieldObjects {
     private FieldObjects() {
 
     }
 
-    public static Map<ObjectPath, FieldData> collectAllData(ObjectPath basePath, Object o) {
-        Map<ObjectPath, FieldData> fields = new LinkedHashMap<>();
+    public static Map<PathStep, FieldData> getData(Object o, int from, int limit) {
+        // TODO: make this good.
+        MutableInt total = new MutableInt();
+        Map<PathStep, FieldData> collected = new HashMap<>();
 
+        FieldObjects.collectAllData(o, (step, data) -> {
+            int i = total.getAndIncrement();
+
+            if (limit >= 0 && i >= from + limit) return true;
+
+            if (i >= from ) {
+                collected.put(step, data);
+            }
+
+            return false;
+        });
+
+        return collected;
+    }
+
+    public static void collectAllData(Object o, BiPredicate<PathStep, FieldData> receiver) {
         if (o instanceof Iterable<?> iter) {
             int i = 0;
             boolean isFinal = ReflectionUtil.guessImmutability(iter);
 
             for (Object sub : iter) {
                 int idx = i++;
-                var path = basePath.then(new IndexPathStep(idx));
 
                 FieldObject obj = FieldObjects.fromObject(sub);
 
-                fields.put(path, new FieldData(obj, false, isFinal));
+                if (receiver.test(new IndexPathStep(idx), new FieldData(obj, false, isFinal)))
+                    return;
             }
         }
 
@@ -49,21 +70,23 @@ public final class FieldObjects {
 
             if (type != null) {
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
-                    var path = basePath.then(new MapPathStep(type, type.toNetwork(entry.getKey())));
+                    var path = new MapPathStep(type, type.toNetwork(entry.getKey()));
 
                     FieldObject obj = FieldObjects.fromObject(entry.getValue());
 
-                    fields.put(path, new FieldData(obj, false, isFinal));
+                    if (receiver.test(path, new FieldData(obj, false, isFinal)))
+                        return;
                 }
             } else {
                 int i = 0;
                 for (Object sub : map.entrySet()) {
                     int idx = i++;
-                    var path = basePath.then(new IndexPathStep(idx));
+                    var path = new IndexPathStep(idx);
 
                     FieldObject obj = FieldObjects.fromObject(sub);
 
-                    fields.put(path, new FieldData(obj, false, isFinal));
+                    if (receiver.test(path, new FieldData(obj, false, isFinal)))
+                        return;
                 }
             }
         }
@@ -72,35 +95,33 @@ public final class FieldObjects {
             int size = Array.getLength(o);
 
             for (int i = 0; i < size; i++) {
-                var path = basePath.then(new IndexPathStep(i));
+                var path = new IndexPathStep(i);
 
                 FieldObject obj = FieldObjects.fromObject(Array.get(o, i));
 
-                fields.put(path, new FieldData(obj, false, false));
+                if (receiver.test(path, new FieldData(obj, false, false)))
+                    return;
             }
 
-            return fields;
+            return;
         }
 
-        Fields.allInstance(o.getClass())
-            .filter(x -> !x.isSynthetic())
-            .forEach(field -> {
-                var path = basePath.then(FieldPathStep.forField(field));
+        for (Field field : (Iterable<Field>) Fields.allInstance(o.getClass()).filter(x -> !x.isSynthetic())::iterator) {
+            var path = FieldPathStep.forField(field);
 
-                FieldObject obj;
+            FieldObject obj;
 
-                try {
-                    obj = FieldObjects.fromObject(Accessor.get(o, field));
-                } catch (Exception e) {
-                    obj = ErrorFieldObject.fromException(e);
-                }
+            try {
+                obj = FieldObjects.fromObject(Accessor.get(o, field));
+            } catch (Exception e) {
+                obj = ErrorFieldObject.fromException(e);
+            }
 
-                boolean isMixin = field.getAnnotation(MixinMerged.class) != null;
+            boolean isMixin = field.getAnnotation(MixinMerged.class) != null;
 
-                fields.put(path, new FieldData(obj, isMixin, false));
-            });
-
-        return fields;
+            if (receiver.test(path, new FieldData(obj, isMixin, false)))
+                return;
+        }
     }
 
 

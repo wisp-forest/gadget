@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.client.field.FieldDataIsland;
+import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
 import io.wispforest.gadget.util.ReflectionUtil;
@@ -59,10 +60,11 @@ public final class OwoSupport {
 
             view.child(Components.label(Text.literal(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()))));
 
-            FieldDataIsland island = new FieldDataIsland();
-
-            island.shortenNames();
-            island.targetObject(unwrapped, false);
+            FieldDataIsland island = new FieldDataIsland(
+                new LocalFieldDataSource(unwrapped, false),
+                true,
+                false
+            );
 
             view.child(island.mainContainer());
 
@@ -110,9 +112,11 @@ public final class OwoSupport {
             Object data = ((ParticleSystemAccessor) system).getAdapter().deserializer().apply(buf);
 
             if (data != null) {
-                FieldDataIsland island = new FieldDataIsland();
-                island.shortenNames();
-                island.targetObject(data, false);
+                FieldDataIsland island = new FieldDataIsland(
+                    new LocalFieldDataSource(data, false),
+                    true,
+                    false
+                );
                 view.child(island.mainContainer());
             }
 
