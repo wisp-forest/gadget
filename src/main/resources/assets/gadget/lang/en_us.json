@@ -256,6 +256,7 @@
     "text.gadget.join_with_dump": "Join and start dumping packets",
     "text.gadget.save_as_java": "Save as .java",
     "text.gadget.save_as_class": "Save as .class",
+    "text.gadget_export_field_dump": "Export field dump",
     "text.gadget.packet_read_error": [
         {"text": "Packet Read Error!", "color": "red"},
         [

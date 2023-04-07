@@ -13,4 +13,11 @@ public class ClientFieldDataNode extends FieldDataNode<ClientFieldDataNode> {
     public ClientFieldDataNode(FieldDataIsland island, ObjectPath path, FieldData data) {
         super(island, path, data);
     }
+
+    @Override
+    public void onRemoved() {
+        super.onRemoved();
+
+        containerComponent.remove();
+    }
 }

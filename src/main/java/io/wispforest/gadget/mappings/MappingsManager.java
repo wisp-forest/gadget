@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public final class MappingsManager {
@@ -48,6 +49,12 @@ public final class MappingsManager {
         reloadMappings();
 
         Gadget.CONFIG.subscribeToMappings(type -> reloadMappings());
+
+        CompletableFuture.runAsync(MappingsManager::runtimeMappings)
+            .exceptionally(e -> {
+                Gadget.LOGGER.error("Encountered error while loading runtime mappings", e);
+                return null;
+            });
     }
 
     public static void reloadMappings() {

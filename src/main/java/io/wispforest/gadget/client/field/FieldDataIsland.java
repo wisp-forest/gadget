@@ -13,7 +13,6 @@ import io.wispforest.gadget.field.FieldDataHolder;
 import io.wispforest.gadget.field.FieldDataSource;
 import io.wispforest.gadget.path.FieldPathStep;
 import io.wispforest.gadget.path.PathStep;
-import io.wispforest.gadget.util.WeakObservableDispatcher;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -30,18 +29,11 @@ import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
-    private static final WeakObservableDispatcher<List<String>> HIDDEN_FIELDS = new WeakObservableDispatcher<>();
-
-    static {
-        Gadget.CONFIG.subscribeToHiddenFields(HIDDEN_FIELDS::handle);
-    }
-
     private final FlowLayout mainContainer;
     private final boolean generateAnchors;
     BiConsumer<ObjectPath, PrimitiveEditData> primitiveSetter = null;
@@ -171,22 +163,12 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
 
                     GuiUtil.contextMenu(rowLabel, mouseX, mouseY)
                         .button(Text.translatable("text.gadget.hide_field"), unused -> {
-                            node.containerComponent.remove();
                             ArrayList<String> hiddenFields = new ArrayList<>(Gadget.CONFIG.hiddenFields());
                             hiddenFields.add(step.fieldId());
                             Gadget.CONFIG.hiddenFields(hiddenFields);
                         });
 
                     return true;
-                });
-
-                HIDDEN_FIELDS.register(value -> {
-                    if (value.contains(step.fieldId())) {
-                        node.containerComponent.remove();
-                        return true;
-                    }
-
-                    return false;
                 });
             }
 
@@ -203,7 +185,7 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
             for (var entry : children.entrySet()) {
                 if (entry.getKey() instanceof FieldPathStep step
                     && Gadget.CONFIG.hiddenFields().contains(step.fieldId())) {
-                    return;
+                    continue;
                 }
 
                 container.child(entry.getValue().containerComponent);

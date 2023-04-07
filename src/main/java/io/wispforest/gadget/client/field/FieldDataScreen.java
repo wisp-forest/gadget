@@ -1,11 +1,13 @@
 package io.wispforest.gadget.client.field;
 
+import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.search.SearchGui;
 import io.wispforest.gadget.field.FieldDataSource;
 import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.network.*;
 import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.path.PathStep;
+import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -13,12 +15,20 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
@@ -136,6 +146,46 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         });
 
         verticalFlowLayout.child(sidebar);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_E && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+            String path = DialogUtil.saveFileDialog(
+                I18n.translate("text.gadget_export_field_dump"),
+                FabricLoader.getInstance().getGameDir().toString() + "/",
+                List.of("*.txt", "*.json"),
+                "JSON or Plain Text file"
+            );
+
+            if (path != null) {
+                if (path.endsWith(".txt")) {
+                    try {
+                        var os = Files.newOutputStream(Path.of(path));
+                        var bos = new BufferedOutputStream(os);
+                        FormattedDumper dumper = new FormattedDumper(new PrintStream(bos));
+
+                        dumper.write(0, "Field data of " + target);
+                        island.dumpToText(dumper, 0, island.root, 5)
+                            .whenComplete((ignored1, ignored2) -> {
+                                try {
+                                    os.close();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (path.endsWith(".json")) {
+                    // TODO: implement this.
+                }
+            }
+
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     public FieldDataSource dataSource() {
