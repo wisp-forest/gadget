@@ -8,11 +8,13 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,10 +61,12 @@ public final class PrettyPrinters {
 
         register(x -> "\"" + x + "\"", String.class);
 
+        register(x -> "MinecraftServer", MinecraftServer.class);
+
         register(x -> Registries.ITEM.getId(x).toString(), Item.class);
         register(x -> Registries.BLOCK.getId(x).toString(), Block.class);
         register(x -> Registries.ENTITY_TYPE.getId(x).toString(), EntityType.class);
-        register(x -> Registries.BLOCK_ENTITY_TYPE.getId(x).toString(), BlockEntityType.class);
-        register(x -> Registries.STATUS_EFFECT.getId(x).toString(), StatusEffect.class);
+        register(x -> Objects.toString(Registries.BLOCK_ENTITY_TYPE.getId(x), x.toString()), BlockEntityType.class);
+        register(x -> Objects.toString(Registries.STATUS_EFFECT.getId(x), x.toString()), StatusEffect.class);
     }
 }

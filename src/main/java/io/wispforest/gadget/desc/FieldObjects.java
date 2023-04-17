@@ -16,9 +16,7 @@ import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 public final class FieldObjects {
@@ -26,12 +24,12 @@ public final class FieldObjects {
 
     }
 
-    public static Map<PathStep, FieldData> getData(Object o, int from, int limit) {
+    public static Map<PathStep, FieldData> getData(Object o, Set<Object> pathObjs, int from, int limit) {
         // TODO: make this good.
         MutableInt total = new MutableInt();
-        Map<PathStep, FieldData> collected = new HashMap<>();
+        Map<PathStep, FieldData> collected = new LinkedHashMap<>();
 
-        FieldObjects.collectAllData(o, (step, data) -> {
+        FieldObjects.collectAllData(o, pathObjs, (step, data) -> {
             int i = total.getAndIncrement();
 
             if (limit >= 0 && i >= from + limit) return true;
@@ -46,18 +44,25 @@ public final class FieldObjects {
         return collected;
     }
 
-    public static void collectAllData(Object o, BiPredicate<PathStep, FieldData> receiver) {
+    public static void collectAllData(Object o, Set<Object> pathObjs, BiPredicate<PathStep, FieldData> receiver) {
+        if (o == null)
+            return;
+
         if (o instanceof Iterable<?> iter) {
             int i = 0;
             boolean isFinal = ReflectionUtil.guessImmutability(iter);
 
-            for (Object sub : iter) {
-                int idx = i++;
+            try {
+                for (Object sub : iter) {
+                    int idx = i++;
 
-                FieldObject obj = FieldObjects.fromObject(sub);
+                    FieldObject obj = FieldObjects.fromObject(sub, pathObjs);
 
-                if (receiver.test(new IndexPathStep(idx), new FieldData(obj, false, isFinal)))
-                    return;
+                    if (receiver.test(new IndexPathStep(idx), new FieldData(obj, false, isFinal)))
+                        return;
+                }
+            } catch (UnsupportedOperationException uoe) {
+                // Alright, guess you're not actually Iterable then.
             }
         }
 
@@ -72,7 +77,7 @@ public final class FieldObjects {
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
                     var path = new MapPathStep(type, type.toNetwork(entry.getKey()));
 
-                    FieldObject obj = FieldObjects.fromObject(entry.getValue());
+                    FieldObject obj = FieldObjects.fromObject(entry.getValue(), pathObjs);
 
                     if (receiver.test(path, new FieldData(obj, false, isFinal)))
                         return;
@@ -83,7 +88,7 @@ public final class FieldObjects {
                     int idx = i++;
                     var path = new IndexPathStep(idx);
 
-                    FieldObject obj = FieldObjects.fromObject(sub);
+                    FieldObject obj = FieldObjects.fromObject(sub, pathObjs);
 
                     if (receiver.test(path, new FieldData(obj, false, isFinal)))
                         return;
@@ -97,7 +102,7 @@ public final class FieldObjects {
             for (int i = 0; i < size; i++) {
                 var path = new IndexPathStep(i);
 
-                FieldObject obj = FieldObjects.fromObject(Array.get(o, i));
+                FieldObject obj = FieldObjects.fromObject(Array.get(o, i), pathObjs);
 
                 if (receiver.test(path, new FieldData(obj, false, false)))
                     return;
@@ -112,7 +117,7 @@ public final class FieldObjects {
             FieldObject obj;
 
             try {
-                obj = FieldObjects.fromObject(Accessor.get(o, field));
+                obj = FieldObjects.fromObject(Accessor.get(o, field), pathObjs);
             } catch (Exception e) {
                 obj = ErrorFieldObject.fromException(e);
             }
@@ -125,7 +130,7 @@ public final class FieldObjects {
     }
 
 
-    public static FieldObject fromObject(Object o) {
+    public static FieldObject fromObject(Object o, Set<Object> pathObjs) {
         if (o instanceof NbtCompound compound)
             return new NbtCompoundFieldObject(compound);
 
@@ -146,7 +151,8 @@ public final class FieldObjects {
 
         return new ComplexFieldObject(
             MappingsManager.unmapClass(o.getClass()),
-            tag
+            tag,
+            pathObjs.contains(o)
         );
     }
 }

@@ -153,6 +153,7 @@
     "text.config.gadget.option.internalSettings.injectMatrixStackErrors.tooltip": "Causes MatrixStack errors when Shift is pressed",
 
     "text.config.gadget.option.internalSettings.dumpTRMappings": "Dump TR Mappings",
+    "text.config.gadget.option.internalSettings.dumpFieldDataRequests": "Dump Field Data Requests",
     "text.config.gadget.option.quiltflowerVersion": "Quiltflower Version",
     "text.config.gadget.option.quiltflowerVersion.tooltip": "Quiltflower version to use for classes.\nAny version after and including 1.9.0 is valid",
 
@@ -256,7 +257,9 @@
     "text.gadget.join_with_dump": "Join and start dumping packets",
     "text.gadget.save_as_java": "Save as .java",
     "text.gadget.save_as_class": "Save as .class",
-    "text.gadget_export_field_dump": "Export field dump",
+    "text.gadget.export_field_dump": "Export field dump",
+    "text.gadget.exporting_field_dump": "Exporting field dump",
+    "text.gadget.exporting.dumping_path": "%s",
     "text.gadget.packet_read_error": [
         {"text": "Packet Read Error!", "color": "red"},
         [

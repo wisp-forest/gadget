@@ -9,14 +9,17 @@ import io.wispforest.gadget.network.InspectionTarget;
 import io.wispforest.gadget.network.packet.c2s.FieldDataRequestC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.FieldDataSetPrimitiveC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.FieldDataSetNbtCompoundC2SPacket;
+import io.wispforest.gadget.network.packet.s2c.FieldDataErrorS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.FieldDataResponseS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.gadget.path.PathStep;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class RemoteFieldDataSource implements FieldDataSource {
     private final InspectionTarget target;
@@ -43,13 +46,18 @@ public class RemoteFieldDataSource implements FieldDataSource {
 
     @Override
     public CompletableFuture<Map<PathStep, FieldData>> requestFieldsOf(ObjectPath path, int from, int limit) {
-        CompletableFuture<Map<PathStep, FieldData>> future = new CompletableFuture<>();
+        if (pendingFieldsRequests.containsKey(path)) return pendingFieldsRequests.get(path);
 
-        GadgetNetworking.CHANNEL.clientHandle().send(new FieldDataRequestC2SPacket(this.target, path, from, limit));
+        CompletableFuture<Map<PathStep, FieldData>> future = new CompletableFuture<>();
 
         pendingFieldsRequests.put(path, future);
 
-        return future;
+        GadgetNetworking.CHANNEL.clientHandle().send(new FieldDataRequestC2SPacket(this.target, path, from, limit));
+
+        if (Gadget.CONFIG.internalSettings.dumpFieldDataRequests())
+            Gadget.LOGGER.info("-> {}", path);
+
+        return future.orTimeout(10, TimeUnit.SECONDS);
     }
 
     @Override
@@ -72,7 +80,10 @@ public class RemoteFieldDataSource implements FieldDataSource {
     }
 
     public void acceptPacket(FieldDataResponseS2CPacket packet) {
-        var future = pendingFieldsRequests.get(packet.path());
+        var future = pendingFieldsRequests.remove(packet.path());
+
+        if (Gadget.CONFIG.internalSettings.dumpFieldDataRequests())
+            Gadget.LOGGER.info("<- {}", packet.path());
 
         if (future == null) {
             Gadget.LOGGER.error("FieldDataResponseS2CPacket received with unknown ObjectPath {}", packet.path());
@@ -80,5 +91,32 @@ public class RemoteFieldDataSource implements FieldDataSource {
         }
 
         future.complete(packet.fields());
+    }
+
+    public void acceptPacket(FieldDataErrorS2CPacket packet) {
+        var future = pendingFieldsRequests.remove(packet.path());
+
+        if (Gadget.CONFIG.internalSettings.dumpFieldDataRequests())
+            Gadget.LOGGER.info("<- {} (err)", packet.path());
+
+        if (future == null) {
+            Gadget.LOGGER.error("FieldDataErrorS2CPacket received with unknown ObjectPath {}", packet.path());
+            return;
+        }
+
+        future.completeExceptionally(new RemoteErrorException(packet.message()));
+    }
+
+    public static class RemoteErrorException extends RuntimeException {
+        private final Text message;
+
+        public RemoteErrorException(Text message) {
+            super(message.getString());
+            this.message = message;
+        }
+
+        public Text message() {
+            return message;
+        }
     }
 }

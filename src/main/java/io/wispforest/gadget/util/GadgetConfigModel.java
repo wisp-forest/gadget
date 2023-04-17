@@ -90,6 +90,7 @@ public class GadgetConfigModel {
         public boolean debugMatrixStackDebugging = false;
         public boolean injectMatrixStackErrors = false;
         public boolean dumpTRMappings = false;
+        public boolean dumpFieldDataRequests = false;
     }
 
     public enum MappingsType {

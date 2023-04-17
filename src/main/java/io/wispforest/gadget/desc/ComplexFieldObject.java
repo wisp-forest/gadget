@@ -2,7 +2,7 @@ package io.wispforest.gadget.desc;
 
 import io.wispforest.gadget.mappings.MappingsManager;
 
-public record ComplexFieldObject(String className, String tag) implements FieldObject {
+public record ComplexFieldObject(String className, String tag, boolean isRepeat) implements FieldObject {
     public String text() {
         return MappingsManager.displayMappings().mapClass(className) + tag;
     }

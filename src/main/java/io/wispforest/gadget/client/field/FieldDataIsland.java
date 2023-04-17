@@ -8,7 +8,6 @@ import io.wispforest.gadget.client.nbt.KeyAdderWidget;
 import io.wispforest.gadget.client.nbt.NbtDataIsland;
 import io.wispforest.gadget.client.nbt.NbtPath;
 import io.wispforest.gadget.desc.*;
-import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.gadget.field.FieldDataHolder;
 import io.wispforest.gadget.field.FieldDataSource;
 import io.wispforest.gadget.path.FieldPathStep;
@@ -30,21 +29,18 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
     private final FlowLayout mainContainer;
     private final boolean generateAnchors;
-    BiConsumer<ObjectPath, PrimitiveEditData> primitiveSetter = null;
-    BiConsumer<ObjectPath, NbtCompound> nbtCompoundSetter = null;
 
     public FieldDataIsland(FieldDataSource source, boolean shortenNames, boolean generateAnchors) {
         super(source, shortenNames);
         this.generateAnchors = generateAnchors;
         this.mainContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
-        addChildrenTo(mainContainer, root.ensureChildren().join());
+        addChildrenTo(mainContainer, root.childrenOrNull());
     }
 
     public FlowLayout mainContainer() {
@@ -84,7 +80,7 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
             row.child(rowLabel);
 
             if (data.obj() instanceof PrimitiveFieldObject pfo) {
-                if (!data.isFinal() && primitiveSetter != null && pfo.editData().isPresent()) {
+                if (!data.isFinal() && source.isMutable() && pfo.editData().isPresent()) {
                     rowText.append(Text.literal(" = ")
                         .formatted(Formatting.GRAY));
                     row.child(new PrimitiveFieldWidget(this, path, pfo));
@@ -118,9 +114,11 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
                         .formatted(Formatting.GRAY)
                 );
 
-                row
-                    .child(subContainer.getSpinnyBoi()
-                        .sizing(Sizing.fixed(10), Sizing.content()));
+                if (!cfo.isRepeat()) {
+                    row
+                        .child(subContainer.getSpinnyBoi()
+                            .sizing(Sizing.fixed(10), Sizing.content()));
+                }
             } else if (data.obj() instanceof NbtCompoundFieldObject nfo) {
                 var subContainer = new SubObjectContainer(
                     unused -> {
@@ -132,8 +130,8 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
 
                 Consumer<NbtCompound> reloader = null;
 
-                if (nbtCompoundSetter != null)
-                    reloader = newData -> nbtCompoundSetter.accept(path, newData);
+                if (source.isMutable())
+                    reloader = newData -> source.setNbtCompoundAt(path, newData);
 
                 var island = new NbtDataIsland(nfo.data(), reloader);
 
@@ -143,7 +141,7 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
                     .child(subContainer.getSpinnyBoi()
                         .sizing(Sizing.fixed(10), Sizing.content()));
 
-                if (nbtCompoundSetter != null) {
+                if (source.isMutable()) {
                     var plusLabel = Components.label(Text.of("+"));
 
                     GuiUtil.semiButton(plusLabel, (mouseX, mouseY) ->

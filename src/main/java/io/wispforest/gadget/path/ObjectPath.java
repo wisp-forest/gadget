@@ -13,6 +13,17 @@ public record ObjectPath(PathStep[] steps) implements Comparable<ObjectPath> {
         return o;
     }
 
+    public Object[] toRealPath(Object o) {
+        Object[] real = new Object[steps.length + 1];
+        real[0] = o;
+
+        for (int i = 0; i < steps.length; i++) {
+            real[i + 1] = steps[i].follow(real[i]);
+        }
+
+        return real;
+    }
+
     public void set(Object o, Object to) {
         for (int i = 0; i < steps.length - 1; i++)
             o = steps[i].follow(o);

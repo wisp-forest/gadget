@@ -23,8 +23,12 @@ public interface ProgressToast {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return new ProgressToastImpl(headText);
         } else {
-            return new Dummy();
+            return dummy();
         }
+    }
+
+    static ProgressToast dummy() {
+        return new Dummy();
     }
 
     void step(Text text);

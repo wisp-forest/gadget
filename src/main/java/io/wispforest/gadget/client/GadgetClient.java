@@ -18,10 +18,7 @@ import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
 import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.RequestResourceC2SPacket;
-import io.wispforest.gadget.network.packet.s2c.FieldDataResponseS2CPacket;
-import io.wispforest.gadget.network.packet.s2c.OpenFieldDataScreenS2CPacket;
-import io.wispforest.gadget.network.packet.s2c.ResourceDataS2CPacket;
-import io.wispforest.gadget.network.packet.s2c.ResourceListS2CPacket;
+import io.wispforest.gadget.network.packet.s2c.*;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -86,6 +83,14 @@ public class GadgetClient implements ClientModInitializer {
         });
 
         GadgetNetworking.CHANNEL.registerClientbound(FieldDataResponseS2CPacket.class, (packet, access) -> {
+            if (access.runtime().currentScreen instanceof FieldDataScreen gui
+                && gui.target().equals(packet.target())
+                && gui.dataSource() instanceof RemoteFieldDataSource remote) {
+                remote.acceptPacket(packet);
+            }
+        });
+
+        GadgetNetworking.CHANNEL.registerClientbound(FieldDataErrorS2CPacket.class, (packet, access) -> {
             if (access.runtime().currentScreen instanceof FieldDataScreen gui
                 && gui.target().equals(packet.target())
                 && gui.dataSource() instanceof RemoteFieldDataSource remote) {

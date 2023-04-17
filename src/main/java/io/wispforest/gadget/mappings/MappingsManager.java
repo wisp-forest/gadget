@@ -117,13 +117,18 @@ public final class MappingsManager {
             return unmapClass(name.substring(0, slashIdx)) + name.substring(slashIdx);
         }
 
+        if (name.contains("$$")) {
+            int dollarDollarIdx = name.lastIndexOf("$$");
+            return unmapClass(name.substring(0, dollarDollarIdx)) + name.substring(dollarDollarIdx);
+        }
+
         return FabricLoader.getInstance().getMappingResolver().unmapClassName("intermediary", name);
     }
 
     public static String unmapField(Field field) {
         if (!FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace().equals("named")) return field.getName();
 
-        var ownerUnmapped = FabricLoader.getInstance().getMappingResolver().unmapClassName("intermediary", field.getDeclaringClass().getName());
+        var ownerUnmapped = unmapClass(field.getDeclaringClass());
         var owner = intermediaryClassMap.get().get(ownerUnmapped.replace('.', '/'));
 
         if (owner == null)

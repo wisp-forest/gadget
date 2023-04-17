@@ -50,7 +50,7 @@ public class PrimitiveFieldWidget extends FlowLayout {
         if (keyCode == GLFW.GLFW_KEY_ENTER) {
             UISounds.playButtonSound();
 
-            island.primitiveSetter.accept(fieldPath, new PrimitiveEditData(editData.type(), editField.getText()));
+            island.source().setPrimitiveAt(fieldPath, new PrimitiveEditData(editData.type(), editField.getText()));
 
             removeChild(editField);
 
