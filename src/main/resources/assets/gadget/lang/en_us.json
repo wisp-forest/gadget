@@ -29,11 +29,13 @@
     "message.gadget.progress.downloading_quiltflower": "Downloading Quiltflower",
 
     "message.gadget.progress.reading_packets": "Reading packet data",
+    "message.gadget.progress.calculating_data": "Calculating data",
     "message.gadget.progress.building_screen": "Building screen",
     "message.gadget.progress.mounting_components": "Mounting components",
 
     "message.gadget.loading_mappings": "Loading mappings",
     "message.gadget.loading_dump": "Loading dump",
+    "message.gadget.loading_dump_stats": "Loading dump stats",
     "message.gadget.loading_classes": "Loading Classes",
 
     "text.gadget.client_current": {

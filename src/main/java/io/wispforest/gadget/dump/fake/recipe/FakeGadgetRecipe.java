@@ -1,4 +1,4 @@
-package io.wispforest.gadget.dump.recipe;
+package io.wispforest.gadget.dump.fake.recipe;
 
 import com.google.gson.JsonObject;
 import net.minecraft.inventory.Inventory;

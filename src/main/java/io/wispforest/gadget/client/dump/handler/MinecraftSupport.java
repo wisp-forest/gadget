@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.dump.handler;
 
+import io.wispforest.gadget.client.dump.handler.PacketRenderer;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.gadget.util.NetworkUtil;
@@ -21,7 +22,7 @@ public final class MinecraftSupport {
     }
 
     public static void init() {
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        PacketRenderer.EVENT.register((packet, view, errSink) -> {
             if (!Objects.equals(packet.channelId(), CustomPayloadS2CPacket.BRAND)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
@@ -34,7 +35,7 @@ public final class MinecraftSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        PacketRenderer.EVENT.register((packet, view, errSink) -> {
             Text header;
 
             if (Objects.equals(packet.channelId(), REGISTER_CHANNEL)) {
@@ -66,7 +67,6 @@ public final class MinecraftSupport {
 
                     more = new StringBuilder();
                 }
-
             }
 
             return true;

@@ -66,9 +66,18 @@ public interface ProgressToast {
 
     void finish(Text text, boolean hideImmediately);
 
+    void oom(OutOfMemoryError oom);
+
     default CompletableFuture<Void> follow(CompletableFuture<Void> future, boolean closeImmediately) {
         return future.whenComplete((res, e) -> {
             if (e != null) {
+                if (e instanceof OutOfMemoryError oom) {
+                    // Welp.
+
+                    oom(oom);
+                    return;
+                }
+
                 Gadget.LOGGER.error("Loading failed with exception", e);
                 force();
                 finish(Text.translatable("message.gadget.progress.failed"), false);
@@ -96,6 +105,11 @@ public interface ProgressToast {
 
         @Override
         public void finish(Text text, boolean hideImmediately) {
+
+        }
+
+        @Override
+        public void oom(OutOfMemoryError oom) {
 
         }
     }

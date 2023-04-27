@@ -2,18 +2,15 @@ package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.client.field.FieldDataIsland;
 import io.wispforest.gadget.field.LocalFieldDataSource;
-import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
-import io.wispforest.gadget.util.ReflectionUtil;
+import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
-import io.wispforest.owo.network.serialization.RecordSerializer;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.util.VectorSerializer;
-import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
@@ -39,61 +36,7 @@ public final class OwoSupport {
     }
 
     public static void init() {
-        DrawPacketHandler.EVENT.register((packet, view) -> {
-            if (packet.state() != NetworkState.PLAY) return false;
-
-            if (packet.channelId() == null) return false;
-
-            OwoNetChannelAccessor channel = (OwoNetChannelAccessor) OwoNetChannelAccessor.getRegisteredChannels().get(packet.channelId());
-
-            if (channel == null) return false;
-
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
-            int handlerId = buf.readVarInt();
-
-            if (!packet.outbound())
-                handlerId = -handlerId;
-
-            RecordSerializer<?> serializer = channel.getSerializersByIndex().get(handlerId).getSerializer();
-
-            Object unwrapped = serializer.read(buf);
-
-            view.child(Components.label(Text.literal(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()))));
-
-            FieldDataIsland island = new FieldDataIsland(
-                new LocalFieldDataSource(unwrapped, false),
-                true,
-                false
-            );
-
-            view.child(island.mainContainer());
-
-            return true;
-        });
-
-        SearchTextPacketHandler.EVENT.register((packet, searchText) -> {
-            if (packet.state() != NetworkState.PLAY) return;
-
-            if (packet.channelId() == null) return;
-
-            OwoNetChannelAccessor channel = (OwoNetChannelAccessor) OwoNetChannelAccessor.getRegisteredChannels().get(packet.channelId());
-
-            if (channel == null) return;
-
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
-            int handlerId = buf.readVarInt();
-
-            if (!packet.outbound())
-                handlerId = -handlerId;
-
-            RecordSerializer<?> serializer = channel.getSerializersByIndex().get(handlerId).getSerializer();
-
-            Object unwrapped = serializer.read(buf);
-
-            searchText.append(" ").append(ReflectionUtil.nameWithoutPackage(unwrapped.getClass()));
-        });
-
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        PacketRenderer.EVENT.register((packet, view, errSink) -> {
             if (packet.state() != NetworkState.PLAY) return false;
 
             if (packet.channelId() == null) return false;
@@ -123,7 +66,7 @@ public final class OwoSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        PacketRenderer.EVENT.register((packet, view, errSink) -> {
             if (!(packet.packet() instanceof LoginQueryRequestS2CPacket) || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
@@ -137,7 +80,7 @@ public final class OwoSupport {
             return true;
         });
 
-        DrawPacketHandler.EVENT.register((packet, view) -> {
+        PacketRenderer.EVENT.register((packet, view, errSink) -> {
             if (!(packet.packet() instanceof LoginQueryResponseC2SPacket) || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
@@ -163,12 +106,12 @@ public final class OwoSupport {
     private static void drawHandshakeMap(Map<Identifier, Integer> data, Text prefix, FlowLayout view) {
         for (var entry : data.entrySet()) {
             view.child(Components.label(
-                Text.literal("")
-                    .append(prefix)
-                    .append(Text.literal(entry.getKey().toString())
-                        .formatted(Formatting.WHITE))
-                    .append(Text.literal(" = " + entry.getValue())
-                        .formatted(Formatting.GRAY)))
+                    Text.literal("")
+                        .append(prefix)
+                        .append(Text.literal(entry.getKey().toString())
+                            .formatted(Formatting.WHITE))
+                        .append(Text.literal(" = " + entry.getValue())
+                            .formatted(Formatting.GRAY)))
                 .margins(Insets.bottom(3)));
         }
     }

@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.NotificationToast;
-import io.wispforest.gadget.dump.PacketDumping;
+import io.wispforest.gadget.dump.write.PacketDumping;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;

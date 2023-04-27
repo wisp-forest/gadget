@@ -100,7 +100,7 @@ public final class GuiUtil {
             text -> textField.setEditableColor(verifier.test(text) ? VALID_COLOR : INVALID_COLOR));
     }
 
-    public static LabelComponent showException(Exception e) {
+    public static LabelComponent showException(Throwable e) {
         CharArrayWriter writer = new CharArrayWriter();
         e.printStackTrace(new PrintWriter(writer));
         return showExceptionText(writer.toString());

@@ -1,27 +1,26 @@
 package io.wispforest.gadget.client.dump.handler;
 
-import io.wispforest.gadget.client.dump.DumpedPacket;
+import io.wispforest.gadget.dump.read.DumpedPacket;
+import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.ui.container.FlowLayout;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
-public interface DrawPacketHandler {
-    Event<DrawPacketHandler> EVENT = EventFactory.createArrayBacked(DrawPacketHandler.class, callbacks -> (packet, view) -> {
-        packet.drawErrors().clear();
-
+public interface PacketRenderer {
+    Event<PacketRenderer> EVENT = EventFactory.createArrayBacked(PacketRenderer.class, callbacks -> (packet, view, errSink) -> {
         for (var callback : callbacks) {
             try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
-                boolean result = callback.onDrawPacket(packet, view);
+                boolean result = callback.renderPacket(packet, view, errSink);
                 if (result)
                     return true;
             } catch (Exception e) {
-                packet.drawErrors().add(e);
+                errSink.accept(e);
             }
         }
 
         return false;
     });
 
-    boolean onDrawPacket(DumpedPacket packet, FlowLayout view);
+    boolean renderPacket(DumpedPacket packet, FlowLayout out, ErrorSink errSink);
 }

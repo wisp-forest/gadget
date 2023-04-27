@@ -1,32 +1,40 @@
 package io.wispforest.gadget.client.dump;
 
-import io.wispforest.gadget.client.dump.handler.DrawPacketHandler;
-import io.wispforest.gadget.client.dump.handler.SearchTextPacketHandler;
+import io.wispforest.gadget.client.dump.handler.PacketRenderer;
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
-import io.wispforest.gadget.dump.GadgetReadErrorPacket;
-import io.wispforest.gadget.dump.GadgetWriteErrorPacket;
+import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
+import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
+import io.wispforest.gadget.dump.read.DumpedPacket;
+import io.wispforest.gadget.dump.read.SearchTextData;
+import io.wispforest.gadget.util.ContextData;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.ui.container.*;
+import io.wispforest.owo.ui.container.CollapsibleContainer;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.List;
 
-public final class ProcessedDumpedPacket {
+public class RenderedPacketComponent {
+    public static final ContextData.Key<DumpedPacket, RenderedPacketComponent> KEY = new ContextData.Key<>(RenderedPacketComponent::new);
+
     private final DumpedPacket packet;
     private SoftReference<Component> component;
-    private String searchText;
+    private final List<Throwable> drawErrors = new ArrayList<>();
 
-    public ProcessedDumpedPacket(DumpedPacket packet) {
+    public RenderedPacketComponent(DumpedPacket packet) {
         this.packet = packet;
     }
 
-    public DumpedPacket packet() {
-        return packet;
+    public List<Throwable> drawErrors() {
+        return drawErrors;
     }
 
     public Component component() {
@@ -37,8 +45,6 @@ public final class ProcessedDumpedPacket {
                 .padding(Insets.of(5))
                 .surface(Surface.outline(packet.color()))
                 .margins(Insets.bottom(5));
-
-
 
             MutableText typeText = Text.literal("");
 
@@ -57,12 +63,12 @@ public final class ProcessedDumpedPacket {
             view.child(new BasedLabelComponent(typeText)
                 .margins(Insets.bottom(3)));
 
-            DrawPacketHandler.EVENT.invoker().onDrawPacket(packet, view);
+            drawErrors.clear();
+            PacketRenderer.EVENT.invoker().renderPacket(packet, view, drawErrors::add);
 
-            if (!packet.drawErrors().isEmpty()
-             || !packet.searchTextErrors().isEmpty()
-             || packet.packet() instanceof GadgetReadErrorPacket
-             || packet.packet() instanceof GadgetWriteErrorPacket) {
+            if (!drawErrors.isEmpty()
+                || packet.packet() instanceof GadgetReadErrorPacket
+                || packet.packet() instanceof GadgetWriteErrorPacket) {
                 CollapsibleContainer errors = Containers.collapsible(
                     Sizing.content(),
                     Sizing.content(),
@@ -87,12 +93,12 @@ public final class ProcessedDumpedPacket {
                         .margins(Insets.bottom(2)));
                 }
 
-                for (var e : packet.searchTextErrors()) {
+                for (var e : packet.get(SearchTextData.KEY).searchTextErrors()) {
                     errors.child(GuiUtil.showException(e)
                         .margins(Insets.bottom(2)));
                 }
 
-                for (var e : packet.drawErrors()) {
+                for (var e : packet.get(RenderedPacketComponent.KEY).drawErrors()) {
                     errors.child(GuiUtil.showException(e)
                         .margins(Insets.bottom(2)));
                 }
@@ -110,17 +116,5 @@ public final class ProcessedDumpedPacket {
         }
 
         return component.get();
-    }
-
-    public String searchText() {
-        if (searchText == null) {
-            StringBuilder sb = new StringBuilder();
-
-            SearchTextPacketHandler.EVENT.invoker().onCreateSearchText(packet, sb);
-
-            this.searchText = sb.toString();
-        }
-
-        return searchText;
     }
 }

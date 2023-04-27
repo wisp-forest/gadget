@@ -16,12 +16,12 @@ import net.minecraft.text.Text;
 import java.util.function.LongSupplier;
 
 public class ProgressToastImpl implements Toast, ProgressToast {
-    private final OwoUIAdapter<FlowLayout> adapter;
+    private OwoUIAdapter<FlowLayout> adapter;
     private final MinecraftClient client = MinecraftClient.getInstance();
     private boolean attached = false;
 
-    private final LabelComponent stepLabel;
-    private final BoxComponent progressBox;
+    private LabelComponent stepLabel;
+    private BoxComponent progressBox;
     private long stopTime = 0;
     private LongSupplier following = null;
     private long followingTotal = 0;
@@ -115,6 +115,23 @@ public class ProgressToastImpl implements Toast, ProgressToast {
             this.stepLabel.text(text);
             this.following = null;
             stopTime = hideImmediately ? -2 : -1;
+        });
+    }
+
+    public void oom(OutOfMemoryError oom) {
+        adapter.rootComponent.clearChildren();
+        client.currentScreen.removed();
+        client.currentScreen = null;
+
+        following = null;
+        adapter = null;
+        stepLabel = null;
+        progressBox = null;
+
+        client.execute(() -> {
+            client.getToastManager().clear();
+
+            throw oom;
         });
     }
 }

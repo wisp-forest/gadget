@@ -1,4 +1,4 @@
-package io.wispforest.gadget.dump.recipe;
+package io.wispforest.gadget.dump.fake.recipe;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;

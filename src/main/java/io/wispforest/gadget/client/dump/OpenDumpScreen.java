@@ -2,7 +2,7 @@ package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
-import io.wispforest.gadget.util.NumberUtil;
+import io.wispforest.gadget.dump.read.PacketDumpReader;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
@@ -28,35 +29,15 @@ import java.util.concurrent.CompletableFuture;
 public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
     private ProgressToast toast;
-    private final List<ProcessedDumpedPacket> packets;
+    private final PacketDumpReader reader;
     private FlowLayout main;
     private FlowLayout infoButton;
     private BasedSliderComponent timeSlider;
-    private final long startTime;
-    private final long endTime;
 
-    private OpenDumpScreen(Screen parent, ProgressToast toast, Path path) throws IOException {
+    private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader) throws IOException {
         this.parent = parent;
         this.toast = toast;
-        this.packets = new ArrayList<>();
-
-        toast.step(Text.translatable("message.gadget.progress.reading_packets"));
-        List<DumpedPacket> rawPackets;
-        try (var is = toast.loadWithProgress(path)) {
-            if (path.toString().endsWith(".dump"))
-                rawPackets = PacketDumpReader.readV0(is);
-            else
-                rawPackets = PacketDumpReader.readNew(is);
-        }
-
-        rawPackets.forEach(packet -> packets.add(new ProcessedDumpedPacket(packet)));
-
-        if (rawPackets.size() > 0) {
-            startTime = rawPackets.get(0).sentAt();
-            endTime = rawPackets.get(rawPackets.size() - 1).sentAt();
-        } else {
-            startTime = endTime = 0;
-        }
+        this.reader = reader;
     }
 
     public static void openWithProgress(Screen parent, Path path) {
@@ -66,9 +47,11 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         toast.follow(
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    OpenDumpScreen screen = new OpenDumpScreen(parent, toast, path);
+                    toast.step(Text.translatable("message.gadget.progress.reading_packets"));
+                    var reader = new PacketDumpReader(path, toast);
 
                     toast.step(Text.translatable("message.gadget.progress.building_screen"));
+                    OpenDumpScreen screen = new OpenDumpScreen(parent, toast, reader);
                     screen.init(client, parent.width, parent.height);
                     screen.toast = null;
 
@@ -116,10 +99,10 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         timeSlider = new BasedSliderComponent(Sizing.fill(95));
         timeSlider
             .tooltipFactory(value -> Text.of(
-                DurationFormatUtils.formatDurationHMS(currentTime(value) - startTime)
+                DurationFormatUtils.formatDurationHMS(currentTime(value) - reader.startTime())
             ))
             .message(unused -> Text.of(
-                DurationFormatUtils.formatDurationHMS(currentTime() - startTime)
+                DurationFormatUtils.formatDurationHMS(currentTime() - reader.startTime())
             ));
         timeSlider.onChanged().subscribe(value -> {
             rebuild(searchBox.getText(), currentTime());
@@ -128,7 +111,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         rootComponent
             .child(searchBox);
 
-        if (endTime > startTime)
+        if (reader.endTime() > reader.startTime())
             rootComponent.child(timeSlider);
 
         rootComponent
@@ -138,7 +121,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         this.main.padding(Insets.of(15));
 
-        rebuild("", startTime);
+        rebuild("", reader.startTime());
 
         FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
@@ -163,12 +146,12 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                 List<TooltipComponent> tooltip = new ArrayList<>();
 
                 tooltip.add(TooltipComponent.of(
-                    Text.translatable("text.gadget.info.fps", NumberUtil.formatDouble((1000.f / (delta * 50))))
+                    Text.translatable("text.gadget.info.fps", client.getCurrentFps())
                         .asOrderedText()));
 
                 tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_components", totalComponents).asOrderedText()));
 
-                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_packets", packets.size()).asOrderedText()));
+                tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.total_packets", reader.packets().size()).asOrderedText()));
 
                 tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.packets_on_screen", main.children().size()).asOrderedText()));
 
@@ -214,7 +197,18 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
             UISounds.playInteractionSound();
 
-            client.setScreen(new DumpStatsScreen(this, packets));
+            ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_dump_stats"));
+
+            toast.follow(
+                CompletableFuture.supplyAsync(() -> {
+                        toast.step(Text.translatable("message.gadget.progress.calculating_data"));
+
+                        DumpStatsScreen screen = new DumpStatsScreen(parent, reader, toast);
+
+                        return screen;
+                    })
+                    .thenAcceptAsync(client::setScreen, client),
+                true);
 
             return true;
         });
@@ -231,7 +225,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     private long currentTime(double value) {
-        return (long) (startTime + (endTime - startTime) * value);
+        return (long) MathHelper.lerp(value, reader.startTime(), reader.endTime());
     }
 
     private long currentTime() {
@@ -244,24 +238,10 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     private void rebuild(String searchText, long time) {
-        List<SearchWord> words = SearchWord.parseSearch(searchText);
         List<Component> neededComponents = new ArrayList<>();
 
-        main.clearChildren();
-
-        outer:
-        for (var packet : packets) {
-            if (packet.packet().sentAt() < time) continue;
-            if (packet.packet().sentAt() > time && neededComponents.size() > 300) break;
-
-            String relevantText = packet.searchText();
-
-            for (var word : words) {
-                if (!word.matches(relevantText))
-                    continue outer;
-            }
-
-            neededComponents.add(packet.component());
+        for (var packet : reader.collectFor(searchText, time, 300)) {
+            neededComponents.add(packet.get(RenderedPacketComponent.KEY).component());
         }
 
         main.children(neededComponents);

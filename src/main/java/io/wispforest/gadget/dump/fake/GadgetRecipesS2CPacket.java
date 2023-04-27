@@ -1,9 +1,9 @@
-package io.wispforest.gadget.dump;
+package io.wispforest.gadget.dump.fake;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.dump.recipe.FakeGadgetRecipe;
-import io.wispforest.gadget.dump.recipe.ReadErrorRecipe;
-import io.wispforest.gadget.dump.recipe.WriteErrorRecipe;
+import io.wispforest.gadget.dump.fake.recipe.FakeGadgetRecipe;
+import io.wispforest.gadget.dump.fake.recipe.ReadErrorRecipe;
+import io.wispforest.gadget.dump.fake.recipe.WriteErrorRecipe;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;

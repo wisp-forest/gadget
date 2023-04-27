@@ -1,4 +1,4 @@
-package io.wispforest.gadget.dump;
+package io.wispforest.gadget.dump.fake;
 
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;

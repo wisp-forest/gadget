@@ -1,6 +1,7 @@
-package io.wispforest.gadget.client.dump;
+package io.wispforest.gadget.dump.read;
 
-import io.wispforest.gadget.dump.PacketDumping;
+import io.wispforest.gadget.dump.write.PacketDumping;
+import io.wispforest.gadget.util.ContextData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import io.wispforest.gadget.util.NetworkUtil;
@@ -23,8 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-public class PacketDumpReader {
-    private PacketDumpReader() {
+public class PacketDumpDeserializer {
+    private PacketDumpDeserializer() {
 
     }
 
@@ -65,8 +66,7 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size,
-                    new ArrayList<>(), new ArrayList<>()));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
             }
         } catch (EOFException e) {
             return list;
@@ -128,8 +128,7 @@ public class PacketDumpReader {
                     channelId = loginQueryChannels.get(res.getQueryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size,
-                    new ArrayList<>(), new ArrayList<>()));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
             }
         } catch (EOFException e) {
             return list;

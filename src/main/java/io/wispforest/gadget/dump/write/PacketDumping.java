@@ -1,6 +1,7 @@
-package io.wispforest.gadget.dump;
+package io.wispforest.gadget.dump.write;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.dump.fake.*;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.NetworkSide;

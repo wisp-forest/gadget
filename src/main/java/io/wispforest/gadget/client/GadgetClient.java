@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
+import io.wispforest.gadget.client.dump.handler.ClientPacketHandlers;
 import io.wispforest.gadget.client.field.RemoteFieldDataSource;
 import io.wispforest.gadget.client.gui.ContextMenuScreens;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
@@ -12,7 +13,7 @@ import io.wispforest.gadget.client.resource.ViewResourcesScreen;
 import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.*;
-import io.wispforest.gadget.client.dump.handler.PacketHandlers;
+import io.wispforest.gadget.dump.read.handler.PacketHandlers;
 import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.gui.GadgetScreen;
@@ -66,7 +67,7 @@ public class GadgetClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(INSPECT_KEY);
         KeyBindingHelper.registerKeyBinding(DUMP_KEY);
 
-        PacketHandlers.init();
+        ClientPacketHandlers.init();
         UIInspector.init();
         ServerData.init();
         ContextMenuScreens.init();

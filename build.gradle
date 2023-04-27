@@ -80,7 +80,7 @@ dependencies {
 //	modLocalRuntime "dev.architectury:architectury-fabric:6.3.49"
 //	modLocalRuntime "com.glisco:things:0.2.20+1.19"
 	modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:10.0.96"
-	modLocalRuntime "maven.modrinth:auth-me:5.0.0"
+	modLocalRuntime "maven.modrinth:auth-me:6.0.0"
 
 	testmodImplementation sourceSets.main.output
 }

@@ -1,6 +1,7 @@
-package io.wispforest.gadget.dump;
+package io.wispforest.gadget.dump.fake;
 
 import com.google.common.collect.Lists;
+import io.wispforest.gadget.dump.write.PacketDumping;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
