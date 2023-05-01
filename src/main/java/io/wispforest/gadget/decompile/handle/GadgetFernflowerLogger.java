@@ -1,5 +1,6 @@
 package io.wispforest.gadget.decompile.handle;
 
+import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.text.Text;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
 
@@ -26,9 +27,7 @@ public class GadgetFernflowerLogger extends IFernflowerLogger {
 
     @Override
     public void writeMessage(String message, Severity severity, Throwable t) {
-        CharArrayWriter writer = new CharArrayWriter();
-        t.printStackTrace(new PrintWriter(writer));
-        String fullExceptionText = writer.toString().replace("\t", "    ");
+        String fullExceptionText = ThrowableUtil.throwableToString(t);
 
         if (severity == Severity.INFO) {
             handler.logConsumer.accept(

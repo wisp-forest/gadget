@@ -262,6 +262,19 @@
     "text.gadget.export_field_dump": "Export field dump",
     "text.gadget.exporting_field_dump": "Exporting field dump",
     "text.gadget.exporting.dumping_path": "%s",
+    "text.gadget.export.packet_dump": {
+        "text": "Export packet dump",
+        "bold": true
+    },
+    "text.gadget.export.output_path": "Output Path: ",
+    "text.gadget.export.gather_progress": [
+        {"text": "", "color": "light_gray"},
+        "Found ",
+        {"index": 0},
+        " packets"
+    ],
+    "text.gadget.export.export_button": "Export",
+    "text.gadget.export.exporting_packet_dump": "Exporting packet dump",
     "text.gadget.packet_read_error": [
         {"text": "Packet Read Error!", "color": "red"},
         [

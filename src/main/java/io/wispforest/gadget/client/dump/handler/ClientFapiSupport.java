@@ -10,10 +10,10 @@ import net.minecraft.util.Identifier;
 
 import java.util.Objects;
 
-public final class FapiSupport {
+public final class ClientFapiSupport {
     private static final Identifier EARLY_REGISTRATION_CHANNEL = new Identifier("fabric-networking-api-v1", "early_registration");
 
-    private FapiSupport() {
+    private ClientFapiSupport() {
 
     }
 

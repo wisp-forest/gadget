@@ -2,10 +2,15 @@ package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
+import io.wispforest.gadget.client.gui.SaveFilePathComponent;
+import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.PacketDumpReader;
+import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.*;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
@@ -13,14 +18,19 @@ import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +40,17 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
     private ProgressToast toast;
     private final PacketDumpReader reader;
+    private final Path path;
     private FlowLayout main;
     private FlowLayout infoButton;
     private BasedSliderComponent timeSlider;
+    private TextBoxComponent searchBox;
 
-    private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader) throws IOException {
+    private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader, Path path) throws IOException {
         this.parent = parent;
         this.toast = toast;
         this.reader = reader;
+        this.path = path;
     }
 
     public static void openWithProgress(Screen parent, Path path) {
@@ -51,7 +64,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                     var reader = new PacketDumpReader(path, toast);
 
                     toast.step(Text.translatable("message.gadget.progress.building_screen"));
-                    OpenDumpScreen screen = new OpenDumpScreen(parent, toast, reader);
+                    OpenDumpScreen screen = new OpenDumpScreen(parent, toast, reader, path);
                     screen.init(client, parent.width, parent.height);
                     screen.toast = null;
 
@@ -80,7 +93,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), this.main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
 
-        var searchBox = Components.textBox(Sizing.fill(95));
+        searchBox = Components.textBox(Sizing.fill(95));
         searchBox.onChanged().subscribe(text -> rebuild(text, currentTime()));
         searchBox.margins(Insets.bottom(3));
 
@@ -237,6 +250,79 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         super.render(matrices, mouseX, mouseY, delta);
     }
 
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_E && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
+            // Export.
+            FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
+
+            exportModal
+                .surface(Surface.DARK_PANEL)
+                .padding(Insets.of(8));
+
+            exportModal.child(Components.label(Text.translatable("text.gadget.export.packet_dump"))
+                .margins(Insets.bottom(4)));
+
+            SaveFilePathComponent savePath = new SaveFilePathComponent(
+                I18n.translate("text.gadget.export.packet_dump"),
+                path.toString() + ".txt")
+                .pattern("*.txt")
+                .filterDescription("Plain Text file");
+
+            LabelComponent progressLabel = Components.label(Text.translatable("text.gadget.export.gather_progress", 0));
+
+            CompletableFuture<List<DumpedPacket>> collected = CompletableFuture.supplyAsync(() ->
+                reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, progress ->
+                    client.execute(() ->
+                        progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress))
+                    )
+                )
+            );
+
+            exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
+                .child(Components.label(Text.translatable("text.gadget.export.output_path")))
+                .child(savePath)
+                .verticalAlignment(VerticalAlignment.CENTER)
+            );
+
+            exportModal.child(progressLabel);
+
+            var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
+
+                try {
+                    Path nioPath = Path.of(savePath.path().get());
+                    var os = Files.newOutputStream(nioPath);
+                    var bos = new BufferedOutputStream(os);
+                    FormattedDumper dumper = new FormattedDumper(new PrintStream(bos));
+
+                    ProgressToast toast = ProgressToast.create(Text.translatable("text.gadget.export.exporting_packet_dump"));
+                    dumper.write(0, "Packet dump " + path.getFileName().toString());
+                    MutableLong progress = new MutableLong();
+
+                    toast.force();
+                    toast.followProgress(progress::getValue, collected.join().size());
+                    toast.follow(CompletableFuture.runAsync(() -> {
+                        for (var packet : collected.join()) {
+                            reader.dumpPacketToText(packet, dumper, 0);
+                            progress.increment();
+                        }
+                    }), false);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            button.active(false);
+            collected.thenRunAsync(() -> button.active(true), client);
+
+            exportModal.child(button);
+
+            uiAdapter.rootComponent.child(Containers.overlay(exportModal));
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
     private void rebuild(String searchText, long time) {
         List<Component> neededComponents = new ArrayList<>();
 
@@ -244,7 +330,11 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             neededComponents.add(packet.get(RenderedPacketComponent.KEY).component());
         }
 
-        main.children(neededComponents);
+        main.configure(a -> {
+            main.clearChildren();
+            main.children(neededComponents);
+        });
+
     }
 
     @Override

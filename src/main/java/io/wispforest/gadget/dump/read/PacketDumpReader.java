@@ -1,13 +1,25 @@
 package io.wispforest.gadget.dump.read;
 
 import io.wispforest.gadget.client.dump.SearchWord;
+import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
+import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
+import io.wispforest.gadget.dump.read.handler.PlainTextPacketDumper;
+import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.ProgressToast;
-import io.wispforest.owo.ui.core.Component;
+import io.wispforest.gadget.util.ReflectionUtil;
+import io.wispforest.gadget.util.ThrowableUtil;
+import io.wispforest.owo.ui.core.Insets;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntConsumer;
 
 public class PacketDumpReader {
     private final List<DumpedPacket> packets;
@@ -35,6 +47,10 @@ public class PacketDumpReader {
     }
 
     public List<DumpedPacket> collectFor(String searchText, long from, int max) {
+        return collectFor(searchText, from, max, unused -> {});
+    }
+
+    public List<DumpedPacket> collectFor(String searchText, long from, int max, IntConsumer progressConsumer) {
         List<SearchWord> words = SearchWord.parseSearch(searchText);
         List<DumpedPacket> collected = new ArrayList<>();
 
@@ -51,9 +67,47 @@ public class PacketDumpReader {
             }
 
             collected.add(packet);
+            progressConsumer.accept(collected.size());
         }
 
         return collected;
+    }
+
+    public void dumpPacketToText(DumpedPacket packet, FormattedDumper out, int indent) {
+        StringBuilder sb = new StringBuilder();
+
+        if (packet.packet() instanceof GadgetReadErrorPacket errorPacket) {
+            sb.append(I18n.translate("text.gadget.packet_read_error", errorPacket.packetId()));
+        } else if (packet.packet() instanceof GadgetWriteErrorPacket errorPacket) {
+            sb.append(I18n.translate("text.gadget.packet_write_error", errorPacket.packetId()));
+        } else {
+            sb.append(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
+
+            if (packet.channelId() != null)
+                sb.append(" ").append(packet.channelId());
+        }
+
+        if (startTime < endTime) {
+            sb.append(" [");
+            sb.append(DurationFormatUtils.formatDurationHMS(packet.sentAt() - startTime));
+            sb.append("]");
+        }
+
+        out.write(indent, sb.toString());
+
+        if (packet.packet() instanceof GadgetReadErrorPacket error) {
+            out.writeLines(indent + 1, ThrowableUtil.throwableToString(error.exception()));
+        }
+
+        if (packet.packet() instanceof GadgetWriteErrorPacket error) {
+            out.writeLines(indent + 1, error.exceptionText());
+        }
+
+        PlainTextPacketDumper.EVENT.invoker().dumpAsPlainText(packet, out, indent + 1, throwable -> {
+            out.write(indent + 1, "----ERROR----");
+            out.writeLines(indent + 1, ThrowableUtil.throwableToString(throwable));
+            out.write(indent + 1, "-------------");
+        });
     }
 
     public long startTime() {

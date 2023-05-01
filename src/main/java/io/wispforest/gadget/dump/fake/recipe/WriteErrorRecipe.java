@@ -1,6 +1,7 @@
 package io.wispforest.gadget.dump.fake.recipe;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
@@ -9,11 +10,7 @@ import java.io.PrintWriter;
 
 public record WriteErrorRecipe(Identifier id, String exceptionText) implements FakeGadgetRecipe {
     public static WriteErrorRecipe from(Identifier id, Exception e) {
-        CharArrayWriter writer = new CharArrayWriter();
-        e.printStackTrace(new PrintWriter(writer));
-        String fullExceptionText = writer.toString();
-
-        return new WriteErrorRecipe(id, fullExceptionText);
+        return new WriteErrorRecipe(id, ThrowableUtil.throwableToString(e));
     }
 
     @Override

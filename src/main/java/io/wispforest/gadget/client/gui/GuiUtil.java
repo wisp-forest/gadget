@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.util.ThrowableUtil;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.DropdownComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
@@ -15,8 +16,6 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -101,9 +100,7 @@ public final class GuiUtil {
     }
 
     public static LabelComponent showException(Throwable e) {
-        CharArrayWriter writer = new CharArrayWriter();
-        e.printStackTrace(new PrintWriter(writer));
-        return showExceptionText(writer.toString());
+        return showExceptionText(ThrowableUtil.throwableToString(e));
     }
 
     public static LabelComponent showExceptionText(String fullExceptionText) {

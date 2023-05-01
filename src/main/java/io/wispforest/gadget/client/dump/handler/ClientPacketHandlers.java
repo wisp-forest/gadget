@@ -21,9 +21,9 @@ public class ClientPacketHandlers {
     }
 
     public static void init() {
-        OwoSupport.init();
-        MinecraftSupport.init();
-        FapiSupport.init();
+        ClientOwoSupport.init();
+        ClientMinecraftSupport.init();
+        ClientFapiSupport.init();
 
         PacketRenderer.EVENT.register((packet, view, errSink) -> {
             var unwrapped = PacketUnwrapper.EVENT.invoker().tryUnwrap(packet, errSink);

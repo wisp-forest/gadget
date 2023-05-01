@@ -1,5 +1,6 @@
 package io.wispforest.gadget.dump.fake;
 
+import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
@@ -11,10 +12,7 @@ public record GadgetWriteErrorPacket(int packetId, String exceptionText) impleme
     public static final int ID = -1;
 
     public static GadgetWriteErrorPacket fromThrowable(int packetId, Throwable t) {
-        CharArrayWriter writer = new CharArrayWriter();
-        t.printStackTrace(new PrintWriter(writer));
-        String fullExceptionText = writer.toString();
-        return new GadgetWriteErrorPacket(packetId, fullExceptionText);
+        return new GadgetWriteErrorPacket(packetId, ThrowableUtil.throwableToString(t));
     }
 
     public static GadgetWriteErrorPacket read(PacketByteBuf buf, NetworkState state, NetworkSide side) {
