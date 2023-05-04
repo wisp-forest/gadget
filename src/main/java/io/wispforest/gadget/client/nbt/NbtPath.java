@@ -1,6 +1,8 @@
 package io.wispforest.gadget.client.nbt;
 
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.AbstractNbtList;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 
 import java.util.Arrays;
 

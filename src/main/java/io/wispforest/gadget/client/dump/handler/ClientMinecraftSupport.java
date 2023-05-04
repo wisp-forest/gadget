@@ -1,9 +1,9 @@
 package io.wispforest.gadget.client.dump.handler;
 
 import io.wispforest.gadget.dump.read.handler.MinecraftSupport;
+import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.Insets;
-import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.text.Text;

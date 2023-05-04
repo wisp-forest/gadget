@@ -275,6 +275,10 @@
     ],
     "text.gadget.export.export_button": "Export",
     "text.gadget.export.exporting_packet_dump": "Exporting packet dump",
+    "text.gadget.export.error": {
+        "text": "Error! Check logs.",
+        "color": "red"
+    },
     "text.gadget.packet_read_error": [
         {"text": "Packet Read Error!", "color": "red"},
         [

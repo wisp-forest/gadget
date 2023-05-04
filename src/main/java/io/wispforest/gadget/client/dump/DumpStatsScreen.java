@@ -18,7 +18,9 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
     private final Map<String, PacketTypeData> packetTypes = new HashMap<>();

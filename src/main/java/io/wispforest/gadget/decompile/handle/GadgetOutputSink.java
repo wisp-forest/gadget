@@ -2,8 +2,6 @@ package io.wispforest.gadget.decompile.handle;
 
 import org.jetbrains.java.decompiler.main.extern.IContextSource;
 
-import java.io.IOException;
-
 public class GadgetOutputSink implements IContextSource.IOutputSink {
     private final GadgetResultSaver saver;
 

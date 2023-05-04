@@ -1,18 +1,11 @@
 package io.wispforest.gadget.dump.read;
 
 import io.wispforest.gadget.client.dump.SearchWord;
-import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
 import io.wispforest.gadget.dump.read.handler.PlainTextPacketDumper;
-import io.wispforest.gadget.util.FormattedDumper;
-import io.wispforest.gadget.util.ProgressToast;
-import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.gadget.util.ThrowableUtil;
-import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.gadget.util.*;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.io.IOException;
@@ -47,12 +40,14 @@ public class PacketDumpReader {
     }
 
     public List<DumpedPacket> collectFor(String searchText, long from, int max) {
-        return collectFor(searchText, from, max, unused -> {});
+        return collectFor(searchText, from, max, unused -> {}, CancellationToken.NONE);
     }
 
-    public List<DumpedPacket> collectFor(String searchText, long from, int max, IntConsumer progressConsumer) {
+    public List<DumpedPacket> collectFor(String searchText, long from, int max, IntConsumer progressConsumer, CancellationToken token) {
         List<SearchWord> words = SearchWord.parseSearch(searchText);
         List<DumpedPacket> collected = new ArrayList<>();
+
+        token.throwIfCancelled();
 
         outer:
         for (var packet : packets) {
@@ -61,6 +56,8 @@ public class PacketDumpReader {
 
             String relevantText = packet.get(SearchTextData.KEY).searchText();
 
+            token.throwIfCancelled();
+
             for (var word : words) {
                 if (!word.matches(relevantText))
                     continue outer;
@@ -68,8 +65,11 @@ public class PacketDumpReader {
 
             collected.add(packet);
             progressConsumer.accept(collected.size());
+
+            token.throwIfCancelled();
         }
 
+        token.throwIfCancelled();
         return collected;
     }
 

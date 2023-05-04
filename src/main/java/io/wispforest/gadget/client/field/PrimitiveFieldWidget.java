@@ -1,14 +1,14 @@
 package io.wispforest.gadget.client.field;
 
+import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.desc.PrimitiveFieldObject;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
+import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
-import io.wispforest.gadget.client.gui.GuiUtil;
-import io.wispforest.gadget.path.ObjectPath;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;

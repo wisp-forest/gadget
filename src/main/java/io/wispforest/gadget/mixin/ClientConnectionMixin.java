@@ -2,7 +2,10 @@ package io.wispforest.gadget.mixin;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.wispforest.gadget.client.dump.PacketDumper;
-import net.minecraft.network.*;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkSide;
+import net.minecraft.network.NetworkState;
+import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.packet.Packet;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;

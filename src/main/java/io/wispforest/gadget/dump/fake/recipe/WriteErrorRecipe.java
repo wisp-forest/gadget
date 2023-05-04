@@ -5,9 +5,6 @@ import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-
 public record WriteErrorRecipe(Identifier id, String exceptionText) implements FakeGadgetRecipe {
     public static WriteErrorRecipe from(Identifier id, Exception e) {
         return new WriteErrorRecipe(id, ThrowableUtil.throwableToString(e));

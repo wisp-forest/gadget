@@ -3,7 +3,10 @@ package io.wispforest.gadget.client.gui;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 public class ComponentAdditionRound {
     private final Map<FlowLayout, ComponentData> data = new LinkedHashMap<>();

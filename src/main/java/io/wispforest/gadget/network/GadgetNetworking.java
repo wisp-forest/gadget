@@ -2,13 +2,13 @@ package io.wispforest.gadget.network;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.desc.FieldObjects;
+import io.wispforest.gadget.desc.edit.PrimitiveEditTypes;
 import io.wispforest.gadget.network.packet.c2s.*;
 import io.wispforest.gadget.network.packet.s2c.*;
 import io.wispforest.gadget.path.EnumMapPathStepType;
 import io.wispforest.gadget.path.SimpleMapPathStepType;
 import io.wispforest.gadget.util.ResourceUtil;
 import io.wispforest.owo.network.OwoNetChannel;
-import io.wispforest.gadget.desc.edit.PrimitiveEditTypes;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSets;
 import me.lucko.fabric.api.permissions.v0.Permissions;

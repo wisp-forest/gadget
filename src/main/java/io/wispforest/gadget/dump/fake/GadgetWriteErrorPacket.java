@@ -5,9 +5,6 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-
 public record GadgetWriteErrorPacket(int packetId, String exceptionText) implements FakeGadgetPacket {
     public static final int ID = -1;
 

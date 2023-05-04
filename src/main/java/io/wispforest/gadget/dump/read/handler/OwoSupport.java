@@ -1,21 +1,21 @@
 package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.DumpedPacket;
+import io.wispforest.gadget.field.DefaultFieldDataHolder;
+import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.mixin.owo.IndexedSerializerAccessor;
 import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
+import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
-import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.util.VectorSerializer;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -59,6 +59,53 @@ public final class OwoSupport {
 
             return new PacketUnwrapper.Unwrapped(unwrapped, netHandlerId);
         });
+
+        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
+            OwoSupport.ParticleSystemPacket parsed = OwoSupport.parseParticleSystemPacket(packet);
+
+            if (parsed == null) return false;
+
+            out.write(indent, "Particle system #" + parsed.systemId() + " @ " + (int) parsed.pos().x + ", " + (int) parsed.pos().y + ", " + (int) parsed.pos().z);
+
+            if (parsed.data() != null) {
+                DefaultFieldDataHolder holder = new DefaultFieldDataHolder(
+                    new LocalFieldDataSource(parsed.data(), false),
+                    true
+                );
+                holder.dumpToText(out, indent, holder.root(), 5).join();
+            }
+
+            return true;
+        });
+
+        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
+            Map<Identifier, Integer> handshakeReq = OwoSupport.parseHandshakeRequest(packet);
+
+            if (handshakeReq == null) return false;
+
+            drawHandshakeMap(handshakeReq, "o ", out, indent);
+
+            return true;
+        });
+
+        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
+            OwoSupport.HandshakeResponse response = OwoSupport.parseHandshakeResponse(packet);
+
+            if (response == null) return false;
+
+            drawHandshakeMap(response.requiredChannels(), "r ", out, indent);
+            drawHandshakeMap(response.requiredControllers(), "p ", out, indent);
+            drawHandshakeMap(response.optionalChannels(), "o ", out, indent);
+
+            return true;
+        });
+
+    }
+
+    private static void drawHandshakeMap(Map<Identifier, Integer> data, String prefix, FormattedDumper out, int indent) {
+        for (var entry : data.entrySet()) {
+            out.write(indent, prefix + entry.getKey().toString() + " = " + entry.getValue());
+        }
     }
 
     @SuppressWarnings("UnstableApiUsage")

@@ -7,12 +7,13 @@ import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.network.InspectionTarget;
 import io.wispforest.gadget.network.packet.c2s.FieldDataRequestC2SPacket;
-import io.wispforest.gadget.network.packet.c2s.FieldDataSetPrimitiveC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.FieldDataSetNbtCompoundC2SPacket;
+import io.wispforest.gadget.network.packet.c2s.FieldDataSetPrimitiveC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.FieldDataErrorS2CPacket;
 import io.wispforest.gadget.network.packet.s2c.FieldDataResponseS2CPacket;
 import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.gadget.path.PathStep;
+import io.wispforest.gadget.util.CancellationTokenSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 
@@ -21,11 +22,12 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class RemoteFieldDataSource implements FieldDataSource {
+public class RemoteFieldDataSource implements FieldDataSource, AutoCloseable {
     private final InspectionTarget target;
     private final FieldData rootData;
     private final Map<PathStep, FieldData> rootFields;
 
+    private final CancellationTokenSource cancelSource = new CancellationTokenSource();
     private final Map<ObjectPath, CompletableFuture<Map<PathStep, FieldData>>> pendingFieldsRequests = new TreeMap<>();
 
     public RemoteFieldDataSource(InspectionTarget target, FieldData rootData, Map<PathStep, FieldData> rootFields) {
@@ -46,6 +48,8 @@ public class RemoteFieldDataSource implements FieldDataSource {
 
     @Override
     public CompletableFuture<Map<PathStep, FieldData>> requestFieldsOf(ObjectPath path, int from, int limit) {
+        cancelSource.token().throwIfCancelled();
+
         if (pendingFieldsRequests.containsKey(path)) return pendingFieldsRequests.get(path);
 
         CompletableFuture<Map<PathStep, FieldData>> future = new CompletableFuture<>();
@@ -57,7 +61,7 @@ public class RemoteFieldDataSource implements FieldDataSource {
         if (Gadget.CONFIG.internalSettings.dumpFieldDataRequests())
             Gadget.LOGGER.info("-> {}", path);
 
-        return future.orTimeout(10, TimeUnit.SECONDS);
+        return cancelSource.token().wrapFuture(future.orTimeout(10, TimeUnit.SECONDS));
     }
 
     @Override
@@ -67,6 +71,8 @@ public class RemoteFieldDataSource implements FieldDataSource {
 
     @Override
     public CompletableFuture<Void> setPrimitiveAt(ObjectPath path, PrimitiveEditData editData) {
+        cancelSource.token().throwIfCancelled();
+
         GadgetNetworking.CHANNEL.clientHandle().send(new FieldDataSetPrimitiveC2SPacket(this.target, path, editData));
 
         return CompletableFuture.completedFuture(null);
@@ -74,6 +80,8 @@ public class RemoteFieldDataSource implements FieldDataSource {
 
     @Override
     public CompletableFuture<Void> setNbtCompoundAt(ObjectPath path, NbtCompound tag) {
+        cancelSource.token().throwIfCancelled();
+
         GadgetNetworking.CHANNEL.clientHandle().send(new FieldDataSetNbtCompoundC2SPacket(this.target, path, tag));
 
         return CompletableFuture.completedFuture(null);
@@ -105,6 +113,11 @@ public class RemoteFieldDataSource implements FieldDataSource {
         }
 
         future.completeExceptionally(new RemoteErrorException(packet.message()));
+    }
+
+    @Override
+    public void close() {
+        cancelSource.cancel();
     }
 
     public static class RemoteErrorException extends RuntimeException {

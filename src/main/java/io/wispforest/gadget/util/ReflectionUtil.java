@@ -4,7 +4,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.gadget.mappings.MappingsManager;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
 
 public final class ReflectionUtil {
     @SuppressWarnings("RedundantUnmodifiable")

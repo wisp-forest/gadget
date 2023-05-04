@@ -15,7 +15,9 @@ import io.wispforest.gadget.util.ResourceUtil;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.*;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
@@ -120,6 +122,10 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
 
             for (var dump : FileUtil.listSortedByFileName(PacketDumper.DUMP_DIR)) {
                 String filename = dump.getFileName().toString();
+
+                if (!filename.endsWith(".gdump")
+                 && !filename.endsWith(".dump"))
+                    continue;
 
                 FlowLayout row = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 

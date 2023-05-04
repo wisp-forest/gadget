@@ -1,7 +1,6 @@
 package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.DumpedPacket;
-import io.wispforest.gadget.dump.read.SearchTextData;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.FormattedDumper;
 import io.wispforest.gadget.util.NetworkUtil;

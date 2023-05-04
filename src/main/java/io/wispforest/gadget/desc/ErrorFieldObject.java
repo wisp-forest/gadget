@@ -2,9 +2,6 @@ package io.wispforest.gadget.desc;
 
 import io.wispforest.gadget.util.ThrowableUtil;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-
 public record ErrorFieldObject(String exceptionClass, String fullExceptionText) implements FieldObject {
     public static ErrorFieldObject fromException(Exception e) {
         return new ErrorFieldObject(e.getClass().getName(), ThrowableUtil.throwableToString(e));

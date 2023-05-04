@@ -1,5 +1,6 @@
 package io.wispforest.gadget.client.dump.handler;
 
+import io.wispforest.gadget.dump.read.handler.FapiSupport;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.core.Insets;
@@ -11,15 +12,13 @@ import net.minecraft.util.Identifier;
 import java.util.Objects;
 
 public final class ClientFapiSupport {
-    private static final Identifier EARLY_REGISTRATION_CHANNEL = new Identifier("fabric-networking-api-v1", "early_registration");
-
     private ClientFapiSupport() {
 
     }
 
     public static void init() {
         PacketRenderer.EVENT.register((packet, view, errSink) -> {
-            if (!Objects.equals(packet.channelId(), EARLY_REGISTRATION_CHANNEL)) return false;
+            if (!Objects.equals(packet.channelId(), FapiSupport.EARLY_REGISTRATION_CHANNEL)) return false;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
             int count = buf.readVarInt();

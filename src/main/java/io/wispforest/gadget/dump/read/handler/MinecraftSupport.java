@@ -3,6 +3,7 @@ package io.wispforest.gadget.dump.read.handler;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,31 @@ public final class MinecraftSupport {
 
     private MinecraftSupport() {
 
+    }
+
+    public static void init() {
+        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
+            if (!Objects.equals(packet.channelId(), CustomPayloadS2CPacket.BRAND)) return false;
+
+            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            String brand = buf.readString();
+
+            out.write(indent, "brand = \"" + brand + "\"");
+
+            return true;
+        });
+
+        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
+            MinecraftSupport.RegisterPacket parsed = MinecraftSupport.parseRegisterPacket(packet);
+
+            if (parsed == null) return false;
+
+            for (Identifier channel : parsed.channels()) {
+                out.write(indent, (parsed.unregister() ? "+ " : "- ") + channel);
+            }
+
+            return true;
+        });
     }
 
     public static @Nullable RegisterPacket parseRegisterPacket(DumpedPacket packet) {

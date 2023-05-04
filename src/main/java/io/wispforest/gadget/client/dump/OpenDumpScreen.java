@@ -1,20 +1,25 @@
 package io.wispforest.gadget.client.dump;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
+import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SaveFilePathComponent;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.PacketDumpReader;
-import io.wispforest.gadget.util.FormattedDumper;
-import io.wispforest.gadget.util.ProgressToast;
+import io.wispforest.gadget.util.*;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.component.TextBoxComponent;
-import io.wispforest.owo.ui.container.*;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.OverlayContainer;
+import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
+import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -34,7 +39,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private final Screen parent;
@@ -45,6 +52,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private FlowLayout infoButton;
     private BasedSliderComponent timeSlider;
     private TextBoxComponent searchBox;
+    private CancellationTokenSource currentSearchToken = null;
 
     private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader, Path path) throws IOException {
         this.parent = parent;
@@ -270,14 +278,16 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                 .filterDescription("Plain Text file");
 
             LabelComponent progressLabel = Components.label(Text.translatable("text.gadget.export.gather_progress", 0));
+            Observable<Integer> count = Observable.of(0);
+
+            ReactiveUtils.throttle(count, TimeUnit.MILLISECONDS.toNanos(100), client)
+                .observe(progress ->
+                    progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress)));
+
+            CancellationTokenSource tokSource = new CancellationTokenSource();
 
             CompletableFuture<List<DumpedPacket>> collected = CompletableFuture.supplyAsync(() ->
-                reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, progress ->
-                    client.execute(() ->
-                        progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress))
-                    )
-                )
-            );
+                reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, count::set, tokSource.token()));
 
             exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(Components.label(Text.translatable("text.gadget.export.output_path")))
@@ -288,6 +298,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             exportModal.child(progressLabel);
 
             var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
+                tokSource.token().throwIfCancelled();
 
                 try {
                     Path nioPath = Path.of(savePath.path().get());
@@ -305,6 +316,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                         for (var packet : collected.join()) {
                             reader.dumpPacketToText(packet, dumper, 0);
                             progress.increment();
+                            tokSource.token().throwIfCancelled();
                         }
                     }), false);
                 } catch (IOException e) {
@@ -313,28 +325,63 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             });
 
             button.active(false);
-            collected.thenRunAsync(() -> button.active(true), client);
+            collected.whenCompleteAsync((r, t) -> {
+                if (t != null) {
+                    exportModal.child(exportModal.children().size() - 1, Components.label(Text.translatable("text.gadget.export.error")));
+                    Gadget.LOGGER.error("Error occured while gathering packets for export", t);
+                } else {
+                    button.active(true);
+                }
+            }, client);
 
             exportModal.child(button);
 
-            uiAdapter.rootComponent.child(Containers.overlay(exportModal));
+            uiAdapter.rootComponent.child(new OverlayContainer<>(exportModal) {
+                @Override
+                public void dismount(DismountReason reason) {
+                    super.dismount(reason);
+
+                    if (reason != DismountReason.REMOVED) return;
+
+                    // breh
+                    tokSource.cancel();
+                }
+            });
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private void rebuild(String searchText, long time) {
-        List<Component> neededComponents = new ArrayList<>();
+        if (currentSearchToken != null)
+            currentSearchToken.cancel();
 
-        for (var packet : reader.collectFor(searchText, time, 300)) {
-            neededComponents.add(packet.get(RenderedPacketComponent.KEY).component());
-        }
+        currentSearchToken = new CancellationTokenSource();
+        CancellationToken token = currentSearchToken.token();
 
-        main.configure(a -> {
-            main.clearChildren();
-            main.children(neededComponents);
-        });
+        CompletableFuture.supplyAsync(() -> {
+            List<Component> neededComponents = new ArrayList<>();
 
+            for (var packet : reader.collectFor(searchText, time, 300, unused -> {}, token)) {
+                token.throwIfCancelled();
+                neededComponents.add(packet.get(RenderedPacketComponent.KEY).component());
+            }
+
+            return neededComponents;
+        })
+            .thenAcceptAsync(components -> {
+                main.configure(a -> {
+                    main.clearChildren();
+                    main.children(components);
+                });
+            }, client)
+            .whenComplete((r, t) -> {
+                if (t != null) {
+                    if (t.getCause() instanceof CancellationException) return;
+
+                    Gadget.LOGGER.error("Search failed!", t);
+                }
+            });
     }
 
     @Override

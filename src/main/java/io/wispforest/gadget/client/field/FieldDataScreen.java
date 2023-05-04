@@ -5,7 +5,9 @@ import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.search.SearchGui;
 import io.wispforest.gadget.field.FieldDataSource;
 import io.wispforest.gadget.field.LocalFieldDataSource;
-import io.wispforest.gadget.network.*;
+import io.wispforest.gadget.network.FieldData;
+import io.wispforest.gadget.network.GadgetNetworking;
+import io.wispforest.gadget.network.InspectionTarget;
 import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.path.PathStep;
 import io.wispforest.gadget.util.FormattedDumper;
@@ -25,7 +27,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -212,5 +217,11 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
 
     public FieldDataSource dataSource() {
         return dataSource;
+    }
+
+    @Override
+    public void removed() {
+        if (dataSource instanceof RemoteFieldDataSource remote)
+            remote.close();
     }
 }

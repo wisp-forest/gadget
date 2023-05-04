@@ -1,13 +1,9 @@
 package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.client.field.FieldDataIsland;
-import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
 import io.wispforest.gadget.field.DefaultFieldDataHolder;
-import io.wispforest.gadget.field.FieldDataHolder;
-import io.wispforest.gadget.field.FieldDataNode;
 import io.wispforest.gadget.field.LocalFieldDataSource;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.util.ReflectionUtil;
@@ -26,6 +22,7 @@ public final class PacketHandlers {
     public static void init() {
         OwoSupport.init();
         FapiSupport.init();
+        MinecraftSupport.init();
 
         SearchTextGatherer.EVENT.addPhaseOrdering(FIRST_PHASE, Event.DEFAULT_PHASE);
         SearchTextGatherer.EVENT.register(FIRST_PHASE, (packet, searchText, errSink) -> {
@@ -41,6 +38,32 @@ public final class PacketHandlers {
             if (unwrapped == null) return;
 
             out.append(" ").append(ReflectionUtil.nameWithoutPackage(unwrapped.packet().getClass()));
+        });
+
+        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
+            var unwrapped = PacketUnwrapper.EVENT.invoker().tryUnwrap(packet, errSink);
+
+            if (unwrapped == null) return false;
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.append(ReflectionUtil.nameWithoutPackage(unwrapped.packet().getClass()));
+
+            if (unwrapped.packetId().isPresent()) {
+                sb.append(" #").append(unwrapped.packetId().getAsInt());
+            }
+
+            out.write(indent, sb.toString());
+
+            DefaultFieldDataHolder holder = new DefaultFieldDataHolder(
+                new LocalFieldDataSource(unwrapped.packet(), false),
+                true
+            );
+
+            holder.dumpToText(out, indent, holder.root(), 5)
+                .join();
+
+            return true;
         });
 
         PlainTextPacketDumper.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);

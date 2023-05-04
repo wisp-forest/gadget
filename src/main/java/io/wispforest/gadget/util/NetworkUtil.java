@@ -1,8 +1,8 @@
 package io.wispforest.gadget.util;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
@@ -77,10 +77,5 @@ public final class NetworkUtil {
         tmpBuf.writeBytes(buf, length);
 
         return tmpBuf;
-    }
-
-    public interface InfallibleClosable extends AutoCloseable {
-        @Override
-        void close();
     }
 }

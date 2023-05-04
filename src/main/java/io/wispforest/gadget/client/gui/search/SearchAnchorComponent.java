@@ -3,7 +3,6 @@
 
 package io.wispforest.gadget.client.gui.search;
 
-import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Positioning;
@@ -11,7 +10,6 @@ import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.StringJoiner;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class SearchAnchorComponent extends BaseComponent {

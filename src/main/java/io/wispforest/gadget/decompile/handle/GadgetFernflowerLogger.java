@@ -4,9 +4,6 @@ import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.text.Text;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-
 public class GadgetFernflowerLogger extends IFernflowerLogger {
     private final QuiltflowerHandlerImpl handler;
 
