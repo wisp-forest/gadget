@@ -25,6 +25,7 @@ public class CancellationTokenSource {
             }
 
             listeners.clear();
+            listeners = null;
         }
     }
 }

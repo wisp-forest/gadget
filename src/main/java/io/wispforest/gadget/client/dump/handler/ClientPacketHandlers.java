@@ -33,7 +33,7 @@ public class ClientPacketHandlers {
             MutableText headText = Text.literal(ReflectionUtil.nameWithoutPackage(unwrapped.packet().getClass()));
 
             if (unwrapped.packetId().isPresent()) {
-                headText.append(Text.literal(" #" + unwrapped.packetId())
+                headText.append(Text.literal(" #" + unwrapped.packetId().getAsInt())
                     .formatted(Formatting.GRAY));
             }
 

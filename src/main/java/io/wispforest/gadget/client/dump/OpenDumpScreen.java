@@ -347,6 +347,17 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                     tokSource.cancel();
                 }
             });
+
+            return true;
+        }
+
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            for (Component rootChild : uiAdapter.rootComponent.children()) {
+                if (rootChild instanceof OverlayContainer<?> overlay && overlay.closeOnClick()) {
+                    overlay.remove();
+                    return true;
+                }
+            }
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
