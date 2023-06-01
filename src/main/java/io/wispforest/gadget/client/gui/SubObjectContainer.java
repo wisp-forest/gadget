@@ -27,7 +27,7 @@ public class SubObjectContainer extends FlowLayout {
     private final Consumer<SubObjectContainer> loader;
     private final Consumer<SubObjectContainer> unloader;
 
-    protected List<Component> collapsibleChildren = new ArrayList<>();
+    protected final List<Component> collapsibleChildren = new ArrayList<>();
     protected boolean expanded;
 
     protected final SpinnyBoiComponent spinnyBoi;

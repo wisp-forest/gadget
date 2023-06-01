@@ -3,7 +3,7 @@ package io.wispforest.gadget.path;
 import org.jetbrains.annotations.NotNull;
 
 public record ObjectPath(PathStep[] steps) implements Comparable<ObjectPath> {
-    public static ObjectPath EMPTY = new ObjectPath(new PathStep[0]);
+    public static final ObjectPath EMPTY = new ObjectPath(new PathStep[0]);
 
     public Object follow(Object o) {
         for (PathStep step : steps) {

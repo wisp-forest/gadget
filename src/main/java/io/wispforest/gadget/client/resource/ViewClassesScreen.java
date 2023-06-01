@@ -209,7 +209,6 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                     }
                 });
 
-                return true;
             } else {
                 String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1);
 
@@ -251,9 +250,9 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                         }
                     });
 
-                return true;
             }
 
+            return true;
         });
 
         return row;

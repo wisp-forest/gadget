@@ -36,7 +36,7 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
         return ReflectionUtil.findFor(klass, CLASS_TO_TYPE);
     }
 
-    public static void init() {}
+    public static void init() { }
 
     static {
         register("int", Integer.class, Integer::parseInt, Object::toString);

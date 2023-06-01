@@ -3,7 +3,6 @@ package io.wispforest.gadget.client.dump;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
-import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.SaveFilePathComponent;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.PacketDumpReader;
@@ -54,7 +53,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private TextBoxComponent searchBox;
     private CancellationTokenSource currentSearchToken = null;
 
-    private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader, Path path) throws IOException {
+    private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader, Path path) {
         this.parent = parent;
         this.toast = toast;
         this.reader = reader;
@@ -224,9 +223,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                 CompletableFuture.supplyAsync(() -> {
                         toast.step(Text.translatable("message.gadget.progress.calculating_data"));
 
-                        DumpStatsScreen screen = new DumpStatsScreen(parent, reader, toast);
-
-                        return screen;
+                        return new DumpStatsScreen(parent, reader, toast);
                     })
                     .thenAcceptAsync(client::setScreen, client),
                 true);

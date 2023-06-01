@@ -102,11 +102,14 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
         ));
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @SuppressWarnings("unchecked")
     protected void refreshOptions() {
         this.collapsibleChildren.clear();
 
         var listType = ReflectionUtils.getTypeArgument(this.backingOption.backingField().field().getGenericType(), 0);
+
+        if (listType == null) throw new IllegalStateException();
+
         for (int i = 0; i < this.backingList.size(); i++) {
             var container = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
             container.verticalAlignment(VerticalAlignment.CENTER);

@@ -1,7 +1,6 @@
 package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.client.command.ConfigCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
 import io.wispforest.gadget.client.dump.PacketDumper;
@@ -60,8 +59,8 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public class GadgetClient implements ClientModInitializer {
-    public static KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.MISC_CATEGORY);
-    public static KeyBinding DUMP_KEY = new KeyBinding("key.gadget.dump", GLFW.GLFW_KEY_K, KeyBinding.MISC_CATEGORY);
+    public static final KeyBinding INSPECT_KEY = new KeyBinding("key.gadget.inspect", GLFW.GLFW_KEY_I, KeyBinding.MISC_CATEGORY);
+    public static final KeyBinding DUMP_KEY = new KeyBinding("key.gadget.dump", GLFW.GLFW_KEY_K, KeyBinding.MISC_CATEGORY);
 
     @Override
     public void onInitializeClient() {
@@ -227,10 +226,8 @@ public class GadgetClient implements ClientModInitializer {
             });
         });
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            ReloadMappingsCommand.register(dispatcher);
-            ConfigCommand.register(dispatcher);
-        });
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
+            ReloadMappingsCommand.register(dispatcher));
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
             if (Gadget.CONFIG.internalSettings.injectMatrixStackErrors() && Screen.hasShiftDown()) {

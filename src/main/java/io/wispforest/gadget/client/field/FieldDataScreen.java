@@ -41,7 +41,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     private final InspectionTarget target;
     private final FieldDataSource dataSource;
     private final boolean isClient;
-    public FieldDataIsland island;
+    public final FieldDataIsland island;
 
     public FieldDataScreen(InspectionTarget target, boolean isClient, @Nullable FieldData rootData, @Nullable Map<PathStep, FieldData> initialFields) {
         this.target = target;

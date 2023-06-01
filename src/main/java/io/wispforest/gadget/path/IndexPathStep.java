@@ -38,6 +38,6 @@ public record IndexPathStep(int idx) implements PathStep {
 
     @Override
     public String toString() {
-        return idx + "";
+        return String.valueOf(idx);
     }
 }
