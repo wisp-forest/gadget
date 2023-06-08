@@ -13,6 +13,7 @@
     "message.gadget.dump.stopped": "Saved dump to",
     "message.gadget.progress.finished": "Finished!",
     "message.gadget.progress.failed": "Failed! Check logs for details",
+    "message.gadget.progress.cancelled": "Cancelled.",
     "message.gadget.progress.downloading_intermediary": "Downloading Intermediary",
     "message.gadget.progress.downloading_qm_versions": "Downloading QM versions",
     "message.gadget.progress.downloading_yarn_versions": "Downloading Yarn versions",
@@ -187,6 +188,8 @@
     "text.config.gadget.option.fullDecompilationContext.tooltip": "Gives QF all classes for better decompiled sources\nMight result in slower decompiles",
     "text.config.gadget.option.hiddenFields": "Hidden Fields",
     "text.config.gadget.option.hiddenFields.tooltip": "Fields hidden in field inspections.",
+    "text.config.gadget.option.errorCheckOwoUi": "Error Check OwO UI",
+    "text.config.gadget.option.errorCheckOwoUi.tooltip": "Injects checks OwO UI methods for better error messages",
 
     "text.gadget.nbt.compound": {"text": "c", "color": "#0197F6"},
     "text.gadget.nbt.compound.full": ["", {"text": "c", "color": "#0197F6"}, "ompound"],

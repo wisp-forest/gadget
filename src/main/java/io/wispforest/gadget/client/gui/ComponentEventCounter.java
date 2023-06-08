@@ -2,6 +2,7 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.util.GadgetConfigModel;
+import net.minecraft.client.gui.screen.Screen;
 
 public final class ComponentEventCounter {
     private static final ThreadLocal<ComponentEventCounter> STORE = ThreadLocal.withInitial(ComponentEventCounter::new);
@@ -47,6 +48,10 @@ public final class ComponentEventCounter {
     }
 
     public static void countMutation() {
+        if (Screen.hasShiftDown()) {
+            new Throwable("bro it's a mutation on " + Thread.currentThread().getName()).printStackTrace();
+        }
+
         STORE.get().mutations++;
     }
 }

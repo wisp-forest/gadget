@@ -25,14 +25,14 @@ public final class ReactiveUtils {
                         if (taskSent) return;
 
                         taskSent = true;
-                        CompletableFuture.delayedExecutor(delayNanos, TimeUnit.MILLISECONDS, executor)
+                        CompletableFuture.delayedExecutor(delayNanos, TimeUnit.NANOSECONDS, executor)
                             .execute(() -> {
                                 set(wrapped.get());
                                 previousUpdate = System.nanoTime();
                                 taskSent = false;
                             });
                     } else {
-                        set(newValue);
+                        executor.execute(() -> set(newValue));
                         previousUpdate = now;
                     }
                 });

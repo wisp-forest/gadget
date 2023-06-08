@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.LongSupplier;
 
@@ -75,6 +76,9 @@ public interface ProgressToast {
                     // Welp.
 
                     oom(oom);
+                    return;
+                } else if (e instanceof CancellationException) {
+                    finish(Text.translatable("message.gadget.progress.cancelled"), true);
                     return;
                 }
 

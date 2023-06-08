@@ -52,6 +52,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private BasedSliderComponent timeSlider;
     private TextBoxComponent searchBox;
     private CancellationTokenSource currentSearchToken = null;
+    private CancellationTokenSource screenOpenToken;
 
     private OpenDumpScreen(Screen parent, ProgressToast toast, PacketDumpReader reader, Path path) {
         this.parent = parent;
@@ -87,6 +88,14 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     @Override
     protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
         return OwoUIAdapter.create(this, Containers::verticalFlow);
+    }
+
+    @Override
+    protected void init() {
+        if (screenOpenToken == null || screenOpenToken.token().cancelled())
+            screenOpenToken = new CancellationTokenSource();
+
+        super.init();
     }
 
     @Override
@@ -242,6 +251,14 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         toast.step(Text.translatable("message.gadget.progress.mounting_components"));
     }
 
+    @Override
+    public void removed() {
+        super.removed();
+
+        if (screenOpenToken != null)
+            screenOpenToken.cancel();
+    }
+
     private long currentTime(double value) {
         return (long) MathHelper.lerp(value, reader.startTime(), reader.endTime());
     }
@@ -250,9 +267,34 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         return currentTime(timeSlider.value());
     }
 
-    @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
+    private void dumpTextToFile(Path savePath, List<DumpedPacket> packets) {
+        try {
+            var os = Files.newOutputStream(savePath);
+            var bos = new BufferedOutputStream(os);
+            FormattedDumper dumper = new FormattedDumper(new PrintStream(bos));
+
+            ProgressToast toast = ProgressToast.create(Text.translatable("text.gadget.export.exporting_packet_dump"));
+            dumper.write(0, "Packet dump " + this.path.getFileName().toString());
+            MutableLong progress = new MutableLong();
+
+            toast.force();
+            toast.followProgress(progress::getValue, packets.size());
+            toast.follow(CompletableFuture.runAsync(() -> {
+                for (var packet : packets) {
+                    reader.dumpPacketToText(packet, dumper, 0);
+                    progress.increment();
+                    screenOpenToken.token().throwIfCancelled();
+                }
+
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }), false);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -297,28 +339,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
                 tokSource.token().throwIfCancelled();
 
-                try {
-                    Path nioPath = Path.of(savePath.path().get());
-                    var os = Files.newOutputStream(nioPath);
-                    var bos = new BufferedOutputStream(os);
-                    FormattedDumper dumper = new FormattedDumper(new PrintStream(bos));
-
-                    ProgressToast toast = ProgressToast.create(Text.translatable("text.gadget.export.exporting_packet_dump"));
-                    dumper.write(0, "Packet dump " + path.getFileName().toString());
-                    MutableLong progress = new MutableLong();
-
-                    toast.force();
-                    toast.followProgress(progress::getValue, collected.join().size());
-                    toast.follow(CompletableFuture.runAsync(() -> {
-                        for (var packet : collected.join()) {
-                            reader.dumpPacketToText(packet, dumper, 0);
-                            progress.increment();
-                            tokSource.token().throwIfCancelled();
-                        }
-                    }), false);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                dumpTextToFile(Path.of(savePath.path().get()), collected.join());
             });
 
             button.active(false);

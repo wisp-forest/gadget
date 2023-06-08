@@ -2,10 +2,7 @@ package io.wispforest.gadget.field;
 
 import com.google.gson.stream.JsonWriter;
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.desc.ComplexFieldObject;
-import io.wispforest.gadget.desc.ErrorFieldObject;
-import io.wispforest.gadget.desc.NbtCompoundFieldObject;
-import io.wispforest.gadget.desc.PrimitiveFieldObject;
+import io.wispforest.gadget.desc.*;
 import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.FieldPathStep;
@@ -14,6 +11,7 @@ import io.wispforest.gadget.path.PathStep;
 import io.wispforest.gadget.util.FormattedDumper;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -87,12 +85,16 @@ public abstract class FieldDataHolder<N extends FieldDataNode<N>> {
                             head.append(" ").append(text);
                         } else if (data.fieldObj() instanceof NbtCompoundFieldObject nfo) {
                             head.append(" ").append(nfo.data());
+                        } else if (data.fieldObj() instanceof BytesFieldObject bfo) {
+                            head.append(" ").append(bfo.text());
                         }
 
                         dumper.write(indent, head.toString());
 
                         if (data.fieldObj() instanceof ErrorFieldObject efo) {
                             dumper.writeLines(indent + 1, efo.fullExceptionText());
+                        } else if (data.fieldObj() instanceof BytesFieldObject bfo) {
+                            dumper.writeHexDump(indent + 1, bfo.data());
                         }
 
                         if (data.fieldObj() instanceof ComplexFieldObject && depthLeft > 0) {
@@ -153,6 +155,15 @@ public abstract class FieldDataHolder<N extends FieldDataNode<N>> {
                             } else if (data.fieldObj() instanceof NbtCompoundFieldObject nfo) {
                                 writer.name("data");
                                 writer.value(nfo.data().toString());
+                            } else if (data.fieldObj() instanceof BytesFieldObject bfo) {
+                                writer.name("buffer_class");
+                                writer.value(MappingsManager.displayMappings().mapField(bfo.bufferClass()));
+
+                                writer.name("bytes_len");
+                                writer.value(bfo.data().length);
+
+                                writer.name("bytes_b64");
+                                writer.value(Base64.getEncoder().encodeToString(bfo.data()));
                             }
 
                             if (data.fieldObj() instanceof ComplexFieldObject cfo && !cfo.isRepeat() && depthLeft > 0) {

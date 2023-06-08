@@ -7,10 +7,7 @@ import io.wispforest.gadget.client.gui.search.SearchAnchorComponent;
 import io.wispforest.gadget.client.nbt.KeyAdderWidget;
 import io.wispforest.gadget.client.nbt.NbtDataIsland;
 import io.wispforest.gadget.client.nbt.NbtPath;
-import io.wispforest.gadget.desc.ComplexFieldObject;
-import io.wispforest.gadget.desc.ErrorFieldObject;
-import io.wispforest.gadget.desc.NbtCompoundFieldObject;
-import io.wispforest.gadget.desc.PrimitiveFieldObject;
+import io.wispforest.gadget.desc.*;
 import io.wispforest.gadget.field.FieldDataHolder;
 import io.wispforest.gadget.field.FieldDataSource;
 import io.wispforest.gadget.network.FieldData;
@@ -156,6 +153,25 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
 
                     row.child(plusLabel);
                 }
+            } else if (data.obj() instanceof BytesFieldObject bfo) {
+                var subContainer = new SubObjectContainer(
+                    unused -> {
+                    },
+                    unused -> {
+                    });
+                node.subObjectContainer = subContainer;
+                node.containerComponent.child(subContainer);
+
+                rowText.append(
+                    Text.literal(" " + bfo.text() + " ")
+                        .formatted(Formatting.GRAY)
+                );
+
+                subContainer.child(GuiUtil.hexDump(bfo.data(), false));
+
+                row
+                    .child(subContainer.getSpinnyBoi()
+                        .sizing(Sizing.fixed(10), Sizing.content()));
             }
 
             if (path.last() instanceof FieldPathStep step) {

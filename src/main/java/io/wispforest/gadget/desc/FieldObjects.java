@@ -1,9 +1,11 @@
 package io.wispforest.gadget.desc;
 
+import io.netty.buffer.ByteBuf;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.gadget.mappings.MappingsManager;
 import io.wispforest.gadget.network.FieldData;
 import io.wispforest.gadget.path.*;
+import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.util.PrettyPrinters;
 import io.wispforest.gadget.util.ReflectionUtil;
 import net.auoeke.reflect.Accessor;
@@ -16,6 +18,7 @@ import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -134,8 +137,29 @@ public final class FieldObjects {
 
 
     public static FieldObject fromObject(Object o, Set<Object> pathObjs) {
-        if (o instanceof NbtCompound compound)
+        if (o instanceof NbtCompound compound) {
             return new NbtCompoundFieldObject(compound);
+        } else if (o instanceof byte[] bytes) {
+            return new BytesFieldObject(MappingsManager.unmapClass(o.getClass()), bytes);
+        } else if (o instanceof ByteBuffer byteBuffer) {
+            int position = byteBuffer.position();
+            int limit = byteBuffer.limit();
+
+            try {
+                byte[] bytes = new byte[byteBuffer.remaining()];
+                byteBuffer.get(bytes);
+                return new BytesFieldObject(MappingsManager.unmapClass(o.getClass()), bytes);
+            } finally {
+                byteBuffer.position(position);
+                byteBuffer.limit(limit);
+            }
+        } else if (o instanceof ByteBuf buf) {
+            try (var ignored = NetworkUtil.resetIndexes(buf)) {
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                return new BytesFieldObject(MappingsManager.unmapClass(o.getClass()), bytes);
+            }
+        }
 
         String pretty = PrettyPrinters.tryPrint(o);
 

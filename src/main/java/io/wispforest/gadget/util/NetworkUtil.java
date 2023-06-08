@@ -1,5 +1,6 @@
 package io.wispforest.gadget.util;
 
+import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.Packet;
@@ -44,8 +45,14 @@ public final class NetworkUtil {
     public static InfallibleClosable resetIndexes(Packet<?> packet) {
         PacketByteBuf buf = unwrapCustom(packet);
 
-        if (buf == null) return () -> {};
+        if (buf == null) {
+            return () -> { };
+        } else {
+            return resetIndexes(buf);
+        }
+    }
 
+    public static InfallibleClosable resetIndexes(ByteBuf buf) {
         int readerIdx = buf.readerIndex();
         int writerIdx = buf.writerIndex();
 

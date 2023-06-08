@@ -16,6 +16,7 @@
         "fabric.PacketTypeMixin",
         "owo.BaseComponentMixin",
         "owo.BaseParentComponentMixin",
+        "owo.ComponentMixin",
         "owo.IndexedSerializerAccessor",
         "owo.OwoNetChannelAccessor",
         "owo.OwoUIAdapterMixin",
