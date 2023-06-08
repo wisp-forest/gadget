@@ -48,10 +48,6 @@ public final class ComponentEventCounter {
     }
 
     public static void countMutation() {
-        if (Screen.hasShiftDown()) {
-            new Throwable("bro it's a mutation on " + Thread.currentThread().getName()).printStackTrace();
-        }
-
         STORE.get().mutations++;
     }
 }

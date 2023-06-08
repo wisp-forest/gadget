@@ -16,11 +16,4 @@ public class BaseComponentMixin {
     private void mald(Size space, CallbackInfo ci) {
         ComponentEventCounter.countInflation();
     }
-
-    @Inject(method = "dismount", at = @At("HEAD"))
-    private void breh(Component.DismountReason reason, CallbackInfo ci) {
-        if (Screen.hasShiftDown()) {
-            new Throwable("breeeh on " + Thread.currentThread().getName()).printStackTrace();
-        }
-    }
 }

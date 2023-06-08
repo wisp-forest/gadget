@@ -78,6 +78,12 @@
         "font": "gadget:monocraft"
     },
     "text.gadget.stats.tooltip": "View Stats",
+    "text.gadget.export_button": {
+        "text": "E",
+        "color": "#CC8899",
+        "font": "gadget:monocraft"
+    },
+    "text.gadget.export_button.tooltip": "Export",
     "text.gadget.switch_to_server": "Switch to server",
     "text.gadget.switch_to_client": "Switch to client",
     "text.gadget.menu_button": {
@@ -258,6 +264,11 @@
 
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
+    "text.gadget.deserialized_packet_no_render": [
+        { "color": "red", "text": "! "},
+        { "index": 0 },
+        " doesn't support rendering."
+    ],
     "text.gadget.hide_field": "Hide field",
     "text.gadget.join_with_dump": "Join and start dumping packets",
     "text.gadget.save_as_java": "Save as .java",

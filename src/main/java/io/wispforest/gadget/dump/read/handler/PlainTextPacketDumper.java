@@ -11,15 +11,12 @@ public interface PlainTextPacketDumper {
     Event<PlainTextPacketDumper> EVENT = EventFactory.createArrayBacked(PlainTextPacketDumper.class, callbacks -> (packet, out, indent, errSink) -> {
         for (var callback : callbacks) {
             try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
-                if (callback.dumpAsPlainText(packet, out, indent, errSink))
-                    return true;
+                callback.dumpAsPlainText(packet, out, indent, errSink);
             } catch (Exception e) {
                 errSink.accept(e);
             }
         }
-
-        return false;
     });
 
-    boolean dumpAsPlainText(DumpedPacket packet, FormattedDumper out, int indent, ErrorSink errSink);
+    void dumpAsPlainText(DumpedPacket packet, FormattedDumper out, int indent, ErrorSink errSink);
 }

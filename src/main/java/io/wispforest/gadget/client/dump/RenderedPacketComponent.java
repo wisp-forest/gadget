@@ -8,6 +8,7 @@ import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.SearchTextData;
+import io.wispforest.gadget.dump.read.UnwrappedPacketData;
 import io.wispforest.gadget.util.ContextData;
 import io.wispforest.gadget.util.ReflectionUtil;
 import io.wispforest.owo.ui.container.CollapsibleContainer;
@@ -99,6 +100,11 @@ public class RenderedPacketComponent {
                 }
 
                 for (var e : packet.get(RenderedPacketComponent.KEY).drawErrors()) {
+                    errors.child(GuiUtil.showException(e)
+                        .margins(Insets.bottom(2)));
+                }
+
+                for (var e : packet.get(UnwrappedPacketData.KEY).errors()) {
                     errors.child(GuiUtil.showException(e)
                         .margins(Insets.bottom(2)));
                 }

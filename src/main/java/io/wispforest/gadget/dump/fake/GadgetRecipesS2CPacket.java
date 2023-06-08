@@ -46,7 +46,7 @@ public record GadgetRecipesS2CPacket(List<Recipe<?>> recipes) implements FakeGad
     }
 
     @Override
-    public Packet<?> unwrap() {
+    public Packet<?> unwrapVanilla() {
         return new SynchronizeRecipesS2CPacket(recipes);
     }
 

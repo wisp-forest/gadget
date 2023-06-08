@@ -1,12 +1,12 @@
 package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.DumpedPacket;
-import io.wispforest.gadget.field.DefaultFieldDataHolder;
-import io.wispforest.gadget.field.LocalFieldDataSource;
+import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
+import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.mixin.owo.IndexedSerializerAccessor;
 import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
-import io.wispforest.gadget.util.FormattedDumper;
+import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.particles.systems.ParticleSystem;
@@ -16,6 +16,8 @@ import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.function.Consumer;
 
 public final class OwoSupport {
     public static final Identifier HANDSHAKE_CHANNEL = new Identifier("owo", "handshake");
@@ -34,6 +38,7 @@ public final class OwoSupport {
 
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void init() {
         PacketUnwrapper.EVENT.register((packet, errSink) -> {
             if (packet.state() != NetworkState.PLAY) return null;
@@ -57,107 +62,112 @@ public final class OwoSupport {
 
             Object unwrapped = acc.getSerializer().read(buf);
 
-            return new PacketUnwrapper.Unwrapped(unwrapped, netHandlerId);
+            return new ChannelPacket(unwrapped, netHandlerId);
         });
 
-        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
-            OwoSupport.ParticleSystemPacket parsed = OwoSupport.parseParticleSystemPacket(packet);
+        PacketUnwrapper.EVENT.register((packet, errSink) -> {
+            if (packet.state() != NetworkState.PLAY || packet.channelId() == null) return null;
 
-            if (parsed == null) return false;
+            ParticleSystemController controller = ParticleSystemController.REGISTERED_CONTROLLERS.get(packet.channelId());
 
-            out.write(indent, "Particle system #" + parsed.systemId() + " @ " + (int) parsed.pos().x + ", " + (int) parsed.pos().y + ", " + (int) parsed.pos().z);
+            if (controller == null) return null;
 
-            if (parsed.data() != null) {
-                DefaultFieldDataHolder holder = new DefaultFieldDataHolder(
-                    new LocalFieldDataSource(parsed.data(), false),
-                    true
-                );
-                holder.dumpToText(out, indent, holder.root(), 5).join();
-            }
+            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            int systemId = buf.readVarInt();
+            Vec3d pos = VectorSerializer.read(buf);
+            ParticleSystem<?> system = controller.systemsByIndex.get(systemId);
+            Object data = ((ParticleSystemAccessor) system).getAdapter().deserializer().apply(buf);
 
-            return true;
+            return new ParticleSystemPacket(controller, systemId, pos, data);
         });
 
-        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
-            Map<Identifier, Integer> handshakeReq = OwoSupport.parseHandshakeRequest(packet);
+        PacketUnwrapper.EVENT.register((packet, errSink) -> {
+            if (!(packet.packet() instanceof LoginQueryRequestS2CPacket)
+             || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL))
+                return null;
 
-            if (handshakeReq == null) return false;
+            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
 
-            drawHandshakeMap(handshakeReq, "o ", out, indent);
-
-            return true;
+            return new HandshakeRequest(buf.isReadable()
+                ? HANDSHAKE_SERIALIZER.deserializer().apply(buf)
+                : Collections.emptyMap());
         });
 
-        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
-            OwoSupport.HandshakeResponse response = OwoSupport.parseHandshakeResponse(packet);
+        PacketUnwrapper.EVENT.register((packet, errSink) -> {
+            if (!(packet.packet() instanceof LoginQueryResponseC2SPacket)
+             || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL))
+                return null;
 
-            if (response == null) return false;
+            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
 
-            drawHandshakeMap(response.requiredChannels(), "r ", out, indent);
-            drawHandshakeMap(response.requiredControllers(), "p ", out, indent);
-            drawHandshakeMap(response.optionalChannels(), "o ", out, indent);
+            Map<Identifier, Integer> requiredChannels = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
+            Map<Identifier, Integer> requiredControllers = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
 
-            return true;
+            Map<Identifier, Integer> optionalChannels = Collections.emptyMap();
+
+            if (buf.isReadable())
+                optionalChannels = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
+
+            return new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels);
         });
 
     }
 
-    private static void drawHandshakeMap(Map<Identifier, Integer> data, String prefix, FormattedDumper out, int indent) {
+    private static void drawHandshakeMap(Map<Identifier, Integer> data, Text prefix, Consumer<Text> out) {
         for (var entry : data.entrySet()) {
-            out.write(indent, prefix + entry.getKey().toString() + " = " + entry.getValue());
+            out.accept(Text.literal("")
+                .append(prefix)
+                .append(Text.literal(entry.getKey().toString())
+                    .formatted(Formatting.WHITE))
+                .append(Text.literal(" = " + entry.getValue())
+                    .formatted(Formatting.GRAY)));
         }
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public static @Nullable ParticleSystemPacket parseParticleSystemPacket(DumpedPacket packet) {
-        if (packet.state() != NetworkState.PLAY) return null;
+    public record ParticleSystemPacket(ParticleSystemController controller, int systemId, Vec3d pos, Object data) implements FieldsUnwrappedPacket {
+        @Override
+        public Text headText() {
+            return Text.translatable("text.gadget.particle_system", systemId, (int) pos.x, (int) pos.y, (int) pos.z);
+        }
 
-        if (packet.channelId() == null) return null;
+        @Override
+        public @Nullable Object rawFieldsObject() {
+            return data;
+        }
 
-        ParticleSystemController controller = ParticleSystemController.REGISTERED_CONTROLLERS.get(packet.channelId());
-
-        if (controller == null) return null;
-
-        PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
-        int systemId = buf.readVarInt();
-        Vec3d pos = VectorSerializer.read(buf);
-        ParticleSystem<?> system = controller.systemsByIndex.get(systemId);
-        Object data = ((ParticleSystemAccessor) system).getAdapter().deserializer().apply(buf);
-
-        return new ParticleSystemPacket(controller, systemId, pos, data);
+        @Override
+        public OptionalInt packetId() {
+            return OptionalInt.of(systemId);
+        }
     }
 
-    public static @Nullable Map<Identifier, Integer> parseHandshakeRequest(DumpedPacket packet) {
-        if (!(packet.packet() instanceof LoginQueryRequestS2CPacket)
-         || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL))
-            return null;
+    public record ChannelPacket(Object packetData, int channelPacketId) implements FieldsUnwrappedPacket {
+        @Override
+        public @Nullable Object rawFieldsObject() {
+            return packetData;
+        }
 
-        PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
-
-        return buf.isReadable()
-            ? HANDSHAKE_SERIALIZER.deserializer().apply(buf)
-            : Collections.emptyMap();
+        @Override
+        public OptionalInt packetId() {
+            return OptionalInt.of(channelPacketId);
+        }
     }
 
-    public static @Nullable HandshakeResponse parseHandshakeResponse(DumpedPacket packet) {
-        if (!(packet.packet() instanceof LoginQueryResponseC2SPacket) || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL)) return null;
-
-        PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
-
-        Map<Identifier, Integer> requiredChannels = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
-        Map<Identifier, Integer> requiredControllers = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
-
-        Map<Identifier, Integer> optionalChannels = Collections.emptyMap();
-
-        if (buf.isReadable())
-            optionalChannels = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
-
-        return new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels);
+    public record HandshakeRequest(Map<Identifier, Integer> optionalChannels) implements LinesUnwrappedPacket {
+        @Override
+        public void render(Consumer<Text> out, ErrorSink errSink) {
+            drawHandshakeMap(optionalChannels, Text.literal("o ").formatted(Formatting.AQUA), out);
+        }
     }
-
-    public record ParticleSystemPacket(ParticleSystemController controller, int systemId, Vec3d pos, Object data) { }
 
     public record HandshakeResponse(Map<Identifier, Integer> requiredChannels,
                                     Map<Identifier, Integer> requiredControllers,
-                                    Map<Identifier, Integer> optionalChannels) { }
+                                    Map<Identifier, Integer> optionalChannels) implements LinesUnwrappedPacket {
+        @Override
+        public void render(Consumer<Text> out, ErrorSink errSink) {
+            drawHandshakeMap(requiredChannels, Text.literal("r ").formatted(Formatting.RED), out);
+            drawHandshakeMap(requiredControllers, Text.literal("p ").formatted(Formatting.GREEN), out);
+            drawHandshakeMap(optionalChannels, Text.literal("o ").formatted(Formatting.AQUA), out);
+        }
+    }
 }

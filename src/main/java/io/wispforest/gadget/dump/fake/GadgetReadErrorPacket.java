@@ -1,8 +1,11 @@
 package io.wispforest.gadget.dump.fake;
 
+import io.wispforest.gadget.dump.read.unwrapped.UnprocessedUnwrappedPacket;
+import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
+import org.jetbrains.annotations.Nullable;
 
 public record GadgetReadErrorPacket(byte[] data, int packetId, Exception exception) implements FakeGadgetPacket {
     public static final int ID = -3;
@@ -22,5 +25,10 @@ public record GadgetReadErrorPacket(byte[] data, int packetId, Exception excepti
     @Override
     public void writeToDump(PacketByteBuf buf, NetworkState state, NetworkSide side) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UnwrappedPacket unwrapGadget() {
+        return new UnprocessedUnwrappedPacket(data);
     }
 }

@@ -57,7 +57,7 @@ public record GadgetBundlePacket(NetworkState state, NetworkSide side, List<Pack
 
     @SuppressWarnings("unchecked")
     @Override
-    public Packet<?> unwrap() {
+    public Packet<?> unwrapVanilla() {
         if (state == NetworkState.PLAY && side == NetworkSide.CLIENTBOUND) {
             // java i promise this cast is fine
             return new BundleS2CPacket((Iterable<Packet<ClientPlayPacketListener>>)(Object) packets);

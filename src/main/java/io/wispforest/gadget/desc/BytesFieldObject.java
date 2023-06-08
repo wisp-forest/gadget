@@ -19,6 +19,6 @@ public record BytesFieldObject(String bufferClass, byte[] data) implements Field
 
     @Override
     public int color() {
-        return 0x0000FF;
+        return 0x00FF00;
     }
 }

@@ -1,12 +1,22 @@
 package io.wispforest.gadget.dump.read.handler;
 
+import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
+import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.network.FabricPacketHacks;
+import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.core.Insets;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class FapiSupport {
     public static final Identifier EARLY_REGISTRATION_CHANNEL = new Identifier("fabric-networking-api-v1", "early_registration");
@@ -24,22 +34,36 @@ public final class FapiSupport {
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
             Object unwrapped = type.read(buf);
 
-            return new PacketUnwrapper.Unwrapped(unwrapped);
+            return new FabricObjectPacket(unwrapped);
         });
 
-        PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
-            if (!Objects.equals(packet.channelId(), EARLY_REGISTRATION_CHANNEL)) return false;
+        PacketUnwrapper.EVENT.register((packet, errSink) -> {
+            if (!Objects.equals(packet.channelId(), EARLY_REGISTRATION_CHANNEL)) return null;
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
-            int count = buf.readVarInt();
+            List<Identifier> channels = buf.readList(PacketByteBuf::readIdentifier);
 
-            for (int i = 0; i < count; i++) {
-                Identifier channel = buf.readIdentifier();
-
-                out.write(indent, "+ " + channel.toString());
-            }
-
-            return true;
+            return new EarlyRegisterPacket(channels);
         });
+    }
+
+    public record FabricObjectPacket(Object unwrapped) implements FieldsUnwrappedPacket {
+        @Override
+        public @Nullable Object rawFieldsObject() {
+            return unwrapped;
+        }
+    }
+
+    public record EarlyRegisterPacket(List<Identifier> channels) implements LinesUnwrappedPacket {
+        @Override
+        public void render(Consumer<Text> out, ErrorSink errSink) {
+            for (Identifier channel : channels) {
+                out.accept(
+                    Text.literal("+ ")
+                        .formatted(Formatting.GREEN)
+                        .append(Text.literal(channel.toString())
+                            .formatted(Formatting.GRAY)));
+            }
+        }
     }
 }

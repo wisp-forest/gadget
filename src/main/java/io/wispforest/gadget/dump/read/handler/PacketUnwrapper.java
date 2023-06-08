@@ -1,13 +1,12 @@
 package io.wispforest.gadget.dump.read.handler;
 
+import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.OptionalInt;
 
 // This is a quick and easy way to make generic packet-unwrapping gadget compat.
 // Search text and packet component will be automatically provided by gadget.
@@ -27,15 +26,12 @@ public interface PacketUnwrapper {
         return null;
     });
 
-    @Nullable Unwrapped tryUnwrap(DumpedPacket packet, ErrorSink errSink);
-
-    record Unwrapped(Object packet, OptionalInt packetId) {
-        public Unwrapped(Object packet) {
-            this(packet, OptionalInt.empty());
-        }
-
-        public Unwrapped(Object packet, int packetId) {
-            this(packet, OptionalInt.of(packetId));
-        }
-    }
+    /**
+     * Tries to unwrap this packet
+     * @param packet the packet to unwrap
+     * @param errSink error sink
+     * @return An object that represents this packet. By default, this just makes gadget dump out packet fields, though
+     * other interfaces can be implemented to add custom functionality
+     */
+    @Nullable UnwrappedPacket tryUnwrap(DumpedPacket packet, ErrorSink errSink);
 }

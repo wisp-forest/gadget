@@ -1,5 +1,6 @@
 package io.wispforest.gadget.dump.fake;
 
+import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
@@ -25,5 +26,11 @@ public record GadgetWriteErrorPacket(int packetId, String exceptionText) impleme
     public void writeToDump(PacketByteBuf buf, NetworkState state, NetworkSide side) {
         buf.writeVarInt(packetId);
         buf.writeString(exceptionText);
+    }
+
+    @Override
+    public UnwrappedPacket unwrapGadget() {
+        // Don't render anything.
+        return UnwrappedPacket.NULL;
     }
 }

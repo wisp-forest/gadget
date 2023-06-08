@@ -4,6 +4,7 @@ import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.gui.BasedSliderComponent;
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
 import io.wispforest.gadget.client.gui.SaveFilePathComponent;
+import io.wispforest.gadget.client.gui.SidebarBuilder;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.PacketDumpReader;
 import io.wispforest.gadget.util.*;
@@ -48,7 +49,6 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
     private final PacketDumpReader reader;
     private final Path path;
     private FlowLayout main;
-    private FlowLayout infoButton;
     private BasedSliderComponent timeSlider;
     private TextBoxComponent searchBox;
     private CancellationTokenSource currentSearchToken = null;
@@ -112,6 +112,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         searchBox = Components.textBox(Sizing.fill(95));
         searchBox.onChanged().subscribe(text -> rebuild(text, currentTime()));
         searchBox.margins(Insets.bottom(3));
+        searchBox.setMaxLength(1000);
 
         rootComponent.keyPress().subscribe((keyCode, scanCode, modifiers) -> {
             if (keyCode != GLFW.GLFW_KEY_F || (modifiers & GLFW.GLFW_MOD_CONTROL) == 0)
@@ -152,9 +153,9 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         rebuild("", reader.startTime());
 
-        FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        SidebarBuilder sidebar = new SidebarBuilder();
 
-        infoButton = new FlowLayout(Sizing.fixed(16), Sizing.fixed(16), FlowLayout.Algorithm.VERTICAL) {
+        FlowLayout infoButton = new SidebarBuilder.Button(Text.translatable("text.gadget.info"), Text.empty()) {
             private int totalComponents = -1;
             private int frameNumber = 11;
 
@@ -188,44 +189,9 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             }
         };
 
-        infoButton
-            .child(Components.label(Text.translatable("text.gadget.info"))
-                .verticalTextAlignment(VerticalAlignment.CENTER)
-                .horizontalTextAlignment(HorizontalAlignment.CENTER)
-                .positioning(Positioning.absolute(5, 4))
-                .cursorStyle(CursorStyle.HAND)
-            )
-            .cursorStyle(CursorStyle.HAND);
+        sidebar.layout().child(infoButton);
 
-        infoButton.mouseEnter().subscribe(
-            () -> infoButton.surface(Surface.flat(0x80ffffff)));
-
-        infoButton.mouseLeave().subscribe(
-            () -> infoButton.surface(Surface.BLANK));
-
-        FlowLayout statsButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16));
-
-        statsButton
-            .child(Components.label(Text.translatable("text.gadget.stats"))
-                .verticalTextAlignment(VerticalAlignment.CENTER)
-                .horizontalTextAlignment(HorizontalAlignment.CENTER)
-                .positioning(Positioning.absolute(5, 4))
-                .cursorStyle(CursorStyle.HAND)
-            )
-            .cursorStyle(CursorStyle.HAND)
-            .tooltip(Text.translatable("text.gadget.stats.tooltip"));
-
-        statsButton.mouseEnter().subscribe(
-            () -> statsButton.surface(Surface.flat(0x80ffffff)));
-
-        statsButton.mouseLeave().subscribe(
-            () -> statsButton.surface(Surface.BLANK));
-
-        statsButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
-
-            UISounds.playInteractionSound();
-
+        sidebar.button("text.gadget.stats", (mouseX, mouseY) -> {
             ProgressToast toast = ProgressToast.create(Text.translatable("message.gadget.loading_dump_stats"));
 
             toast.follow(
@@ -236,17 +202,11 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                     })
                     .thenAcceptAsync(client::setScreen, client),
                 true);
-
-            return true;
         });
 
-        sidebar
-            .child(infoButton)
-            .child(statsButton)
-            .positioning(Positioning.absolute(0, 0))
-            .padding(Insets.of(2));
+        sidebar.button("text.gadget.export_button", (mouseX, mouseY) -> openExportModal());
 
-        rootComponent.child(sidebar);
+        rootComponent.child(sidebar.layout());
 
         toast.step(Text.translatable("message.gadget.progress.mounting_components"));
     }
@@ -297,74 +257,78 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         }
     }
 
+    public void openExportModal() {
+        FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
+
+        exportModal
+            .surface(Surface.DARK_PANEL)
+            .padding(Insets.of(8));
+
+        exportModal.child(Components.label(Text.translatable("text.gadget.export.packet_dump"))
+            .margins(Insets.bottom(4)));
+
+        SaveFilePathComponent savePath = new SaveFilePathComponent(
+            I18n.translate("text.gadget.export.packet_dump"),
+            path.toString() + ".txt")
+            .pattern("*.txt")
+            .filterDescription("Plain Text file");
+
+        LabelComponent progressLabel = Components.label(Text.translatable("text.gadget.export.gather_progress", 0));
+        Observable<Integer> count = Observable.of(0);
+
+        ReactiveUtils.throttle(count, TimeUnit.MILLISECONDS.toNanos(100), client)
+            .observe(progress ->
+                progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress)));
+
+        CancellationTokenSource tokSource = new CancellationTokenSource();
+
+        CompletableFuture<List<DumpedPacket>> collected = CompletableFuture.supplyAsync(() ->
+            reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, count::set, tokSource.token()));
+
+        exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
+            .child(Components.label(Text.translatable("text.gadget.export.output_path")))
+            .child(savePath)
+            .verticalAlignment(VerticalAlignment.CENTER)
+        );
+
+        exportModal.child(progressLabel);
+
+        var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
+            tokSource.token().throwIfCancelled();
+            exportModal.parent().remove();
+
+            dumpTextToFile(Path.of(savePath.path().get()), collected.join());
+        });
+
+        button.active(false);
+        collected.whenCompleteAsync((r, t) -> {
+            if (t != null) {
+                exportModal.child(exportModal.children().size() - 1, Components.label(Text.translatable("text.gadget.export.error")));
+                Gadget.LOGGER.error("Error occured while gathering packets for export", t);
+            } else {
+                button.active(true);
+            }
+        }, client);
+
+        exportModal.child(button);
+
+        uiAdapter.rootComponent.child(new OverlayContainer<>(exportModal) {
+            @Override
+            public void dismount(DismountReason reason) {
+                super.dismount(reason);
+
+                if (reason != DismountReason.REMOVED) return;
+
+                // breh
+                tokSource.cancel();
+            }
+        });
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_E && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0) {
-            // Export.
-            FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
-
-            exportModal
-                .surface(Surface.DARK_PANEL)
-                .padding(Insets.of(8));
-
-            exportModal.child(Components.label(Text.translatable("text.gadget.export.packet_dump"))
-                .margins(Insets.bottom(4)));
-
-            SaveFilePathComponent savePath = new SaveFilePathComponent(
-                I18n.translate("text.gadget.export.packet_dump"),
-                path.toString() + ".txt")
-                .pattern("*.txt")
-                .filterDescription("Plain Text file");
-
-            LabelComponent progressLabel = Components.label(Text.translatable("text.gadget.export.gather_progress", 0));
-            Observable<Integer> count = Observable.of(0);
-
-            ReactiveUtils.throttle(count, TimeUnit.MILLISECONDS.toNanos(100), client)
-                .observe(progress ->
-                    progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress)));
-
-            CancellationTokenSource tokSource = new CancellationTokenSource();
-
-            CompletableFuture<List<DumpedPacket>> collected = CompletableFuture.supplyAsync(() ->
-                reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, count::set, tokSource.token()));
-
-            exportModal.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
-                .child(Components.label(Text.translatable("text.gadget.export.output_path")))
-                .child(savePath)
-                .verticalAlignment(VerticalAlignment.CENTER)
-            );
-
-            exportModal.child(progressLabel);
-
-            var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
-                tokSource.token().throwIfCancelled();
-
-                dumpTextToFile(Path.of(savePath.path().get()), collected.join());
-            });
-
-            button.active(false);
-            collected.whenCompleteAsync((r, t) -> {
-                if (t != null) {
-                    exportModal.child(exportModal.children().size() - 1, Components.label(Text.translatable("text.gadget.export.error")));
-                    Gadget.LOGGER.error("Error occured while gathering packets for export", t);
-                } else {
-                    button.active(true);
-                }
-            }, client);
-
-            exportModal.child(button);
-
-            uiAdapter.rootComponent.child(new OverlayContainer<>(exportModal) {
-                @Override
-                public void dismount(DismountReason reason) {
-                    super.dismount(reason);
-
-                    if (reason != DismountReason.REMOVED) return;
-
-                    // breh
-                    tokSource.cancel();
-                }
-            });
+            openExportModal();
 
             return true;
         }

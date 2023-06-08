@@ -1,13 +1,20 @@
 package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.dump.fake.FakeGadgetPacket;
 import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
+import io.wispforest.gadget.dump.read.UnwrappedPacketData;
+import io.wispforest.gadget.dump.read.unwrapped.UnprocessedUnwrappedPacket;
+import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
+import io.wispforest.gadget.dump.read.unwrapped.VanillaUnwrappedPacket;
 import io.wispforest.gadget.field.DefaultFieldDataHolder;
 import io.wispforest.gadget.field.LocalFieldDataSource;
+import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.util.ReflectionUtil;
 import net.fabricmc.fabric.api.event.Event;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 public final class PacketHandlers {
@@ -24,6 +31,22 @@ public final class PacketHandlers {
         FapiSupport.init();
         MinecraftSupport.init();
 
+        PacketUnwrapper.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
+        PacketUnwrapper.EVENT.register(LAST_PHASE, (packet, errSink) -> {
+            if (packet.packet() instanceof FakeGadgetPacket fake) {
+                return fake.unwrapGadget();
+            }
+
+            if (packet.channelId() != null) {
+                PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                return new UnprocessedUnwrappedPacket(bytes);
+            } else {
+                return new VanillaUnwrappedPacket(packet.packet());
+            }
+        });
+
         SearchTextGatherer.EVENT.addPhaseOrdering(FIRST_PHASE, Event.DEFAULT_PHASE);
         SearchTextGatherer.EVENT.register(FIRST_PHASE, (packet, searchText, errSink) -> {
             searchText.append(ReflectionUtil.nameWithoutPackage(packet.packet().getClass()));
@@ -33,65 +56,22 @@ public final class PacketHandlers {
         });
 
         SearchTextGatherer.EVENT.register((packet, out, errSink) -> {
-            var unwrapped = PacketUnwrapper.EVENT.invoker().tryUnwrap(packet, errSink);
+            var unwrapped = packet.get(UnwrappedPacketData.KEY).unwrap();
 
             if (unwrapped == null) return;
 
-            out.append(" ").append(ReflectionUtil.nameWithoutPackage(unwrapped.packet().getClass()));
+            unwrapped.gatherSearchText(out, errSink);
         });
 
         PlainTextPacketDumper.EVENT.register((packet, out, indent, errSink) -> {
-            var unwrapped = PacketUnwrapper.EVENT.invoker().tryUnwrap(packet, errSink);
+            UnwrappedPacketData data = packet.get(UnwrappedPacketData.KEY);
 
-            if (unwrapped == null) return false;
+            var unwrapped = data.unwrap();
+            data.copyErrors(errSink);
 
-            StringBuilder sb = new StringBuilder();
+            if (unwrapped == null) return;
 
-            sb.append(ReflectionUtil.nameWithoutPackage(unwrapped.packet().getClass()));
-
-            if (unwrapped.packetId().isPresent()) {
-                sb.append(" #").append(unwrapped.packetId().getAsInt());
-            }
-
-            out.write(indent, sb.toString());
-
-            DefaultFieldDataHolder holder = new DefaultFieldDataHolder(
-                new LocalFieldDataSource(unwrapped.packet(), false),
-                true
-            );
-
-            holder.dumpToText(out, indent, holder.root(), 5)
-                .join();
-
-            return true;
-        });
-
-        PlainTextPacketDumper.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST_PHASE);
-        PlainTextPacketDumper.EVENT.register(LAST_PHASE, (packet, out, indent, errSink) -> {
-            if (packet.packet() instanceof GadgetReadErrorPacket errorPacket) {
-                out.writeHexDump(indent, errorPacket.data());
-                return true;
-            }
-
-            if (packet.packet() instanceof GadgetWriteErrorPacket) return true;
-
-            if (packet.channelId() != null) {
-                var buf = NetworkUtil.unwrapCustom(packet.packet());
-                byte[] bytes = new byte[buf.readableBytes()];
-                buf.readBytes(bytes);
-                out.writeHexDump(indent, bytes);
-                return true;
-            }
-
-            DefaultFieldDataHolder holder = new DefaultFieldDataHolder(
-                new LocalFieldDataSource(packet.packet(), false),
-                true
-            );
-
-            holder.dumpToText(out, indent, holder.root(), 5)
-                .join();
-
-            return true;
+            unwrapped.dumpAsPlainText(out, indent, errSink);
         });
     }
 }

@@ -11,16 +11,12 @@ public interface PacketRenderer {
     Event<PacketRenderer> EVENT = EventFactory.createArrayBacked(PacketRenderer.class, callbacks -> (packet, view, errSink) -> {
         for (var callback : callbacks) {
             try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
-                boolean result = callback.renderPacket(packet, view, errSink);
-                if (result)
-                    return true;
+                callback.renderPacket(packet, view, errSink);
             } catch (Exception e) {
                 errSink.accept(e);
             }
         }
-
-        return false;
     });
 
-    boolean renderPacket(DumpedPacket packet, FlowLayout out, ErrorSink errSink);
+    void renderPacket(DumpedPacket packet, FlowLayout out, ErrorSink errSink);
 }

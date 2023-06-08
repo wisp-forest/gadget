@@ -77,7 +77,7 @@ public final class PacketDumping {
         try {
             FakeGadgetPacket.Reader<?> fakeReader = PACKETS.get(packetId);
             if (fakeReader != null) {
-                return fakeReader.read(buf, state, side).unwrap();
+                return fakeReader.read(buf, state, side).unwrapVanilla();
             }
 
             return state.getPacketHandler(side, packetId, buf);
