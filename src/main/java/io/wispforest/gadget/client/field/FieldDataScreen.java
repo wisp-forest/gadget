@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.field;
 
 import com.google.gson.stream.JsonWriter;
+import io.wispforest.gadget.client.gui.EventEaterWrapper;
 import io.wispforest.gadget.client.gui.SaveFilePathComponent;
 import io.wispforest.gadget.client.gui.SidebarBuilder;
 import io.wispforest.gadget.client.gui.search.SearchGui;
@@ -133,6 +134,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
 
     public void openExportModal() {
         FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        OverlayContainer<EventEaterWrapper<FlowLayout>> exportOverlay = Containers.overlay(new EventEaterWrapper<>(exportModal));
 
         exportModal
             .surface(Surface.DARK_PANEL)
@@ -158,7 +160,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
             var path = Path.of(savePath.path().get());
 
-            exportModal.parent().remove();
+            exportOverlay.remove();
 
             try {
                 if (path.toString().endsWith(".json")) {
@@ -180,7 +182,7 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
 
         exportModal.child(button);
 
-        uiAdapter.rootComponent.child(Containers.overlay(exportModal));
+        uiAdapter.rootComponent.child(exportOverlay);
     }
 
     public void dumpToJson(Path path) throws IOException {

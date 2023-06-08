@@ -1,10 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.client.gui.BasedSliderComponent;
-import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
-import io.wispforest.gadget.client.gui.SaveFilePathComponent;
-import io.wispforest.gadget.client.gui.SidebarBuilder;
+import io.wispforest.gadget.client.gui.*;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.PacketDumpReader;
 import io.wispforest.gadget.util.*;
@@ -198,7 +195,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                 CompletableFuture.supplyAsync(() -> {
                         toast.step(Text.translatable("message.gadget.progress.calculating_data"));
 
-                        return new DumpStatsScreen(parent, reader, toast);
+                        return new DumpStatsScreen(this, reader, toast);
                     })
                     .thenAcceptAsync(client::setScreen, client),
                 true);
@@ -235,6 +232,10 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
             ProgressToast toast = ProgressToast.create(Text.translatable("text.gadget.export.exporting_packet_dump"));
             dumper.write(0, "Packet dump " + this.path.getFileName().toString());
+            dumper.write(0, "Search text is " + searchBox.getText());
+            dumper.write(0, packets.size() + " total packets");
+            dumper.write(0, "");
+
             MutableLong progress = new MutableLong();
 
             toast.force();
@@ -259,6 +260,17 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
     public void openExportModal() {
         FlowLayout exportModal = Containers.verticalFlow(Sizing.content(), Sizing.content());
+        CancellationTokenSource tokSource = new CancellationTokenSource();
+        var exportOverlay = new OverlayContainer<>(new EventEaterWrapper<>(exportModal)) {
+            @Override
+            public void dismount(DismountReason reason) {
+                super.dismount(reason);
+
+                if (reason != DismountReason.REMOVED) return;
+
+                tokSource.cancel();
+            }
+        };
 
         exportModal
             .surface(Surface.DARK_PANEL)
@@ -280,7 +292,6 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             .observe(progress ->
                 progressLabel.text(Text.translatable("text.gadget.export.gather_progress", progress)));
 
-        CancellationTokenSource tokSource = new CancellationTokenSource();
 
         CompletableFuture<List<DumpedPacket>> collected = CompletableFuture.supplyAsync(() ->
             reader.collectFor(searchBox.getText(), currentTime(), Integer.MAX_VALUE, count::set, tokSource.token()));
@@ -295,7 +306,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         var button = Components.button(Text.translatable("text.gadget.export.export_button"), b -> {
             tokSource.token().throwIfCancelled();
-            exportModal.parent().remove();
+            exportOverlay.remove();
 
             dumpTextToFile(Path.of(savePath.path().get()), collected.join());
         });
@@ -312,17 +323,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
         exportModal.child(button);
 
-        uiAdapter.rootComponent.child(new OverlayContainer<>(exportModal) {
-            @Override
-            public void dismount(DismountReason reason) {
-                super.dismount(reason);
-
-                if (reason != DismountReason.REMOVED) return;
-
-                // breh
-                tokSource.cancel();
-            }
-        });
+        uiAdapter.rootComponent.child(exportOverlay);
     }
 
     @Override

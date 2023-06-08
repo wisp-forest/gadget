@@ -77,7 +77,7 @@ public interface ProgressToast {
 
                     oom(oom);
                     return;
-                } else if (e instanceof CancellationException) {
+                } else if (e instanceof CancellationException || e.getCause() instanceof CancellationException) {
                     finish(Text.translatable("message.gadget.progress.cancelled"), true);
                     return;
                 }

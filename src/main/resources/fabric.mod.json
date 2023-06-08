@@ -8,6 +8,11 @@
     "authors": [
         "BasiqueEvangelist"
     ],
+    "contact": {
+        "homepage": "https://modrinth.com/mod/gadget",
+        "sources": "https://github.com/wisp-forest/gadget",
+        "issues": "https://github.com/wisp-forest/gadget/issues"
+    },
 
     "license": "LGPL-3.0-only",
 
@@ -30,7 +35,10 @@
     "custom": {
         "modmenu": {
             "links": {
-                "modmenu.discord": "https://wispforest.io/discord"
+                "modmenu.discord": "https://wispforest.io/discord",
+                "modmenu.modrinth": "https://modrinth.com/mod/gadget",
+                "modmenu.github_releases": "https://github.com/wisp-forest/gadget/releases",
+                "modmenu.mastodon": "https://mstdn.social/@BasiqueEvangelist"
             }
         }
     },

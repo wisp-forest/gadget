@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client.dump;
 
 import io.wispforest.gadget.client.gui.BasedVerticalFlowLayout;
+import io.wispforest.gadget.client.gui.SidebarBuilder;
 import io.wispforest.gadget.dump.read.PacketDumpReader;
 import io.wispforest.gadget.dump.read.SearchTextData;
 import io.wispforest.gadget.util.NumberUtil;
@@ -57,8 +58,10 @@ public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
             .surface(Surface.VANILLA_TRANSLUCENT);
 
         FlowLayout main = new BasedVerticalFlowLayout(Sizing.fill(100), Sizing.content());
-        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(90), main)
+        ScrollContainer<FlowLayout> scroll = Containers.verticalScroll(Sizing.fill(95), Sizing.fill(100), main)
             .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofArgb(0xA0FFFFFF)));
+
+        main.padding(Insets.vertical(15));
 
         packetTypes
             .entrySet()
@@ -80,8 +83,13 @@ public class DumpStatsScreen extends BaseOwoScreen<FlowLayout> {
                     .margins(Insets.bottom(3)));
             });
 
+        SidebarBuilder sidebar = new SidebarBuilder();
+
+        sidebar.button("text.gadget.back", (mouseX, mouseY) -> close());
+
         rootComponent
-            .child(scroll);
+            .child(scroll)
+            .child(sidebar.layout());
     }
 
     @Override

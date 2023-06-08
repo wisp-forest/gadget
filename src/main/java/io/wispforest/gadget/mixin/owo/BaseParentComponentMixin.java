@@ -17,30 +17,10 @@ import java.util.List;
 
 @Mixin(BaseParentComponent.class)
 public abstract class BaseParentComponentMixin extends BaseComponent {
-    private Throwable lastDismount;
-    private Thread lastDismountThread;
-
-    @Shadow @Nullable public abstract FocusHandler focusHandler();
-
     @Inject(method = "onChildMutated", at = @At("HEAD"), remap = false)
     private void mald(Component child, CallbackInfo ci) {
         if (mounted) {
             ComponentEventCounter.countMutation();
         }
-    }
-
-    @Inject(method = "drawChildren", at = @At(value = "INVOKE", target = "Lio/wispforest/owo/ui/base/BaseParentComponent;focusHandler()Lio/wispforest/owo/ui/util/FocusHandler;"))
-    private void breh(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta, List<Component> children, CallbackInfo ci) {
-        if (focusHandler() == null) {
-            throw new IllegalStateException("focus handler null? wtf on " + (lastDismountThread == null ? "?" : lastDismountThread.getName()), lastDismount);
-        }
-    }
-
-    @Override
-    public void dismount(DismountReason reason) {
-        super.dismount(reason);
-
-        lastDismountThread = Thread.currentThread();
-        lastDismount = new Throwable("Dismount");
     }
 }

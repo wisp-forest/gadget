@@ -35,6 +35,6 @@ public class LayoutCacheWrapper<C extends Component> extends WrappingParentCompo
     public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
         super.draw(matrices, mouseX, mouseY, partialTicks, delta);
 
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, Collections.singletonList(this.child));
+        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, children());
     }
 }

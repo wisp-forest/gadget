@@ -80,10 +80,12 @@
     "text.gadget.stats.tooltip": "View Stats",
     "text.gadget.export_button": {
         "text": "E",
-        "color": "#CC8899",
+        "color": "#8A2BE2",
         "font": "gadget:monocraft"
     },
     "text.gadget.export_button.tooltip": "Export",
+    "text.gadget.back": "←",
+    "text.gadget.back.tooltip": "Back",
     "text.gadget.switch_to_server": "Switch to server",
     "text.gadget.switch_to_client": "Switch to client",
     "text.gadget.menu_button": {
