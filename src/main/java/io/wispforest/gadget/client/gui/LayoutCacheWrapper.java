@@ -6,8 +6,6 @@ import io.wispforest.owo.ui.core.Size;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.util.math.MatrixStack;
 
-import java.util.Collections;
-
 public class LayoutCacheWrapper<C extends Component> extends WrappingParentComponent<C> {
     private Size prevSpace;
 

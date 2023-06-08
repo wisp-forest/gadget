@@ -1,7 +1,7 @@
 package io.wispforest.gadget.dump.read.handler;
 
-import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import io.wispforest.gadget.dump.read.DumpedPacket;
+import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import net.fabricmc.fabric.api.event.Event;

@@ -1,6 +1,5 @@
 package io.wispforest.gadget.dump.read.handler;
 
-import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
@@ -9,7 +8,6 @@ import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

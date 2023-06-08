@@ -1,6 +1,5 @@
 package io.wispforest.gadget.dump.read.handler;
 
-import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.mixin.owo.IndexedSerializerAccessor;

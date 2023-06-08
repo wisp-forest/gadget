@@ -2,15 +2,9 @@ package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.dump.fake.FakeGadgetPacket;
-import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
-import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
 import io.wispforest.gadget.dump.read.UnwrappedPacketData;
 import io.wispforest.gadget.dump.read.unwrapped.UnprocessedUnwrappedPacket;
-import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.VanillaUnwrappedPacket;
-import io.wispforest.gadget.field.DefaultFieldDataHolder;
-import io.wispforest.gadget.field.LocalFieldDataSource;
-import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.gadget.util.ReflectionUtil;
 import net.fabricmc.fabric.api.event.Event;

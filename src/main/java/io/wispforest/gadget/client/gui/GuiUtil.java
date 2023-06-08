@@ -7,7 +7,6 @@ import io.wispforest.owo.ui.component.DropdownComponent;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
-import io.wispforest.owo.ui.container.OverlayContainer;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.client.gui.widget.TextFieldWidget;

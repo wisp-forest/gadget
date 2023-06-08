@@ -5,8 +5,6 @@ import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.network.FabricPacketHacks;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.core.Insets;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;

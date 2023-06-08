@@ -15,7 +15,6 @@ import io.wispforest.owo.ui.container.OverlayContainer;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.Drawer;
-import io.wispforest.owo.ui.util.UISounds;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;

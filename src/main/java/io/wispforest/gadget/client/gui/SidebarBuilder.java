@@ -1,7 +1,5 @@
 package io.wispforest.gadget.client.gui;
 
-import io.wispforest.gadget.client.dump.DumpStatsScreen;
-import io.wispforest.gadget.util.ProgressToast;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;

@@ -5,7 +5,6 @@ import io.wispforest.gadget.dump.read.unwrapped.UnwrappedPacket;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
-import org.jetbrains.annotations.Nullable;
 
 public record GadgetReadErrorPacket(byte[] data, int packetId, Exception exception) implements FakeGadgetPacket {
     public static final int ID = -3;
