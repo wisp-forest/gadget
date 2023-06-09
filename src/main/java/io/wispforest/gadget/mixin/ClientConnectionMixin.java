@@ -1,7 +1,7 @@
 package io.wispforest.gadget.mixin;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.wispforest.gadget.client.dump.PacketDumper;
+import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
@@ -23,17 +23,13 @@ public abstract class ClientConnectionMixin {
     private void readHook(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
         if (side == NetworkSide.SERVERBOUND) return;
 
-        if (PacketDumper.isDumping()) {
-            PacketDumper.dump(false, packet);
-        }
+        ClientPacketDumper.dump(false, packet);
     }
 
     @Inject(method = "sendInternal", at = @At("HEAD"))
     private void writeHook(Packet<?> packet, @Nullable PacketCallbacks callbacks, NetworkState packetState, NetworkState currentState, CallbackInfo ci) {
         if (side == NetworkSide.SERVERBOUND) return;
 
-        if (PacketDumper.isDumping()) {
-            PacketDumper.dump(true, packet);
-        }
+        ClientPacketDumper.dump(true, packet);
     }
 }

@@ -3,8 +3,8 @@ package io.wispforest.gadget.mixin.client;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.MatrixStackLogger;
+import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.DumpPrimer;
-import io.wispforest.gadget.client.dump.PacketDumper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.slf4j.Logger;
@@ -23,11 +23,11 @@ public class MinecraftClientMixin {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
     private void onDisconnect(Screen screen, CallbackInfo ci) {
         if (DumpPrimer.isPrimed) {
-            PacketDumper.start(false);
+            ClientPacketDumper.start(false);
 
             DumpPrimer.isPrimed = false;
-        } else if (PacketDumper.isDumping()) {
-            PacketDumper.stop();
+        } else if (ClientPacketDumper.isDumping()) {
+            ClientPacketDumper.stop();
         }
     }
 

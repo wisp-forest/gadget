@@ -3,8 +3,8 @@ package io.wispforest.gadget.client.gui;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.ServerData;
+import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.OpenDumpScreen;
-import io.wispforest.gadget.client.dump.PacketDumper;
 import io.wispforest.gadget.client.resource.ViewClassesScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
 import io.wispforest.gadget.network.GadgetNetworking;
@@ -117,10 +117,10 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
         }
 
         try {
-            if (!Files.exists(PacketDumper.DUMP_DIR))
-                Files.createDirectories(PacketDumper.DUMP_DIR);
+            if (!Files.exists(ClientPacketDumper.DUMP_DIR))
+                Files.createDirectories(ClientPacketDumper.DUMP_DIR);
 
-            for (var dump : FileUtil.listSortedByFileName(PacketDumper.DUMP_DIR)) {
+            for (var dump : FileUtil.listSortedByFileName(ClientPacketDumper.DUMP_DIR)) {
                 String filename = dump.getFileName().toString();
 
                 if (!filename.endsWith(".gdump")

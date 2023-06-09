@@ -1,6 +1,6 @@
 package io.wispforest.gadget.mixin.client;
 
-import io.wispforest.gadget.client.dump.PacketDumper;
+import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class DisconnectedScreenMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void disableDump(Screen parent, Text title, Text reason, CallbackInfo ci) {
-        if (PacketDumper.isDumping())
-            PacketDumper.stop();
+        if (ClientPacketDumper.isDumping())
+            ClientPacketDumper.stop();
     }
 }

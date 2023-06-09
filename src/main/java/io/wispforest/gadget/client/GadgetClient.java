@@ -3,7 +3,7 @@ package io.wispforest.gadget.client;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
-import io.wispforest.gadget.client.dump.PacketDumper;
+import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.handler.ClientPacketHandlers;
 import io.wispforest.gadget.client.field.FieldDataScreen;
 import io.wispforest.gadget.client.field.RemoteFieldDataSource;
@@ -165,10 +165,10 @@ public class GadgetClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (!DUMP_KEY.wasPressed()) return;
 
-            if (PacketDumper.isDumping()) {
-                PacketDumper.stop();
+            if (ClientPacketDumper.isDumping()) {
+                ClientPacketDumper.stop();
             } else {
-                PacketDumper.start(true);
+                ClientPacketDumper.start(true);
             }
         });
 
