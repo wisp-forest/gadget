@@ -5,7 +5,6 @@ package io.wispforest.gadget.client.gui.search;
 
 import io.wispforest.owo.ui.base.BaseComponent;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class SearchHighlighterComponent extends BaseComponent {
 
