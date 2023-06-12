@@ -3,15 +3,15 @@ package io.wispforest.gadget.client.gui.inspector;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -99,8 +99,10 @@ public class UIInspector {
     }
 
     // Mostly copied (and modified) from Drawer$DebugDrawer#drawInspector
-    public void drawInspector(Screen screen, MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
+    public void drawInspector(Screen screen, DrawContext ctxIn, int mouseX, int mouseY, float tickDelta) {
         if (!enabled()) return;
+
+        OwoUIDrawContext ctx = OwoUIDrawContext.of(ctxIn);
 
         RenderSystem.disableDepthTest();
         var client = MinecraftClient.getInstance();
@@ -132,9 +134,9 @@ public class UIInspector {
             if (!ElementUtils.isVisible(child)) continue;
             if (ElementUtils.x(child) == -1) continue;
 
-            matrices.translate(0, 0, 1000);
+            ctx.getMatrices().translate(0, 0, 1000);
 
-            Drawer.drawRectOutline(matrices, ElementUtils.x(child), ElementUtils.y(child), ElementUtils.width(child), ElementUtils.height(child), 0xFF3AB0FF);
+            ctx.drawRectOutline(ElementUtils.x(child), ElementUtils.y(child), ElementUtils.width(child), ElementUtils.height(child), 0xFF3AB0FF);
 
             if (onlyHovered) {
 
@@ -151,15 +153,13 @@ public class UIInspector {
                 final var descriptor = Text.literal(ElementUtils.x(child) + "," + ElementUtils.y(child) + " (" + ElementUtils.width(child) + "," + ElementUtils.height(child) + ")");
 
                 int width = Math.max(textRenderer.getWidth(nameText), textRenderer.getWidth(descriptor));
-                Drawer.fill(matrices, inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
-                Drawer.drawRectOutline(matrices, inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
+                ctx.fill(inspectorX, inspectorY, inspectorX + width + 3, inspectorY + inspectorHeight, 0xA7000000);
+                ctx.drawRectOutline(inspectorX, inspectorY, width + 3, inspectorHeight, 0xA7000000);
 
-                textRenderer.draw(matrices, nameText,
-                    inspectorX + 2, inspectorY + 2, 0xFFFFFF);
-                textRenderer.draw(matrices, descriptor,
-                    inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF);
+                ctx.drawText(textRenderer, nameText, inspectorX + 2, inspectorY + 2, 0xFFFFFF, false);
+                ctx.drawText(textRenderer, descriptor, inspectorX + 2, inspectorY + textRenderer.fontHeight + 2, 0xFFFFFF, false);
             }
-            matrices.translate(0, 0, -1000);
+            ctx.getMatrices().translate(0, 0, -1000);
         }
 
         RenderSystem.enableDepthTest();

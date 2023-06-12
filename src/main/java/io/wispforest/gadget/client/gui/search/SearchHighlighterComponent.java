@@ -4,11 +4,7 @@
 package io.wispforest.gadget.client.gui.search;
 
 import io.wispforest.owo.ui.base.BaseComponent;
-import io.wispforest.owo.ui.core.Color;
-import io.wispforest.owo.ui.core.Easing;
-import io.wispforest.owo.ui.core.Positioning;
-import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.util.math.MatrixStack;
 
 public class SearchHighlighterComponent extends BaseComponent {
@@ -24,19 +20,19 @@ public class SearchHighlighterComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
         final var mainColor = startColor.interpolate(endColor, (float) Math.sin(age / 25 * Math.PI)).argb();
 
         int segmentWidth = (int) (this.width * .3f);
         int baseX = (int) ((this.x - segmentWidth) + (Easing.CUBIC.apply(this.age / 25)) * (this.width + segmentWidth * 2));
 
-        Drawer.drawGradientRect(matrices,
+        ctx.drawGradientRect(
             baseX - segmentWidth, this.y,
             segmentWidth, this.height,
             0, mainColor,
             mainColor, 0
         );
-        Drawer.drawGradientRect(matrices,
+        ctx.drawGradientRect(
             baseX, this.y,
             segmentWidth, this.height,
             mainColor, 0,

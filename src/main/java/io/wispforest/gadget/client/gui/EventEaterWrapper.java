@@ -2,6 +2,7 @@ package io.wispforest.gadget.client.gui;
 
 import io.wispforest.owo.ui.container.WrappingParentComponent;
 import io.wispforest.owo.ui.core.Component;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.util.math.MatrixStack;
 
@@ -28,9 +29,9 @@ public class EventEaterWrapper<C extends Component> extends WrappingParentCompon
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        super.draw(matrices, mouseX, mouseY, partialTicks, delta);
+    public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
+        super.draw(ctx, mouseX, mouseY, partialTicks, delta);
 
-        this.drawChildren(matrices, mouseX, mouseY, partialTicks, delta, children());
+        this.drawChildren(ctx, mouseX, mouseY, partialTicks, delta, children());
     }
 }

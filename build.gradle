@@ -1,7 +1,7 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.2-SNAPSHOT'
 	id 'maven-publish'
-	id 'io.github.juuxel.loom-quiltflower' version '1.7.3'
+	id 'io.github.juuxel.loom-quiltflower' version '1.10.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -58,20 +58,19 @@ dependencies {
 	modImplementation annotationProcessor("io.wispforest:owo-lib:${project.owo_version}")
 	include "io.wispforest:owo-sentinel:${project.owo_version}"
 
-	modImplementation include('me.lucko:fabric-permissions-api:0.2-SNAPSHOT')
+	modImplementation include("me.lucko:fabric-permissions-api:${project.fabric_perms_api}")
 
-	implementation include('net.fabricmc:mapping-io:0.3.0')
-	implementation include('net.auoeke:result:0.4.1')
-	implementation include('net.auoeke:unsafe:1.7.3')
-	implementation include('net.auoeke:reflect:6.1.3')
+	implementation include("net.fabricmc:mapping-io:${project.mapping_io}")
+	implementation include("net.auoeke:result:${project.auoeke_result}")
+	implementation include("net.auoeke:unsafe:${project.auoeke_unsafe}")
+	implementation include("net.auoeke:reflect:${project.auoeke_reflect}")
 
-	implementation annotationProcessor(include("com.github.llamalad7.mixinextras:mixinextras-fabric:0.2.0-beta.8"))
+	implementation annotationProcessor(include("com.github.llamalad7.mixinextras:mixinextras-fabric:${project.mixinextras}"))
 
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
 
-	modCompileOnly "org.quiltmc:quiltflower:1.9.0"
+	modCompileOnly "org.quiltmc:quiltflower:${project.quiltflower}"
 
-	modLocalRuntime "maven.modrinth:lazydfu:0.1.3"
 	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 
 //	modLocalRuntime "vazkii.patchouli:Patchouli:1.19.2-76-FABRIC"
@@ -79,8 +78,8 @@ dependencies {
 //	modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:9.1.530"
 //	modLocalRuntime "dev.architectury:architectury-fabric:6.3.49"
 //	modLocalRuntime "com.glisco:things:0.2.20+1.19"
-	modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:10.0.96"
-	modLocalRuntime "maven.modrinth:auth-me:6.0.0"
+	modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config}"
+	modLocalRuntime "maven.modrinth:auth-me:${project.auth_me}"
 
 	testmodImplementation sourceSets.main.output
 }

@@ -3,9 +3,7 @@ package io.wispforest.gadget.client.gui;
 import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.RotationAxis;
 import org.lwjgl.glfw.GLFW;
@@ -16,8 +14,7 @@ import java.util.function.Consumer;
 
 // Copied from owo-ui's CollapsibleContainer
 public class SubObjectContainer extends FlowLayout {
-
-    public static final Surface SURFACE = (matrices, component) -> Drawer.fill(matrices,
+    public static final Surface SURFACE = (ctx, component) -> ctx.fill(
         component.x() + 5,
         component.y(),
         component.x() + 6,
@@ -152,14 +149,14 @@ public class SubObjectContainer extends FlowLayout {
         }
 
         @Override
-        public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-            matrices.push();
-            matrices.translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
-            matrices.translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
+        public void draw(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
+            ctx.getMatrices().push();
+            ctx.getMatrices().translate(this.x + this.width / 2f - 1, this.y + this.height / 2f - 1, 0);
+            ctx.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(this.rotation));
+            ctx.getMatrices().translate(-(this.x + this.width / 2f - 1), -(this.y + this.height / 2f - 1), 0);
 
-            super.draw(matrices, mouseX, mouseY, partialTicks, delta);
-            matrices.pop();
+            super.draw(ctx, mouseX, mouseY, partialTicks, delta);
+            ctx.getMatrices().pop();
         }
     }
 }

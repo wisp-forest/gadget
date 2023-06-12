@@ -14,7 +14,6 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.OverlayContainer;
 import io.wispforest.owo.ui.container.ScrollContainer;
 import io.wispforest.owo.ui.core.*;
-import io.wispforest.owo.ui.util.Drawer;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -23,6 +22,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
@@ -156,7 +156,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             private int frameNumber = 11;
 
             @Override
-            public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+            public void drawTooltip(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
                 frameNumber++;
 
                 if (!this.shouldDrawTooltip(mouseX, mouseY)) return;
@@ -164,9 +164,9 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                 if (frameNumber > 9) {
                     frameNumber = 0;
 
-                    var list = new ArrayList<Component>();
-                    uiAdapter.rootComponent.collectChildren(list);
-                    totalComponents = list.size();
+                    MutableInt total = new MutableInt();
+                    uiAdapter.rootComponent.forEachDescendant(c -> total.increment());
+                    totalComponents = total.getValue();
                 }
 
                 List<TooltipComponent> tooltip = new ArrayList<>();
@@ -181,7 +181,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
 
                 tooltip.add(TooltipComponent.of(Text.translatable("text.gadget.info.packets_on_screen", main.children().size()).asOrderedText()));
 
-                Drawer.drawTooltip(matrices, mouseX, mouseY, tooltip);
+                ctx.drawTooltip(client.textRenderer, mouseX, mouseY, tooltip);
             }
         };
 

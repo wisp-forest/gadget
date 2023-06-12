@@ -1,10 +1,13 @@
 package io.wispforest.gadget.client.gui;
 
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.SliderComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.util.Drawer;
+import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -27,14 +30,20 @@ public class BasedSliderComponent extends SliderComponent {
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        OwoNinePatchRenderers.BUTTON_DISABLED.draw(matrices, getX(), getY(), width, height);
+    public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
+        NinePatchTexture.draw(ButtonComponent.DISABLED_TEXTURE, (OwoUIDrawContext) ctx, getX(), getY(), width, height);
 
-        (hovered ? OwoNinePatchRenderers.HOVERED_BUTTON : OwoNinePatchRenderers.ACTIVE_BUTTON)
-            .draw(matrices, this.getX() + (int)(this.value * (double)(this.width - 8)), getY(), 8, 20);
+        NinePatchTexture.draw(
+            (hovered ? ButtonComponent.HOVERED_TEXTURE : ButtonComponent.ACTIVE_TEXTURE),
+            (OwoUIDrawContext) ctx,
+            this.getX() + (int)(this.value * (double)(this.width - 8)),
+            getY(),
+            8,
+            20
+        );
 
         int textColor = this.active ? 16777215 : 10526880;
-        this.drawScrollableText(matrices, MinecraftClient.getInstance().textRenderer, 2, textColor | MathHelper.ceil(this.alpha * 255.0F) << 24);
+        this.drawScrollableText(ctx, MinecraftClient.getInstance().textRenderer, 2, textColor | MathHelper.ceil(this.alpha * 255.0F) << 24);
     }
 
     @Override
@@ -48,7 +57,7 @@ public class BasedSliderComponent extends SliderComponent {
     }
 
     @Override
-    public void drawTooltip(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
+    public void drawTooltip(OwoUIDrawContext ctx, int mouseX, int mouseY, float partialTicks, float delta) {
         if (!shouldDrawTooltip(mouseX, mouseY)) return;
         if (tooltipFactory == null) return;
 
@@ -56,6 +65,6 @@ public class BasedSliderComponent extends SliderComponent {
 
         List<TooltipComponent> tooltip = new ArrayList<>();
         tooltip.add(TooltipComponent.of(tooltipFactory.apply(tooltipValue).asOrderedText()));
-        Drawer.drawTooltip(matrices, mouseX, mouseY, tooltip);
+        ctx.drawTooltip(MinecraftClient.getInstance().textRenderer, mouseX, mouseY, tooltip);
     }
 }

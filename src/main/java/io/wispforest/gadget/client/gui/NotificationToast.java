@@ -5,6 +5,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
@@ -37,8 +38,8 @@ public class NotificationToast implements Toast {
     }
 
     @Override
-    public Visibility draw(MatrixStack matrices, ToastManager manager, long startTime) {
-        this.adapter.render(matrices, 0, 0, client.getTickDelta());
+    public Visibility draw(DrawContext ctx, ToastManager manager, long startTime) {
+        this.adapter.render(ctx, 0, 0, client.getTickDelta());
 
         return startTime > 5000 ? Visibility.HIDE : Visibility.SHOW;
     }
