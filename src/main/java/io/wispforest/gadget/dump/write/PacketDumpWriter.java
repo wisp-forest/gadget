@@ -26,7 +26,7 @@ public class PacketDumpWriter implements AutoCloseable {
 
     public PacketDumpWriter(Path path) throws IOException {
         this.path = path;
-        this.output = new GZIPOutputStream(Files.newOutputStream(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE));
+        this.output = new GZIPOutputStream(Files.newOutputStream(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE), true);
 
         ByteBuf headerBuf = Unpooled.buffer(15);
         headerBuf.writeBytes("gadget:dump".getBytes(StandardCharsets.UTF_8));
@@ -70,6 +70,7 @@ public class PacketDumpWriter implements AutoCloseable {
 
             try {
                 buf.getBytes(buf.readerIndex(), out, buf.readableBytes());
+                out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
