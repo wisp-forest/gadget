@@ -133,6 +133,17 @@
         "Drops chunk data packets to\n",
         "reduce dump file size."
     ],
+    "text.config.gadget.option.dumpFlushMode": "Dump Flush Mode",
+    "text.config.gadget.option.dumpFlushMode.tooltip": "Describes when the dump writer flushes packets.",
+    "text.config.gadget.enum.flushMode.manual": [
+        "Manual (On Pause)"
+    ],
+    "text.config.gadget.enum.flushMode.on_exit": [
+        "On JVM Exit"
+    ],
+    "text.config.gadget.enum.flushMode.on_every_packet": [
+        "After Packet Write"
+    ],
     "text.config.gadget.option.debugKeysInScreens": "Debug Keys In Screens",
     "text.config.gadget.option.debugKeysInScreens.tooltip": "Allows you to use F3 debug keys in any screen",
     "text.config.gadget.option.matrixStackDebugging": "MatrixStack Debugging",

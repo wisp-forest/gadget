@@ -81,6 +81,15 @@ public class ClientPacketDumper {
         writer.write(packet, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
     }
 
+    public static void flushIfNeeded() {
+        PacketDumpWriter writer = WRITER;
+
+        if (writer == null) return;
+
+        writer.flush();
+        LOGGER.info("Flushing packet dump");
+    }
+
     public static boolean isDumping() {
         return WRITER != null;
     }
