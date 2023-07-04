@@ -13,14 +13,12 @@ import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.util.Identifier;
 
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.zip.GZIPInputStream;
 
 public class PacketDumpDeserializer {
@@ -29,22 +27,21 @@ public class PacketDumpDeserializer {
     }
 
     public static List<DumpedPacket> readV0(InputStream is) throws IOException {
-        DataInputStream dis = new DataInputStream(is);
-        List<DumpedPacket> list = new ArrayList<>();
-        PacketByteBuf buf = PacketByteBufs.create();
+        try (BufferedInputStream bis = new BufferedInputStream(is)) {
+            List<DumpedPacket> list = new ArrayList<>();
+            PacketByteBuf buf = PacketByteBufs.create();
 
-        Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
+            Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
 
-        try {
-            // I know, IntelliJ.
-            //noinspection InfiniteLoopStatement
             while (true) {
-                int length = dis.readInt();
+                OptionalInt length = readInt(bis, true);
+
+                if (length.isEmpty()) return list;
 
                 buf.readerIndex(0);
                 buf.writerIndex(0);
 
-                buf.writeBytes(dis.readNBytes(length));
+                buf.writeBytes(bis.readNBytes(length.getAsInt()));
 
                 short flags = buf.readShort();
                 boolean outbound = (flags & 1) != 0;
@@ -67,71 +64,80 @@ public class PacketDumpDeserializer {
 
                 list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
             }
-        } catch (EOFException e) {
-            return list;
         }
     }
 
     public static List<DumpedPacket> readNew(InputStream is) throws IOException {
-        DataInputStream dis = new DataInputStream(new GZIPInputStream(is));
+        try (BufferedInputStream dis = new BufferedInputStream(new GZIPInputStream(is))) {
+            var magic = dis.readNBytes(11);
 
-        var magic = dis.readNBytes(11);
+            if (!Arrays.equals(magic, "gadget:dump".getBytes(StandardCharsets.UTF_8))) {
+                throw new IllegalStateException("Invalid gdump file!");
+            }
 
-        if (!Arrays.equals(magic, "gadget:dump".getBytes(StandardCharsets.UTF_8))) {
-            throw new IllegalStateException("Invalid gdump file!");
+            var version = readInt(dis, false).orElseThrow();
+
+            if (version == 1)
+                return readV1(dis);
+            else
+                throw new IllegalStateException("Invalid gdump version " + version);
         }
-
-        var version = dis.readInt();
-
-        if (version == 1)
-            return readV1(dis);
-        else
-            throw new IllegalStateException("Invalid gdump version " + version);
     }
 
-    private static List<DumpedPacket> readV1(DataInputStream is) throws IOException {
+    private static List<DumpedPacket> readV1(InputStream is) throws IOException {
         List<DumpedPacket> list = new ArrayList<>();
 
         PacketByteBuf buf = PacketByteBufs.create();
 
         Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
 
-        try {
-            // I know, IntelliJ.
-            //noinspection InfiniteLoopStatement
-            while (true) {
-                int length = is.readInt();
+        while (true) {
+            OptionalInt len = readInt(is, true);
 
-                buf.readerIndex(0);
-                buf.writerIndex(0);
+            if (len.isEmpty())
+                return list;
 
-                buf.writeBytes(is.readNBytes(length));
+            buf.readerIndex(0);
+            buf.writerIndex(0);
 
-                short flags = buf.readShort();
-                boolean outbound = (flags & 1) != 0;
-                NetworkState state = switch (flags & 0b0110) {
-                    case 0b0000 -> NetworkState.HANDSHAKING;
-                    case 0b0010 -> NetworkState.PLAY;
-                    case 0b0100 -> NetworkState.STATUS;
-                    case 0b0110 -> NetworkState.LOGIN;
-                    default -> throw new IllegalStateException();
-                };
-                long sentAt = buf.readLong();
-                int size = buf.readableBytes();
-                Packet<?> packet = PacketDumping.readPacket(buf, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
-                Identifier channelId = NetworkUtil.getChannelOrNull(packet);
+            buf.writeBytes(is.readNBytes(len.getAsInt()));
 
-                if (packet instanceof LoginQueryRequestS2CPacket req) {
-                    loginQueryChannels.put(req.getQueryId(), req.getChannel());
-                } else if (packet instanceof LoginQueryResponseC2SPacket res) {
-                    channelId = loginQueryChannels.get(res.getQueryId());
-                }
+            short flags = buf.readShort();
+            boolean outbound = (flags & 1) != 0;
+            NetworkState state = switch (flags & 0b0110) {
+                case 0b0000 -> NetworkState.HANDSHAKING;
+                case 0b0010 -> NetworkState.PLAY;
+                case 0b0100 -> NetworkState.STATUS;
+                case 0b0110 -> NetworkState.LOGIN;
+                default -> throw new IllegalStateException();
+            };
+            long sentAt = buf.readLong();
+            int size = buf.readableBytes();
+            Packet<?> packet = PacketDumping.readPacket(buf, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
+            Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
+            if (packet instanceof LoginQueryRequestS2CPacket req) {
+                loginQueryChannels.put(req.getQueryId(), req.getChannel());
+            } else if (packet instanceof LoginQueryResponseC2SPacket res) {
+                channelId = loginQueryChannels.get(res.getQueryId());
             }
-        } catch (EOFException e) {
-            return list;
+
+            list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
         }
     }
 
+    // I hate DataInputStream.
+    private static OptionalInt readInt(InputStream is, boolean gracefulEof) throws IOException {
+        int ch1 = is.read();
+        int ch2 = is.read();
+        int ch3 = is.read();
+        int ch4 = is.read();
+
+        if (gracefulEof && ch1 < 0)
+            return OptionalInt.empty();
+        else if ((ch1 | ch2 | ch3 | ch4) < 0)
+            throw new EOFException();
+
+        return OptionalInt.of(((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + ch4));
+    }
 }
