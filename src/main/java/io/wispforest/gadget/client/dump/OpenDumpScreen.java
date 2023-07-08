@@ -66,6 +66,13 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
                     toast.step(Text.translatable("message.gadget.progress.reading_packets"));
                     var reader = new PacketDumpReader(path, toast);
 
+                    if (reader.readError() != null) {
+                        new NotificationToast(
+                            Text.translatable("message.gadget.dump.error"),
+                            Text.translatable("message.gadget.dump.error.desc")
+                        ).register();
+                    }
+
                     toast.step(Text.translatable("message.gadget.progress.building_screen"));
                     OpenDumpScreen screen = new OpenDumpScreen(parent, toast, reader, path);
                     screen.init(client, parent.width, parent.height);

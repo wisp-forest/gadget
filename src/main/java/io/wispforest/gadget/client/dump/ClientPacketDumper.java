@@ -40,7 +40,10 @@ public class ClientPacketDumper {
             LOGGER.info("Started dumping to {}", filename);
 
             if (doToast)
-                MinecraftClient.getInstance().getToastManager().add(new NotificationToast(Text.translatable("message.gadget.dump.started"), null));
+                new NotificationToast(
+                    Text.translatable("message.gadget.dump.started"),
+                    null
+                ).register();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -56,9 +59,12 @@ public class ClientPacketDumper {
 
             try {
                 LOGGER.info("Saved dump to {}", dumper.path());
-                MinecraftClient.getInstance().getToastManager().add(
-                    new NotificationToast(Text.translatable("message.gadget.dump.stopped"), Text.literal(dumper.path().getFileName().toString()))
-                );
+
+                new NotificationToast(
+                    Text.translatable("message.gadget.dump.stopped"),
+                    Text.literal(dumper.path().getFileName().toString())
+                )
+                    .register();
 
                 dumper.close();
                 WRITER = null;

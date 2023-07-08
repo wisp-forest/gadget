@@ -11,6 +11,8 @@
 
     "message.gadget.dump.started": "Started dumping",
     "message.gadget.dump.stopped": "Saved dump to",
+    "message.gadget.dump.error": "Failed to read full dump",
+    "message.gadget.dump.error.desc": "Some packets may be missing",
     "message.gadget.progress.finished": "Finished!",
     "message.gadget.progress.failed": "Failed! Check logs for details",
     "message.gadget.progress.cancelled": "Cancelled.",
@@ -133,16 +135,27 @@
         "Drops chunk data packets to\n",
         "reduce dump file size."
     ],
-    "text.config.gadget.option.dumpFlushMode": "Dump Flush Mode",
-    "text.config.gadget.option.dumpFlushMode.tooltip": "Describes when the dump writer flushes packets.",
-    "text.config.gadget.enum.flushMode.manual": [
-        "Manual (On Pause)"
+    "text.config.gadget.option.dumpSafety": "Dump Safety",
+    "text.config.gadget.option.dumpSafety.tooltip": [
+        "Describes the precautions taken to avoid missed packets in dumps.\n\n",
+        "- ", {"text": "On Pause\n", "bold": true},
+        "  Only flushes when the pause menu is opened.\n",
+        "  Not recommended.\n",
+        "- ", {"text": "On JVM Exit\n", "bold": true},
+        "  Flushes when the JVM exits cleanly. Results in \n",
+        "  clean dump files, but may not always trigger.\n",
+        "- ", {"text": "After Every Packet\n", "bold": true},
+        "  Flushes on JVM exit and after every written packet.\n",
+        "  Might result in degraded performance.\n"
     ],
-    "text.config.gadget.enum.flushMode.on_exit": [
+    "text.config.gadget.enum.dumpSafetyMode.on_pause": [
+        "On Pause"
+    ],
+    "text.config.gadget.enum.dumpSafetyMode.on_exit": [
         "On JVM Exit"
     ],
-    "text.config.gadget.enum.flushMode.on_every_packet": [
-        "After Packet Write"
+    "text.config.gadget.enum.dumpSafetyMode.after_every_packet": [
+        "After Every Packet"
     ],
     "text.config.gadget.option.debugKeysInScreens": "Debug Keys In Screens",
     "text.config.gadget.option.debugKeysInScreens.tooltip": "Allows you to use F3 debug keys in any screen",

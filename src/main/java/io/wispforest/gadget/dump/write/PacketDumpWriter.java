@@ -25,24 +25,28 @@ public class PacketDumpWriter implements AutoCloseable {
     protected @Nullable OutputStream output;
     protected @Nullable Thread onExitThread;
     protected final Path path;
-    protected final FlushMode flushMode;
+    protected final boolean flushAfterWrite;
 
     public PacketDumpWriter(Path path) throws IOException {
-        this(path, Gadget.CONFIG.dumpFlushMode());
+        this(
+            path,
+            Gadget.CONFIG.dumpSafety().createExitHook(),
+            Gadget.CONFIG.dumpSafety().flushAfterWrite()
+        );
     }
 
-    public PacketDumpWriter(Path path, FlushMode flushMode) throws IOException {
+    public PacketDumpWriter(Path path, boolean createExitHook, boolean flushAfterWrite) throws IOException {
         this.path = path;
         this.output = new GZIPOutputStream(Files.newOutputStream(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE), true);
-        this.flushMode = flushMode;
+        this.flushAfterWrite = flushAfterWrite;
 
         ByteBuf headerBuf = Unpooled.buffer(15);
         headerBuf.writeBytes("gadget:dump".getBytes(StandardCharsets.UTF_8));
         headerBuf.writeInt(VERSION);
         headerBuf.getBytes(headerBuf.readerIndex(), output, headerBuf.readableBytes());
 
-        if (flushMode == FlushMode.ON_EXIT) {
-            onExitThread = new Thread(this::onVmStop, "On-exit close thread for " + this);
+        if (createExitHook) {
+            onExitThread = new Thread(this::onVmStop, "Exit hook thread for " + this);
             Runtime.getRuntime().addShutdownHook(onExitThread);
         }
     }
@@ -84,7 +88,7 @@ public class PacketDumpWriter implements AutoCloseable {
             try {
                 buf.getBytes(buf.readerIndex(), out, buf.readableBytes());
 
-                if (flushMode == FlushMode.ON_EVERY_PACKET)
+                if (flushAfterWrite)
                     out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -133,20 +137,8 @@ public class PacketDumpWriter implements AutoCloseable {
         }
     }
 
-    public enum FlushMode {
-        /**
-         * The writer is only flushed when {@link PacketDumpWriter#flush()} is called or the writer is fully closed.
-         */
-        MANUAL,
-        /**
-         * Attaches via {@link Runtime#addShutdownHook(Thread)} to flush whenever the JVM is cleanly shut down.
-         *
-         * <p><b>N.B.:</b> Dump is not guaranteed to be valid after an abort.
-         */
-        ON_EXIT,
-        /**
-         * Flushes after every written packet.
-         */
-        ON_EVERY_PACKET
+    @Override
+    public String toString() {
+        return "PacketDumpWriter[" + path + ']';
     }
 }

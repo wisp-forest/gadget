@@ -33,7 +33,15 @@ public class NotificationToast implements Toast {
             root.child(Components.label(messageText));
 
         this.adapter.inflateAndMount();
+    }
 
+    public void register() {
+        if (!client.isOnThread()) {
+            client.execute(this::register);
+            return;
+        }
+
+        client.getToastManager().add(this);
     }
 
     @Override

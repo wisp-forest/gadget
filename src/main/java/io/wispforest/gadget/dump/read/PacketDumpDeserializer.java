@@ -2,6 +2,7 @@ package io.wispforest.gadget.dump.read;
 
 import io.wispforest.gadget.dump.write.PacketDumping;
 import io.wispforest.gadget.util.NetworkUtil;
+import io.wispforest.gadget.util.ProgressToast;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -12,9 +13,11 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,9 +29,19 @@ public class PacketDumpDeserializer {
 
     }
 
-    public static List<DumpedPacket> readV0(InputStream is) throws IOException {
+    public static ReadPacketDump readFrom(ProgressToast toast, Path path) throws IOException {
+        try (var is = toast.loadWithProgress(path)) {
+            if (path.toString().endsWith(".dump"))
+                return PacketDumpDeserializer.readV0(is);
+            else
+                return PacketDumpDeserializer.readNew(is);
+        }
+    }
+
+    public static ReadPacketDump readV0(InputStream is) {
+        List<DumpedPacket> list = new ArrayList<>();
+
         try (BufferedInputStream bis = new BufferedInputStream(is)) {
-            List<DumpedPacket> list = new ArrayList<>();
             PacketByteBuf buf = PacketByteBufs.create();
 
             Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
@@ -36,7 +49,7 @@ public class PacketDumpDeserializer {
             while (true) {
                 OptionalInt length = readInt(bis, true);
 
-                if (length.isEmpty()) return list;
+                if (length.isEmpty()) return new ReadPacketDump(list, null);
 
                 buf.readerIndex(0);
                 buf.writerIndex(0);
@@ -64,10 +77,12 @@ public class PacketDumpDeserializer {
 
                 list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
             }
+        } catch (IOException e) {
+            return new ReadPacketDump(list, e);
         }
     }
 
-    public static List<DumpedPacket> readNew(InputStream is) throws IOException {
+    public static ReadPacketDump readNew(InputStream is) throws IOException {
         try (BufferedInputStream dis = new BufferedInputStream(new GZIPInputStream(is))) {
             var magic = dis.readNBytes(11);
 
@@ -84,45 +99,49 @@ public class PacketDumpDeserializer {
         }
     }
 
-    private static List<DumpedPacket> readV1(InputStream is) throws IOException {
+    private static ReadPacketDump readV1(InputStream is) {
         List<DumpedPacket> list = new ArrayList<>();
 
         PacketByteBuf buf = PacketByteBufs.create();
 
         Int2ObjectMap<Identifier> loginQueryChannels = new Int2ObjectOpenHashMap<>();
 
-        while (true) {
-            OptionalInt len = readInt(is, true);
+        try {
+            while (true) {
+                OptionalInt len = readInt(is, true);
 
-            if (len.isEmpty())
-                return list;
+                if (len.isEmpty())
+                    return new ReadPacketDump(list, null);
 
-            buf.readerIndex(0);
-            buf.writerIndex(0);
+                buf.readerIndex(0);
+                buf.writerIndex(0);
 
-            buf.writeBytes(is.readNBytes(len.getAsInt()));
+                buf.writeBytes(is.readNBytes(len.getAsInt()));
 
-            short flags = buf.readShort();
-            boolean outbound = (flags & 1) != 0;
-            NetworkState state = switch (flags & 0b0110) {
-                case 0b0000 -> NetworkState.HANDSHAKING;
-                case 0b0010 -> NetworkState.PLAY;
-                case 0b0100 -> NetworkState.STATUS;
-                case 0b0110 -> NetworkState.LOGIN;
-                default -> throw new IllegalStateException();
-            };
-            long sentAt = buf.readLong();
-            int size = buf.readableBytes();
-            Packet<?> packet = PacketDumping.readPacket(buf, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
-            Identifier channelId = NetworkUtil.getChannelOrNull(packet);
+                short flags = buf.readShort();
+                boolean outbound = (flags & 1) != 0;
+                NetworkState state = switch (flags & 0b0110) {
+                    case 0b0000 -> NetworkState.HANDSHAKING;
+                    case 0b0010 -> NetworkState.PLAY;
+                    case 0b0100 -> NetworkState.STATUS;
+                    case 0b0110 -> NetworkState.LOGIN;
+                    default -> throw new IllegalStateException();
+                };
+                long sentAt = buf.readLong();
+                int size = buf.readableBytes();
+                Packet<?> packet = PacketDumping.readPacket(buf, state, outbound ? NetworkSide.SERVERBOUND : NetworkSide.CLIENTBOUND);
+                Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
-            if (packet instanceof LoginQueryRequestS2CPacket req) {
-                loginQueryChannels.put(req.getQueryId(), req.getChannel());
-            } else if (packet instanceof LoginQueryResponseC2SPacket res) {
-                channelId = loginQueryChannels.get(res.getQueryId());
+                if (packet instanceof LoginQueryRequestS2CPacket req) {
+                    loginQueryChannels.put(req.getQueryId(), req.getChannel());
+                } else if (packet instanceof LoginQueryResponseC2SPacket res) {
+                    channelId = loginQueryChannels.get(res.getQueryId());
+                }
+
+                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
             }
-
-            list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
+        } catch (IOException e) {
+            return new ReadPacketDump(list, e);
         }
     }
 
@@ -139,5 +158,9 @@ public class PacketDumpDeserializer {
             throw new EOFException();
 
         return OptionalInt.of(((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + ch4));
+    }
+
+    public record ReadPacketDump(List<DumpedPacket> packets, @Nullable IOException finalError) {
+
     }
 }

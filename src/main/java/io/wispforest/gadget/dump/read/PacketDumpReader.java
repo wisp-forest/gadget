@@ -1,5 +1,6 @@
 package io.wispforest.gadget.dump.read;
 
+import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.dump.SearchWord;
 import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
@@ -18,13 +19,15 @@ public class PacketDumpReader {
     private final List<DumpedPacket> packets;
     private final long startTime;
     private final long endTime;
+    private final IOException readError;
 
     public PacketDumpReader(Path path, ProgressToast toast) throws IOException {
-        try (var is = toast.loadWithProgress(path)) {
-            if (path.toString().endsWith(".dump"))
-                this.packets = PacketDumpDeserializer.readV0(is);
-            else
-                this.packets = PacketDumpDeserializer.readNew(is);
+        var raw = PacketDumpDeserializer.readFrom(toast, path);
+        this.packets = raw.packets();
+        this.readError = raw.finalError();
+
+        if (this.readError != null) {
+            Gadget.LOGGER.error("Encountered IO error while reading dump, results may be incomplete", raw.finalError());
         }
 
         if (packets.size() > 0) {
@@ -37,6 +40,10 @@ public class PacketDumpReader {
 
     public List<DumpedPacket> packets() {
         return packets;
+    }
+
+    public IOException readError() {
+        return readError;
     }
 
     public List<DumpedPacket> collectFor(String searchText, long from, int max) {

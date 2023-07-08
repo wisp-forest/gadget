@@ -1,7 +1,6 @@
 package io.wispforest.gadget.util;
 
 import io.wispforest.gadget.decompile.QuiltflowerVersions;
-import io.wispforest.gadget.dump.write.PacketDumpWriter;
 import io.wispforest.gadget.mappings.*;
 import io.wispforest.owo.config.annotation.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -18,7 +17,7 @@ public class GadgetConfigModel {
     public boolean menuButtonEnabled = true;
     public boolean rightClickDump = true;
     public boolean dropChunkData = false;
-    public PacketDumpWriter.FlushMode dumpFlushMode = PacketDumpWriter.FlushMode.ON_EXIT;
+    public DumpSafetyMode dumpSafety = DumpSafetyMode.ON_EXIT;
     public boolean debugKeysInScreens = true;
     public boolean matrixStackDebugging = true;
     public boolean uiInspector = true;
@@ -118,5 +117,27 @@ public class GadgetConfigModel {
         OFF,
         LOG_ON_LONG_UPDATE,
         LOG_ALWAYS
+    }
+
+    public enum DumpSafetyMode {
+        ON_PAUSE(false, false),
+        ON_EXIT(true, false),
+        AFTER_EVERY_PACKET(true, true);
+
+        private final boolean createExitHook;
+        private final boolean flushAfterWrite;
+
+        DumpSafetyMode(boolean createExitHook, boolean flushAfterWrite) {
+            this.createExitHook = createExitHook;
+            this.flushAfterWrite = flushAfterWrite;
+        }
+
+        public boolean createExitHook() {
+            return createExitHook;
+        }
+
+        public boolean flushAfterWrite() {
+            return flushAfterWrite;
+        }
     }
 }
