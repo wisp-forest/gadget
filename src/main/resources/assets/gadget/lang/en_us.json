@@ -342,6 +342,41 @@
         {"translate": "message.gadget.header"},
         "Reloading mappings"
     ],
+    "commands.gadget.chat-log.enable.success": [
+        {"translate": "message.gadget.header"},
+        "Enabled loud logging for '",
+        {"index":0, "color": "yellow"},
+        "'."
+    ],
+    "commands.gadget.chat-log.disable.success": [
+        {"translate": "message.gadget.header"},
+        "Disabled loud logging for '",
+        {"index":0, "color": "yellow"},
+        "'."
+    ],
+
+    "text.gadget.log_entry": [
+        "",
+        {"text": "[", "color": "dark_gray"},
+        {"index": 0},
+        " ",
+        {"index": 1},
+        {"text": "] ", "color": "dark_gray"},
+        {"index": 2, "color": "aqua"},
+        ": ",
+        {"index":  3}
+    ],
+    "text.gadget.log_level.fatal": {"text": "FATAL", "color": "dark_red"},
+    "text.gadget.log_level.error": {"text": "ERROR", "color": "red"},
+    "text.gadget.log_level.warn": {"text": "WARN", "color": "yellow"},
+    "text.gadget.log_level.info": {"text": "INFO", "color": "blue"},
+    "text.gadget.log_level.debug": {"text": "DEBUG", "color": "gray"},
+    "text.gadget.log_level.trace": {"text": "TRACE", "color": "dark_gray"},
+
+    "chat.tag.gadget.loud_logging": [
+        {"translate": "message.gadget.header"},
+        "Loud logging"
+    ],
 
     "key.gadget.inspect": [
         {"translate": "message.gadget.header"},

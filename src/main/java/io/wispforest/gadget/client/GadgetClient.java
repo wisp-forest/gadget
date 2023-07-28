@@ -1,6 +1,7 @@
 package io.wispforest.gadget.client;
 
 import io.wispforest.gadget.Gadget;
+import io.wispforest.gadget.client.command.ChatLogCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
 import io.wispforest.gadget.client.dump.ClientPacketDumper;
@@ -10,6 +11,7 @@ import io.wispforest.gadget.client.field.RemoteFieldDataSource;
 import io.wispforest.gadget.client.gui.ContextMenuScreens;
 import io.wispforest.gadget.client.gui.GadgetScreen;
 import io.wispforest.gadget.client.gui.inspector.UIInspector;
+import io.wispforest.gadget.client.log.ChatLogAppender;
 import io.wispforest.gadget.client.nbt.StackNbtDataScreen;
 import io.wispforest.gadget.client.resource.ViewResourcesScreen;
 import io.wispforest.gadget.mappings.MappingsManager;
@@ -71,6 +73,7 @@ public class GadgetClient implements ClientModInitializer {
         UIInspector.init();
         ServerData.init();
         ContextMenuScreens.init();
+        ChatLogAppender.init();
 
         ConfigScreen.registerProvider("gadget", GadgetConfigScreen::new);
 
@@ -226,8 +229,10 @@ public class GadgetClient implements ClientModInitializer {
             });
         });
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            ReloadMappingsCommand.register(dispatcher));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            ReloadMappingsCommand.register(dispatcher);
+            ChatLogCommand.register(dispatcher);
+        });
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
             if (Gadget.CONFIG.internalSettings.injectMatrixStackErrors() && Screen.hasShiftDown()) {
