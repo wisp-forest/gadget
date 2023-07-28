@@ -1,4 +1,4 @@
-package io.wispforest.gadget.asm;
+package io.wispforest.gadget.early;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;

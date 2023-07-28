@@ -1,7 +1,7 @@
 package io.wispforest.gadget.client.resource;
 
 import io.wispforest.gadget.Gadget;
-import io.wispforest.gadget.asm.GadgetMixinExtension;
+import io.wispforest.gadget.early.GadgetMixinExtension;
 import io.wispforest.gadget.client.DialogUtil;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
