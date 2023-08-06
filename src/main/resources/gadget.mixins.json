@@ -14,6 +14,8 @@
         "PathUtilMixin",
         "ZipResourcePackMixin",
         "fabric.PacketTypeMixin",
+        "nbt.ItemStackMixin",
+        "nbt.NbtCompoundMixin",
         "owo.BaseComponentMixin",
         "owo.BaseParentComponentMixin",
         "owo.ComponentMixin",

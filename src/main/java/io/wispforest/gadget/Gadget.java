@@ -2,6 +2,8 @@ package io.wispforest.gadget;
 
 import io.wispforest.gadget.dump.read.handler.PacketHandlers;
 import io.wispforest.gadget.mappings.MappingsManager;
+import io.wispforest.gadget.nbt.NbtLock;
+import io.wispforest.gadget.nbt.NbtLocks;
 import io.wispforest.gadget.network.GadgetNetworking;
 import io.wispforest.gadget.util.GadgetConfig;
 import net.fabricmc.api.EnvType;
@@ -25,6 +27,7 @@ public class Gadget implements ModInitializer {
     public void onInitialize() {
         GadgetNetworking.init();
         PacketHandlers.init();
+        NbtLocks.init();
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
             MappingsManager.init();

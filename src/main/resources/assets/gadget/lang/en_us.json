@@ -214,6 +214,8 @@
     "text.config.gadget.enum.uICounterMode.off": "Off",
     "text.config.gadget.enum.uICounterMode.log_on_long_update": "Log On Long Update",
     "text.config.gadget.enum.uICounterMode.log_always": "Always Log",
+    "text.config.gadget.option.nbtLocking": "NBT Locking",
+    "text.config.gadget.option.nbtLocking.tooltip": "Lock item NBT tags during operations that should be read only",
     "text.config.gadget.option.inspectClasses": "Inspect Classes",
     "text.config.gadget.option.inspectClasses.tooltip": "Allows you to inspect game classes",
     "text.config.gadget.option.fullDecompilationContext": "Full Decompilation Context",
