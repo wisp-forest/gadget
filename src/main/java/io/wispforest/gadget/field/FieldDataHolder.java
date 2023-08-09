@@ -20,12 +20,14 @@ import java.util.function.Consumer;
 public abstract class FieldDataHolder<N extends FieldDataNode<N>> {
     protected final FieldDataSource source;
     protected final boolean shortenNames;
-    protected final N root;
+    protected N root = null;
 
     public FieldDataHolder(FieldDataSource source, boolean shortenNames) {
         this.source = source;
         this.shortenNames = shortenNames;
+    }
 
+    protected void init() {
         this.root = createNodeFrom(ObjectPath.EMPTY, source.rootData());
         this.root.initChildren(processMap(ObjectPath.EMPTY, source.initialRootFields()));
     }

@@ -6,6 +6,7 @@ import io.wispforest.gadget.path.ObjectPath;
 public class DefaultFieldDataHolder extends FieldDataHolder<DefaultFieldDataHolder.Node> {
     public DefaultFieldDataHolder(FieldDataSource source, boolean shortenNames) {
         super(source, shortenNames);
+        init();
     }
 
     @Override

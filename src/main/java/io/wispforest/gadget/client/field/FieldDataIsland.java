@@ -38,6 +38,9 @@ public class FieldDataIsland extends FieldDataHolder<ClientFieldDataNode> {
     public FieldDataIsland(FieldDataSource source, boolean shortenNames, boolean generateAnchors) {
         super(source, shortenNames);
         this.generateAnchors = generateAnchors;
+
+        init();
+
         this.mainContainer = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
         addChildrenTo(mainContainer, root.childrenOrNull());
