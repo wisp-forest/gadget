@@ -41,14 +41,30 @@
     "message.gadget.loading_dump_stats": "Loading dump stats",
     "message.gadget.loading_classes": "Loading Classes",
 
-    "text.gadget.client_current": {
+    "text.gadget.client_view.icon": {
         "text": "C",
         "color": "yellow"
     },
-    "text.gadget.server_current": {
+    "text.gadget.client_view.tooltip": [
+        {"text": "Client view", "color": "yellow"},
+        "\n",
+        {"text": "Click to switch to server", "color": "gray"}
+    ],
+    "text.gadget.client_view.no_switch.tooltip": [
+        {"text": "Client view", "color": "yellow"}
+    ],
+    "text.gadget.server_view.icon": {
         "text": "S",
         "color": "green"
     },
+    "text.gadget.server_view.tooltip": [
+        {"text": "Server view", "color": "green"},
+        "\n",
+        {"text": "Click to switch to client", "color": "gray"}
+    ],
+    "text.gadget.server_view.no_switch.tooltip": [
+        {"text": "Server view", "color": "green"}
+    ],
     "text.gadget.info": {
         "text": "i",
         "color": "blue",
@@ -88,8 +104,6 @@
     "text.gadget.export_button.tooltip": "Export",
     "text.gadget.back": "←",
     "text.gadget.back.tooltip": "Back",
-    "text.gadget.switch_to_server": "Switch to server",
-    "text.gadget.switch_to_client": "Switch to client",
     "text.gadget.menu_button": {
         "text": "G",
         "bold": true,

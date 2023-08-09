@@ -6,6 +6,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public class SidebarBuilder {
@@ -25,7 +26,7 @@ public class SidebarBuilder {
         button(Text.translatable(translationKeyBase), Text.translatable(translationKeyBase + ".tooltip"), handler);
     }
 
-    public void button(Text icon, Text tooltip, OnPressHandler handler) {
+    public void button(Text icon, @Nullable Text tooltip, OnPressHandler handler) {
         Button button = new Button(icon, tooltip);
 
         button.mouseDown().subscribe((mouseX, mouseY, mouseButton) -> {
@@ -52,7 +53,9 @@ public class SidebarBuilder {
                 .cursorStyle(CursorStyle.HAND)
             );
             cursorStyle(CursorStyle.HAND);
-            tooltip(tooltip);
+
+            if (tooltip != null)
+                tooltip(tooltip);
 
             mouseEnter().subscribe(
                 () -> surface(Surface.flat(0x80ffffff)));

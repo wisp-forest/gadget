@@ -19,6 +19,7 @@ import io.wispforest.gadget.mixin.client.HandledScreenAccessor;
 import io.wispforest.gadget.network.BlockEntityTarget;
 import io.wispforest.gadget.network.EntityTarget;
 import io.wispforest.gadget.network.GadgetNetworking;
+import io.wispforest.gadget.network.InspectionTarget;
 import io.wispforest.gadget.network.packet.c2s.OpenFieldDataScreenC2SPacket;
 import io.wispforest.gadget.network.packet.c2s.RequestResourceC2SPacket;
 import io.wispforest.gadget.network.packet.s2c.*;
@@ -50,7 +51,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -81,7 +81,7 @@ public class GadgetClient implements ClientModInitializer {
             access.runtime().setScreen(new FieldDataScreen(
                 packet.target(),
                 false,
-                packet.rootData(),
+                true, packet.rootData(),
                 packet.rootChildren()
             ));
         });
@@ -127,41 +127,45 @@ public class GadgetClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (!INSPECT_KEY.wasPressed()) return;
 
-            if (!GadgetNetworking.CHANNEL.canSendToServer()) {
-                if (client.player != null)
-                    client.player.sendMessage(
-                        Text.translatable("message.gadget.fail.noserversupport")
-                            .formatted(Formatting.RED),
-                        true);
+            InspectionTarget target;
 
-                return;
-            }
-
-            var perspective = client.options.getPerspective();
-
-            if (!perspective.isFirstPerson() && client.player != null) {
-                GadgetNetworking.CHANNEL.clientHandle().send(
-                    new OpenFieldDataScreenC2SPacket(new EntityTarget(client.player.getId())));
-                return;
-            }
-
-            Entity camera = client.getCameraEntity();
-            if (camera == null) camera = client.player;
-
-            HitResult target = raycast(camera, client.getTickDelta());
-
-            if (target == null) return;
-
-            if (target instanceof EntityHitResult ehr) {
-                GadgetNetworking.CHANNEL.clientHandle().send(
-                    new OpenFieldDataScreenC2SPacket(new EntityTarget(ehr.getEntity().getId())));
+            if (!client.options.getPerspective().isFirstPerson()
+             && client.player != null) {
+                target = new EntityTarget(client.player.getId());
             } else {
-                BlockPos blockPos = target instanceof BlockHitResult blockHitResult
-                    ? blockHitResult.getBlockPos()
-                    : BlockPos.ofFloored(target.getPos());
+                Entity camera = client.getCameraEntity();
+                if (camera == null) camera = client.player;
 
-                GadgetNetworking.CHANNEL.clientHandle().send(
-                    new OpenFieldDataScreenC2SPacket(new BlockEntityTarget(blockPos)));
+                HitResult hitResult = raycast(camera, client.getTickDelta());
+
+                if (hitResult == null) return;
+
+                if (hitResult instanceof EntityHitResult ehr) {
+                    target = new EntityTarget(ehr.getEntity().getId());
+                } else {
+                    BlockPos blockPos = hitResult instanceof BlockHitResult blockHitResult
+                        ? blockHitResult.getBlockPos()
+                        : BlockPos.ofFloored(hitResult.getPos());
+
+                    target = new BlockEntityTarget(blockPos);
+                }
+            }
+
+            if (!GadgetNetworking.CHANNEL.canSendToServer()) {
+                if (target.resolve(client.world) == null) {
+                    client.player.sendMessage(Text.translatable("message.gadget.fail.notfound"), true);
+                    return;
+                }
+
+                client.setScreen(new FieldDataScreen(
+                    target,
+                    true,
+                    false,
+                    null,
+                    null
+                ));
+            } else {
+                GadgetNetworking.CHANNEL.clientHandle().send(new OpenFieldDataScreenC2SPacket(target));
             }
         });
 

@@ -45,14 +45,14 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
     private final boolean isClient;
     public final FieldDataIsland island;
 
-    public FieldDataScreen(InspectionTarget target, boolean isClient, @Nullable FieldData rootData, @Nullable Map<PathStep, FieldData> initialFields) {
+    public FieldDataScreen(InspectionTarget target, boolean isClient, boolean isMutable, @Nullable FieldData rootData, @Nullable Map<PathStep, FieldData> initialFields) {
         this.target = target;
         this.isClient = isClient;
 
         if (!isClient)
             dataSource = new RemoteFieldDataSource(target, rootData, initialFields);
         else
-            dataSource = new LocalFieldDataSource(target.resolve(MinecraftClient.getInstance().world), true);
+            dataSource = new LocalFieldDataSource(target.resolve(MinecraftClient.getInstance().world), isMutable);
 
         this.island = new FieldDataIsland(
             dataSource,
@@ -97,16 +97,18 @@ public class FieldDataScreen extends BaseOwoScreen<FlowLayout> {
         SidebarBuilder sidebar = new SidebarBuilder();
 
         sidebar.button(
-            Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_current"),
-            Text.translatable("text.gadget.switch_to_" + (isClient() ? "server" : "client")),
+            Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_view.icon"),
+            Text.translatable("text.gadget." + (isClient() ? "client" : "server") + "_view" + (GadgetNetworking.CHANNEL.canSendToServer() ? "" : ".no_switch") + ".tooltip"),
             (mouseX, mouseY) -> {
+                if (!GadgetNetworking.CHANNEL.canSendToServer()) return;
+
                 if (isClient())
                     GadgetNetworking.CHANNEL.clientHandle().send(new OpenFieldDataScreenC2SPacket(target));
                 else
                     client.setScreen(new FieldDataScreen(
                         target,
                         true,
-                        null,
+                        true, null,
                         null
                     ));
             });
