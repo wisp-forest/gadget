@@ -26,8 +26,8 @@ public abstract class ClientConnectionMixin {
         ClientPacketDumper.dump(false, packet);
     }
 
-    @Inject(method = "sendInternal", at = @At("HEAD"))
-    private void writeHook(Packet<?> packet, @Nullable PacketCallbacks callbacks, NetworkState packetState, NetworkState currentState, CallbackInfo ci) {
+    @Inject(method = "sendImmediately", at = @At("HEAD"))
+    private void writeHook(Packet<?> packet, @Nullable PacketCallbacks callbacks, CallbackInfo ci) {
         if (side == NetworkSide.SERVERBOUND) return;
 
         ClientPacketDumper.dump(true, packet);
