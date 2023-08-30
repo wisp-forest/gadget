@@ -6,6 +6,7 @@ import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
 import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
+import io.wispforest.gadget.dump.read.DumpReaderContext;
 import io.wispforest.gadget.dump.read.DumpedPacket;
 import io.wispforest.gadget.dump.read.SearchTextData;
 import io.wispforest.gadget.dump.read.UnwrappedPacketData;
@@ -18,6 +19,7 @@ import io.wispforest.owo.ui.core.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -59,6 +61,15 @@ public class RenderedPacketComponent {
                 if (packet.channelId() != null)
                     typeText.append(Text.literal(" " + packet.channelId())
                         .formatted(Formatting.GRAY));
+            }
+
+            var readerCtx = packet.get(DumpReaderContext.KEY);
+
+            if (readerCtx != null) {
+                typeText.append(" ");
+
+                typeText.append(Text.literal(DurationFormatUtils.formatDuration(packet.sentAt() - readerCtx.reader().startTime(), "mm:ss.SSS"))
+                    .formatted(Formatting.GRAY));
             }
 
             view.child(new BasedLabelComponent(typeText)

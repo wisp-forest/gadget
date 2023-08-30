@@ -26,6 +26,12 @@ public class PacketDumpReader {
         this.packets = raw.packets();
         this.readError = raw.finalError();
 
+        DumpReaderContext ctxFeature = new DumpReaderContext(this);
+
+        for (var packet : this.packets) {
+            packet.put(DumpReaderContext.KEY, ctxFeature);
+        }
+
         if (this.readError != null) {
             Gadget.LOGGER.error("Encountered IO error while reading dump, results may be incomplete", raw.finalError());
         }
