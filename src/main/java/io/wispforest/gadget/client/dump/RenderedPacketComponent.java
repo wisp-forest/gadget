@@ -4,6 +4,7 @@ import io.wispforest.gadget.client.dump.handler.PacketRenderer;
 import io.wispforest.gadget.client.gui.BasedLabelComponent;
 import io.wispforest.gadget.client.gui.GuiUtil;
 import io.wispforest.gadget.client.gui.LayoutCacheWrapper;
+import io.wispforest.gadget.client.gui.SubObjectContainer;
 import io.wispforest.gadget.dump.fake.GadgetReadErrorPacket;
 import io.wispforest.gadget.dump.fake.GadgetWriteErrorPacket;
 import io.wispforest.gadget.dump.read.DumpReaderContext;
@@ -69,14 +70,25 @@ public class RenderedPacketComponent {
                 typeText.append(" ");
 
                 typeText.append(Text.literal(DurationFormatUtils.formatDuration(packet.sentAt() - readerCtx.reader().startTime(), "mm:ss.SSS"))
-                    .formatted(Formatting.GRAY));
+                    .formatted(Formatting.DARK_GRAY));
             }
 
-            view.child(new BasedLabelComponent(typeText)
+            var container = new SubObjectContainer(unused -> {}, unused -> {});
+
+            container
+                .padding(Insets.of(0))
+                .surface(Surface.BLANK);
+
+            container.toggleExpansion();
+
+            view.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
+                .child(new BasedLabelComponent(typeText))
+                .child(container.getSpinnyBoi())
                 .margins(Insets.bottom(3)));
 
+
             drawErrors.clear();
-            PacketRenderer.EVENT.invoker().renderPacket(packet, view, drawErrors::add);
+            PacketRenderer.EVENT.invoker().renderPacket(packet, container, drawErrors::add);
 
             if (!drawErrors.isEmpty()
                 || packet.packet() instanceof GadgetReadErrorPacket
@@ -120,8 +132,10 @@ public class RenderedPacketComponent {
                         .margins(Insets.bottom(2)));
                 }
 
-                view.child(1, errors);
+                container.child(0, errors);
             }
+
+            view.child(container);
 
             FlowLayout fullRow = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
 

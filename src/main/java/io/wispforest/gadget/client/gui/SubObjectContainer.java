@@ -60,7 +60,7 @@ public class SubObjectContainer extends FlowLayout {
         return spinnyBoi;
     }
 
-    protected void toggleExpansion() {
+    public void toggleExpansion() {
         if (expanded) {
             this.children.removeAll(collapsibleChildren);
             this.spinnyBoi.targetRotation = 0;
