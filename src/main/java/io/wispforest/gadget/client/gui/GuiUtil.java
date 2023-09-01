@@ -79,7 +79,9 @@ public final class GuiUtil {
         FlowLayout root = (FlowLayout) root(at);
         var dropdown = Components.dropdown(Sizing.content());
 
-        dropdown.positioning(Positioning.absolute((int) mouseX + at.x(), (int) mouseY + at.y()));
+        dropdown
+            .positioning(Positioning.absolute((int) mouseX + at.x(), (int) mouseY + at.y()))
+            .zIndex(100);
 
         ((ParentComponent) dropdown.children().get(0)).padding(Insets.of(3));
 

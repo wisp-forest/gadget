@@ -13,6 +13,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +24,9 @@ public class NbtDataIsland extends FlowLayout {
     private final Map<NbtPath, WidgetData> elements = new HashMap<>();
 
     final NbtCompound data;
-    final Consumer<NbtCompound> reloader;
+    final @Nullable Consumer<NbtCompound> reloader;
 
-    public NbtDataIsland(NbtCompound data, Consumer<NbtCompound> reloader) {
+    public NbtDataIsland(NbtCompound data, @Nullable Consumer<NbtCompound> reloader) {
         super(Sizing.content(), Sizing.content(), Algorithm.VERTICAL);
 
         this.data = data;

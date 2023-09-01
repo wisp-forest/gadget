@@ -5,7 +5,7 @@ import net.minecraft.nbt.NbtCompound;
 public record NbtCompoundFieldObject(NbtCompound data) implements FieldObject {
     @Override
     public String type() {
-        return "n";
+        return "nbt";
     }
 
     @Override
