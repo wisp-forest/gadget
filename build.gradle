@@ -65,7 +65,7 @@ dependencies {
 	implementation include("net.auoeke:unsafe:${project.auoeke_unsafe}")
 	implementation include("net.auoeke:reflect:${project.auoeke_reflect}")
 
-	implementation annotationProcessor(include("com.github.llamalad7.mixinextras:mixinextras-fabric:${project.mixinextras}"))
+	implementation annotationProcessor(include("io.github.llamalad7:mixinextras-fabric:${project.mixinextras}"))
 
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
 
