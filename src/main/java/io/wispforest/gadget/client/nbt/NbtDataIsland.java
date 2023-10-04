@@ -207,6 +207,10 @@ public class NbtDataIsland extends FlowLayout {
     }
 
     public void typeSelector(int mouseX, int mouseY, Consumer<NbtType<?>> consumer) {
+        if (this.reloader == null) {
+            throw new IllegalStateException("Tried to open type selector with read-only NBT island!");
+        }
+
         var dropdown = GuiUtil.contextMenu(GuiUtil.root(this), mouseX, mouseY);
 
         for (NbtType<?> type : NbtTypesAccessor.getVALUES()) {

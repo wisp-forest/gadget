@@ -76,38 +76,41 @@ public class StackNbtDataScreen extends BaseOwoScreen<FlowLayout> {
 
         FlowLayout sidebar = Containers.verticalFlow(Sizing.content(), Sizing.content());
 
-        var addButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
-            .child(Components.label(Text.literal("+"))
-                .verticalTextAlignment(VerticalAlignment.CENTER)
-                .horizontalTextAlignment(HorizontalAlignment.CENTER)
-                .positioning(Positioning.absolute(5, 4))
-                .cursorStyle(CursorStyle.HAND)
-            );
+        if (island.reloader != null) {
+            var addButton = Containers.verticalFlow(Sizing.fixed(16), Sizing.fixed(16))
+                .child(Components.label(Text.literal("+"))
+                    .verticalTextAlignment(VerticalAlignment.CENTER)
+                    .horizontalTextAlignment(HorizontalAlignment.CENTER)
+                    .positioning(Positioning.absolute(5, 4))
+                    .cursorStyle(CursorStyle.HAND)
+                );
 
-        addButton
-            .cursorStyle(CursorStyle.HAND);
+            addButton
+                .cursorStyle(CursorStyle.HAND);
 
-        addButton.mouseEnter().subscribe(
-            () -> addButton.surface(Surface.flat(0x80ffffff)));
+            addButton.mouseEnter().subscribe(
+                () -> addButton.surface(Surface.flat(0x80ffffff)));
 
-        addButton.mouseLeave().subscribe(
-            () -> addButton.surface(Surface.BLANK));
+            addButton.mouseLeave().subscribe(
+                () -> addButton.surface(Surface.BLANK));
 
-        addButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+            addButton.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
 
-            UISounds.playInteractionSound();
+                UISounds.playInteractionSound();
 
-            island.typeSelector(
-                (int) (addButton.x() + mouseX),
-                (int) (addButton.y() + mouseY),
-                type -> island.child(new KeyAdderWidget(island, NbtPath.EMPTY, type, unused -> true)));
+                island.typeSelector(
+                    (int) (addButton.x() + mouseX),
+                    (int) (addButton.y() + mouseY),
+                    type -> island.child(new KeyAdderWidget(island, NbtPath.EMPTY, type, unused -> true)));
 
-            return true;
-        });
+                return true;
+            });
+
+            sidebar.child(addButton);
+        }
 
         sidebar
-            .child(addButton)
             .positioning(Positioning.absolute(0, 0))
             .padding(Insets.of(5));
 
