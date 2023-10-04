@@ -33,6 +33,7 @@ import io.wispforest.owo.ui.layers.Layers;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -231,6 +232,14 @@ public class GadgetClient implements ClientModInitializer {
 
                 return false;
             });
+        });
+
+        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
+            if (Gadget.CONFIG.nonNullEmptyNbtTooltip()
+             && stack.getNbt() != null
+             && stack.getNbt().isEmpty()) {
+                lines.add(Text.translatable("text.gadget.nonNullEmptyNbt"));
+            }
         });
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

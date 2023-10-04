@@ -238,6 +238,7 @@
     "text.config.gadget.option.hiddenFields.tooltip": "Fields hidden in field inspections.",
     "text.config.gadget.option.errorCheckOwoUi": "Error Check OwO UI",
     "text.config.gadget.option.errorCheckOwoUi.tooltip": "Injects checks OwO UI methods for better error messages",
+    "text.config.gadget.option.nonNullEmptyNbtTooltip": "Show tooltip for stacks with non-null empty NBT",
 
     "text.gadget.nbt.compound": {"text": "c", "color": "#0197F6"},
     "text.gadget.nbt.compound.full": ["", {"text": "c", "color": "#0197F6"}, "ompound"],
@@ -388,6 +389,20 @@
     "text.gadget.log_level.info": {"text": "INFO", "color": "blue"},
     "text.gadget.log_level.debug": {"text": "DEBUG", "color": "gray"},
     "text.gadget.log_level.trace": {"text": "TRACE", "color": "dark_gray"},
+
+    "text.gadget.nonNullEmptyNbt": [
+        "",
+        {
+            "text": "!",
+            "color": "red",
+            "bold": true
+        },
+        " ",
+        {
+            "text": "Stack has non-null empty NBT",
+            "color": "gray"
+        }
+    ],
 
     "chat.tag.gadget.loud_logging": [
         {"translate": "message.gadget.header"},

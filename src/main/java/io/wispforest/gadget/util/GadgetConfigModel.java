@@ -70,6 +70,7 @@ public class GadgetConfigModel {
         "net.minecraft.class_1297#field_5961"
     ));
     public boolean errorCheckOwoUi = false;
+    public boolean nonNullEmptyNbtTooltip = true;
     @Nest public InternalSettings internalSettings = new InternalSettings();
 
     public static boolean isQuiltflowerVersionValid(String version) {
