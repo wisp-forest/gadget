@@ -20,7 +20,7 @@ public class MultiplayerServerEntryMixin {
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onRightClick(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+        if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT && button != GLFW.GLFW_MOUSE_BUTTON_1) return;
         if (!Gadget.CONFIG.rightClickDump()) return;
 
         ContextMenuScreens.contextMenuAt(screen, mouseX, mouseY)
