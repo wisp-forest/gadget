@@ -51,7 +51,7 @@ public final class PacketDumping {
                 return;
             }
 
-            packetId = state.getPacketId(side, packet);
+            packetId = state.getHandler(side).getId(packet);
 
             if (packetId == -1)
                 throw new UnsupportedOperationException(packet.getClass().getName() + " is an invalid packet in " + side + " " + state);
@@ -80,7 +80,7 @@ public final class PacketDumping {
                 return fakeReader.read(buf, state, side).unwrapVanilla();
             }
 
-            return state.getPacketHandler(side, packetId, buf);
+            return state.getHandler(side).createPacket(packetId, buf);
         } catch (Exception e) {
             buf.readerIndex(startOfData);
             return GadgetReadErrorPacket.from(buf, packetId, e);

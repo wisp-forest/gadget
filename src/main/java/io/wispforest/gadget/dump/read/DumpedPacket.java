@@ -29,6 +29,7 @@ public final class DumpedPacket extends ContextData<DumpedPacket> {
             case HANDSHAKING -> 0xFF808080;
             case LOGIN -> 0xFFFF0000;
             case STATUS -> 0xFFFFFF00;
+            case CONFIGURATION -> 0xFFFFFFFF;
         };
     }
 

@@ -1,6 +1,7 @@
 package io.wispforest.gadget.dump.fake.recipe;
 
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.util.Identifier;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -27,9 +28,8 @@ public record ReadErrorRecipe(byte[] data, Identifier id, Exception exception) i
         return new ReadErrorRecipe(bytes, recipeId, exception);
     }
 
-    @Override
-    public Identifier getId() {
-        return id;
+    public RecipeEntry<ReadErrorRecipe> toRecipeEntry() {
+        return new RecipeEntry<>(this.id, this);
     }
 
     @Override

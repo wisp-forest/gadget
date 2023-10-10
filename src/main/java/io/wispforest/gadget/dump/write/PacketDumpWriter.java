@@ -67,9 +67,10 @@ public class PacketDumpWriter implements AutoCloseable {
 
         switch (state) {
             case HANDSHAKING -> { }
-            case PLAY -> flags |= 0b0010;
             case STATUS -> flags |= 0b0100;
             case LOGIN -> flags |= 0b0110;
+            case CONFIGURATION -> flags |= 0b1110;
+            case PLAY -> flags |= 0b0010;
         }
 
         try (var ignored = NetworkUtil.writeByteLength(buf)) {

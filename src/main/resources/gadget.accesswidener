@@ -2,3 +2,5 @@ accessWidener v2 named
 
 accessible class net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$LockableSlot
 accessible class net/minecraft/client/gui/widget/EntryListWidget$Entry
+
+accessible method net/minecraft/network/packet/s2c/play/SynchronizeRecipesS2CPacket readRecipe (Lnet/minecraft/network/PacketByteBuf;)Lnet/minecraft/recipe/RecipeEntry;

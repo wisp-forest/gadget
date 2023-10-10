@@ -1,5 +1,6 @@
 package io.wispforest.gadget.dump.fake.recipe;
 
+import com.mojang.serialization.Codec;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.network.PacketByteBuf;
@@ -8,11 +9,6 @@ import net.minecraft.util.Identifier;
 public record WriteErrorRecipe(Identifier id, String exceptionText) implements FakeGadgetRecipe {
     public static WriteErrorRecipe from(Identifier id, Exception e) {
         return new WriteErrorRecipe(id, ThrowableUtil.throwableToString(e));
-    }
-
-    @Override
-    public Identifier getId() {
-        return id;
     }
 
     @Override
@@ -30,13 +26,20 @@ public record WriteErrorRecipe(Identifier id, String exceptionText) implements F
         }
 
         @Override
-        public WriteErrorRecipe read(Identifier id, PacketByteBuf buf) {
-            return new WriteErrorRecipe(id, buf.readString());
+        public void write(PacketByteBuf buf, WriteErrorRecipe recipe) {
+            buf.writeString(recipe.exceptionText);
         }
 
         @Override
-        public void write(PacketByteBuf buf, WriteErrorRecipe recipe) {
-            buf.writeString(recipe.exceptionText);
+        public Codec<WriteErrorRecipe> codec() {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'codec'");
+        }
+
+        @Override
+        public WriteErrorRecipe read(PacketByteBuf buf) {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'read'");
         }
     }
 }

@@ -134,7 +134,7 @@ public class RemappingListOptionContainer extends CollapsibleContainer implement
 
             final var box = new ConfigTextBox();
             box.setText(remapper.apply(this.backingList.get(i)));
-            box.setCursorToStart();
+            box.setCursorToStart(false);
             box.setDrawsBackground(false);
             box.margins(Insets.vertical(2));
             box.horizontalSizing(Sizing.fill(95));

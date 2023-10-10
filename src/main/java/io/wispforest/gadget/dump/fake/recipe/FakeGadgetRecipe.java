@@ -1,6 +1,5 @@
 package io.wispforest.gadget.dump.fake.recipe;
 
-import com.google.gson.JsonObject;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
@@ -29,7 +28,7 @@ public interface FakeGadgetRecipe extends Recipe<Inventory> {
     }
 
     @Override
-    default ItemStack getOutput(DynamicRegistryManager registryManager) {
+    default ItemStack getResult(DynamicRegistryManager registryManager) {
         throw new UnsupportedOperationException();
     }
 
@@ -77,11 +76,6 @@ public interface FakeGadgetRecipe extends Recipe<Inventory> {
     }
 
     interface FakeSerializer<R extends FakeGadgetRecipe> extends RecipeSerializer<R> {
-        @Override
-        default R read(Identifier id, JsonObject json) {
-            throw new UnsupportedOperationException();
-        }
-
         Identifier id();
     }
 }

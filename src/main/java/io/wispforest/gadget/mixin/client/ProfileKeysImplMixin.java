@@ -1,7 +1,7 @@
 package io.wispforest.gadget.mixin.client;
 
 import io.wispforest.gadget.Gadget;
-import net.minecraft.client.util.ProfileKeysImpl;
+import net.minecraft.client.session.ProfileKeysImpl;
 import org.slf4j.Logger;
 import org.slf4j.helpers.NOPLogger;
 import org.spongepowered.asm.mixin.Final;
