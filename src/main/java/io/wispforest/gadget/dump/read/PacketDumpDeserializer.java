@@ -64,7 +64,6 @@ public class PacketDumpDeserializer {
                     case 0b0110 -> NetworkState.LOGIN;
                     case 0b1110 -> NetworkState.CONFIGURATION;
                     case 0b0010 -> NetworkState.PLAY;
-
                     default -> throw new IllegalStateException();
                 };
                 int size = buf.readableBytes();
@@ -122,11 +121,12 @@ public class PacketDumpDeserializer {
 
                 short flags = buf.readShort();
                 boolean outbound = (flags & 1) != 0;
-                NetworkState state = switch (flags & 0b0110) {
+                NetworkState state = switch (flags & 0b1110) {
                     case 0b0000 -> NetworkState.HANDSHAKING;
-                    case 0b0010 -> NetworkState.PLAY;
                     case 0b0100 -> NetworkState.STATUS;
                     case 0b0110 -> NetworkState.LOGIN;
+                    case 0b1110 -> NetworkState.CONFIGURATION;
+                    case 0b0010 -> NetworkState.PLAY;
                     default -> throw new IllegalStateException();
                 };
                 long sentAt = buf.readLong();
