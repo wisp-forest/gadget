@@ -8,7 +8,6 @@
         "ChunkDataBlockEntityDataMixin",
         "ClientConnectionMixin",
         "CommandManagerMixin",
-        "CustomPayloadC2SPacketMixin",
         "NamespaceResourceManagerMixin",
         "NbtTypesAccessor",
         "PathUtilMixin",
