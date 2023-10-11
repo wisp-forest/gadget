@@ -1,12 +1,13 @@
 package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.client.gui.TabTextBoxComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -22,7 +23,7 @@ public class PrimitiveEditorWidget extends FlowLayout {
 
     private final LabelComponent contentsLabel;
     private final LabelComponent editLabel;
-    private final TextFieldWidget editField;
+    private final TextBoxComponent editField;
 
     protected PrimitiveEditorWidget(NbtDataIsland island, NbtPath path, Object value, Function<String, NbtElement> parser) {
         super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
@@ -36,7 +37,7 @@ public class PrimitiveEditorWidget extends FlowLayout {
         this.value = value;
         this.parser = parser;
         this.editLabel = Components.label(Text.literal(" ✎ "));
-        this.editField = Components.textBox(Sizing.fixed(100));
+        this.editField = new TabTextBoxComponent(Sizing.fixed(100));
 
         GuiUtil.semiButton(this.editLabel, this::startEditing);
         this.editField.focusLost().subscribe(this::editFieldFocusLost);

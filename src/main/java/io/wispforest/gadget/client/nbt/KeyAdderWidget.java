@@ -1,13 +1,14 @@
 package io.wispforest.gadget.client.nbt;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.client.gui.TabTextBoxComponent;
 import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.ParentComponent;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.nbt.*;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -20,8 +21,8 @@ public class KeyAdderWidget extends FlowLayout {
     private final NbtType<?> type;
     private final Predicate<String> nameVerifier;
 
-    private final TextFieldWidget nameField;
-    private final TextFieldWidget valueField;
+    private final TextBoxComponent nameField;
+    private final TextBoxComponent valueField;
     private boolean wasMounted = false;
 
     public KeyAdderWidget(NbtDataIsland island, NbtPath parentPath, NbtType<?> type, Predicate<String> nameVerifier) {
@@ -34,19 +35,19 @@ public class KeyAdderWidget extends FlowLayout {
 
         child(Components.label(island.typeText(type, "")
             .append(" ")));
-        child((this.nameField = Components.textBox(Sizing.fixed(75)))
+        child((this.nameField = new TabTextBoxComponent(Sizing.fixed(75)))
             .verticalSizing(Sizing.fixed(8)));
 
         if (typeNeedsValue(type)) {
             child(Components.label(Text.of(" = ")));
 
-            child((this.valueField = Components.textBox(Sizing.fixed(75)))
+            child((this.valueField = new TabTextBoxComponent(Sizing.fixed(75)))
                 .verticalSizing(Sizing.fixed(8)));
         } else if (typeNeedsSize(type)) {
             child(Components.label(Text.of("["))
                 .margins(Insets.horizontal(2)));
 
-            child((this.valueField = Components.textBox(Sizing.fixed(50)))
+            child((this.valueField = new TabTextBoxComponent(Sizing.fixed(50)))
                 .verticalSizing(Sizing.fixed(8)));
 
             child(Components.label(Text.of("]"))

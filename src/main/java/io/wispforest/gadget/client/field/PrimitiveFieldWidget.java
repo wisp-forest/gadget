@@ -1,15 +1,16 @@
 package io.wispforest.gadget.client.field;
 
 import io.wispforest.gadget.client.gui.GuiUtil;
+import io.wispforest.gadget.client.gui.TabTextBoxComponent;
 import io.wispforest.gadget.desc.PrimitiveFieldObject;
 import io.wispforest.gadget.desc.edit.PrimitiveEditData;
 import io.wispforest.gadget.path.ObjectPath;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.LabelComponent;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -21,7 +22,7 @@ public class PrimitiveFieldWidget extends FlowLayout {
 
     private final LabelComponent contentsLabel;
     private final LabelComponent editLabel;
-    private final TextFieldWidget editField;
+    private final TextBoxComponent editField;
 
     protected PrimitiveFieldWidget(FieldDataIsland island, ObjectPath fieldPath, PrimitiveFieldObject pfo) {
         super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
@@ -33,7 +34,7 @@ public class PrimitiveFieldWidget extends FlowLayout {
                 .formatted(Formatting.GRAY)
         );
         this.editLabel = Components.label(Text.literal(" ✎ "));
-        this.editField = Components.textBox(Sizing.fixed(100));
+        this.editField = new TabTextBoxComponent(Sizing.fixed(100));
         this.editData = pfo.editData().orElseThrow();
 
         GuiUtil.semiButton(this.editLabel, this::startEditing);
