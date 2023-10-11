@@ -41,7 +41,8 @@
                 "modmenu.discord": "https://wispforest.io/discord",
                 "modmenu.modrinth": "https://modrinth.com/mod/gadget",
                 "modmenu.github_releases": "https://github.com/wisp-forest/gadget/releases",
-                "modmenu.mastodon": "https://mstdn.social/@BasiqueEvangelist"
+                "modmenu.mastodon": "https://mstdn.social/@BasiqueEvangelist",
+                "modmenu.wiki": "https://docs.wispforest.io/gadget/"
             }
         }
     },
