@@ -30,6 +30,7 @@
         "client.DisconnectedScreenMixin",
         "client.EntryListWidgetAccessor",
         "client.EntryListWidgetEntryAccessor",
+        "client.EntryListWidgetMixin",
         "client.GameRendererMixin",
         "client.HandledScreenAccessor",
         "client.KeyboardMixin",
