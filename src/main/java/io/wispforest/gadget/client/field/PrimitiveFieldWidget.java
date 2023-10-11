@@ -75,7 +75,7 @@ public class PrimitiveFieldWidget extends FlowLayout {
 
         child(editField);
         editField.setText(editData.data());
-        editField.setCursorToStart();
+        editField.setCursorToStart(false);
 
         if (focusHandler() != null)
             focusHandler().focus(editField, FocusSource.MOUSE_CLICK);

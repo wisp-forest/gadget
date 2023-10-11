@@ -58,11 +58,12 @@ public class PacketDumpDeserializer {
 
                 short flags = buf.readShort();
                 boolean outbound = (flags & 1) != 0;
-                NetworkState state = switch (flags & 0b0110) {
+                NetworkState state = switch (flags & 0b1110) {
                     case 0b0000 -> NetworkState.HANDSHAKING;
-                    case 0b0010 -> NetworkState.PLAY;
                     case 0b0100 -> NetworkState.STATUS;
                     case 0b0110 -> NetworkState.LOGIN;
+                    case 0b1110 -> NetworkState.CONFIGURATION;
+                    case 0b0010 -> NetworkState.PLAY;
                     default -> throw new IllegalStateException();
                 };
                 int size = buf.readableBytes();
@@ -70,9 +71,9 @@ public class PacketDumpDeserializer {
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof LoginQueryRequestS2CPacket req) {
-                    loginQueryChannels.put(req.getQueryId(), req.getChannel());
+                    loginQueryChannels.put(req.queryId(), req.payload().id());
                 } else if (packet instanceof LoginQueryResponseC2SPacket res) {
-                    channelId = loginQueryChannels.get(res.getQueryId());
+                    channelId = loginQueryChannels.get(res.queryId());
                 }
 
                 list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
@@ -120,11 +121,12 @@ public class PacketDumpDeserializer {
 
                 short flags = buf.readShort();
                 boolean outbound = (flags & 1) != 0;
-                NetworkState state = switch (flags & 0b0110) {
+                NetworkState state = switch (flags & 0b1110) {
                     case 0b0000 -> NetworkState.HANDSHAKING;
-                    case 0b0010 -> NetworkState.PLAY;
                     case 0b0100 -> NetworkState.STATUS;
                     case 0b0110 -> NetworkState.LOGIN;
+                    case 0b1110 -> NetworkState.CONFIGURATION;
+                    case 0b0010 -> NetworkState.PLAY;
                     default -> throw new IllegalStateException();
                 };
                 long sentAt = buf.readLong();
@@ -133,9 +135,9 @@ public class PacketDumpDeserializer {
                 Identifier channelId = NetworkUtil.getChannelOrNull(packet);
 
                 if (packet instanceof LoginQueryRequestS2CPacket req) {
-                    loginQueryChannels.put(req.getQueryId(), req.getChannel());
+                    loginQueryChannels.put(req.queryId(), req.payload().id());
                 } else if (packet instanceof LoginQueryResponseC2SPacket res) {
-                    channelId = loginQueryChannels.get(res.getQueryId());
+                    channelId = loginQueryChannels.get(res.queryId());
                 }
 
                 list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));

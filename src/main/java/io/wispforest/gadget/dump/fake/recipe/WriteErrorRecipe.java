@@ -5,14 +5,9 @@ import io.wispforest.gadget.util.ThrowableUtil;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
-public record WriteErrorRecipe(Identifier id, String exceptionText) implements FakeGadgetRecipe {
-    public static WriteErrorRecipe from(Identifier id, Exception e) {
-        return new WriteErrorRecipe(id, ThrowableUtil.throwableToString(e));
-    }
-
-    @Override
-    public Identifier getId() {
-        return id;
+public record WriteErrorRecipe(String exceptionText) implements FakeGadgetRecipe {
+    public static WriteErrorRecipe from(Exception e) {
+        return new WriteErrorRecipe(ThrowableUtil.throwableToString(e));
     }
 
     @Override
@@ -30,13 +25,13 @@ public record WriteErrorRecipe(Identifier id, String exceptionText) implements F
         }
 
         @Override
-        public WriteErrorRecipe read(Identifier id, PacketByteBuf buf) {
-            return new WriteErrorRecipe(id, buf.readString());
+        public void write(PacketByteBuf buf, WriteErrorRecipe recipe) {
+            buf.writeString(recipe.exceptionText);
         }
 
         @Override
-        public void write(PacketByteBuf buf, WriteErrorRecipe recipe) {
-            buf.writeString(recipe.exceptionText);
+        public WriteErrorRecipe read(PacketByteBuf buf) {
+            return new WriteErrorRecipe(buf.readString());
         }
     }
 }
