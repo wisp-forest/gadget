@@ -1,5 +1,6 @@
 package io.wispforest.gadget.dump.fake.recipe;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
@@ -77,5 +78,10 @@ public interface FakeGadgetRecipe extends Recipe<Inventory> {
 
     interface FakeSerializer<R extends FakeGadgetRecipe> extends RecipeSerializer<R> {
         Identifier id();
+
+        @Override
+        default Codec<R> codec() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

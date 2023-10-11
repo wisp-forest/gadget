@@ -6,8 +6,8 @@ import net.minecraft.util.Identifier;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public record ReadErrorRecipe(byte[] data, Identifier id, Exception exception) implements FakeGadgetRecipe {
-    public static ReadErrorRecipe from(Exception exception, PacketByteBuf buf) {
+public record ReadErrorRecipe(byte[] data, Exception exception) implements FakeGadgetRecipe {
+    public static RecipeEntry<ReadErrorRecipe> from(Exception exception, PacketByteBuf buf) {
         int start = buf.readerIndex();
         Identifier recipeId = new Identifier(
             "gadget-fake",
@@ -25,11 +25,7 @@ public record ReadErrorRecipe(byte[] data, Identifier id, Exception exception) i
         byte[] bytes = new byte[buf.readableBytes()];
         buf.readBytes(bytes);
 
-        return new ReadErrorRecipe(bytes, recipeId, exception);
-    }
-
-    public RecipeEntry<ReadErrorRecipe> toRecipeEntry() {
-        return new RecipeEntry<>(this.id, this);
+        return new RecipeEntry<>(recipeId, new ReadErrorRecipe(bytes, exception));
     }
 
     @Override

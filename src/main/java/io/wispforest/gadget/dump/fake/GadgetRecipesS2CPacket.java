@@ -34,7 +34,7 @@ public record GadgetRecipesS2CPacket(List<RecipeEntry<?>> recipes) implements Fa
                 recipes.add(SynchronizeRecipesS2CPacket.readRecipe(subBuf));
             } catch (Exception e) {
                 subBuf.readerIndex(0);
-                recipes.add(ReadErrorRecipe.from(e, subBuf).toRecipeEntry());
+                recipes.add(ReadErrorRecipe.from(e, subBuf));
             }
         }
 
@@ -62,7 +62,7 @@ public record GadgetRecipesS2CPacket(List<RecipeEntry<?>> recipes) implements Fa
 
                 try {
                     if (recipe.value() instanceof FakeGadgetRecipe fakeRecipe) {
-                        writeFake(buf, fakeRecipe, recipe.id());
+                        writeFake(buf, new RecipeEntry<>(recipe.id(), fakeRecipe));
                         return;
                     }
 
@@ -81,17 +81,17 @@ public record GadgetRecipesS2CPacket(List<RecipeEntry<?>> recipes) implements Fa
 
                     Gadget.LOGGER.error("Error while writing recipe {}", recipe, e);
 
-                    WriteErrorRecipe writeError = WriteErrorRecipe.from(recipe.id(), e);
-                    writeFake(buf, writeError, recipe.id());
+                    WriteErrorRecipe writeError = WriteErrorRecipe.from(e);
+                    writeFake(buf, new RecipeEntry<>(recipe.id(), writeError));
                 }
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void writeFake(PacketByteBuf buf, FakeGadgetRecipe recipe, Identifier id) {
-        buf.writeIdentifier(recipe.getSerializer().id());
-        buf.writeIdentifier(id);
-        ((RecipeSerializer<FakeGadgetRecipe>) recipe.getSerializer()).write(buf, recipe);
+    private void writeFake(PacketByteBuf buf, RecipeEntry<? extends FakeGadgetRecipe> recipe) {
+        buf.writeIdentifier(recipe.value().getSerializer().id());
+        buf.writeIdentifier(recipe.id());
+        ((RecipeSerializer<FakeGadgetRecipe>) recipe.value().getSerializer()).write(buf, recipe.value());
     }
 }
