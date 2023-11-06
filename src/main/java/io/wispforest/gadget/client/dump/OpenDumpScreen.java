@@ -29,7 +29,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -233,7 +235,8 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
         try {
             var os = Files.newOutputStream(savePath);
             var bos = new BufferedOutputStream(os);
-            FormattedDumper dumper = new FormattedDumper(new PrintStream(bos));
+            var printStream = new PrintStream(bos, true, StandardCharsets.UTF_8.name());
+            FormattedDumper dumper = new FormattedDumper(printStream);
 
             ProgressToast toast = ProgressToast.create(Text.translatable("text.gadget.export.exporting_packet_dump"));
             dumper.write(0, "Packet dump " + this.path.getFileName().toString());
