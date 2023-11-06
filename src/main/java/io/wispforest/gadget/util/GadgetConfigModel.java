@@ -26,7 +26,7 @@ public class GadgetConfigModel {
     @PredicateConstraint("isMappingsValid") @Hook public MappingsType mappings =
         FabricLoader.getInstance().isDevelopmentEnvironment() ? MappingsType.LOCAL : MappingsType.YARN;
     public UICounterMode uiCounterMode = UICounterMode.LOG_ON_LONG_UPDATE;
-    public boolean nbtLocking = true;
+    public boolean nbtLocking = false;
     public boolean inspectClasses = true;
     public boolean fullDecompilationContext = true;
     @Hook public List<String> hiddenFields = new ArrayList<>(List.of(
