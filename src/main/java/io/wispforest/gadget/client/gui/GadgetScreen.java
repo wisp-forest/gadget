@@ -65,7 +65,7 @@ public class GadgetScreen extends BaseOwoScreen<FlowLayout> {
 
         openOther.margins(Insets.bottom(4));
         GuiUtil.semiButton(openOther, () -> {
-            String path = DialogUtil.openFileDialog(I18n.translate("text.gadget.open_other_dump"), null, List.of("*.dump"), "gadget network dumps", false);
+            String path = DialogUtil.openFileDialog("Open other dump", null, List.of("*.dump"), "gadget network dumps", false);
 
             if (path != null) {
                 OpenDumpScreen.openWithProgress(this, Path.of(path));

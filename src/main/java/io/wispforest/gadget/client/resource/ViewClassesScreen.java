@@ -142,7 +142,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
             if (currentFileContents == null) return false;
 
             String path = DialogUtil.saveFileDialog(
-                I18n.translate("text.gadget.save_as_java"),
+                "Save as .java",
                 currentFileName.replace(".class", ".java"),
                 List.of("*.java"),
                 "Java source files"
@@ -215,7 +215,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                 GuiUtil.contextMenu(row, mouseX, mouseY)
                     .button(Text.translatable("text.gadget.save_as_java"), unused -> {
                         String path = DialogUtil.saveFileDialog(
-                            I18n.translate("text.gadget.save_as_java"),
+                            "Save as .java",
                             filename.replace(".class", ".java"),
                             List.of("*.java"),
                             "Java source files"
@@ -231,7 +231,7 @@ public class ViewClassesScreen extends BaseOwoScreen<FlowLayout> {
                     })
                     .button(Text.translatable("text.gadget.save_as_class"), unused -> {
                         String path = DialogUtil.saveFileDialog(
-                            I18n.translate("text.gadget.save_as_class"),
+                            "Save as .class",
                             filename,
                             List.of("*.class"),
                             "JVM class files"

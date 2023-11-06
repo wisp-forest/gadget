@@ -287,7 +287,7 @@ public class OpenDumpScreen extends BaseOwoScreen<FlowLayout> {
             .margins(Insets.bottom(4)));
 
         SaveFilePathComponent savePath = new SaveFilePathComponent(
-            I18n.translate("text.gadget.export.packet_dump"),
+            "Export packet dump",
             path.toString() + ".txt")
             .pattern("*.txt")
             .filterDescription("Plain Text file");
