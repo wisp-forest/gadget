@@ -73,23 +73,28 @@
     "text.gadget.info.fps": [
         "",
         {"text": "FPS: ", "color": "gray"},
-        {"index": 0, "color": "white"}
+        {"text": "", "index": 0, "color": "white"}
     ],
     "text.gadget.info.total_components": [
         "",
         {"text": "Total Components: ", "color": "gray"},
-        {"index": 0, "color": "white"}
+        {"text": "", "index": 0, "color": "white"}
     ],
     "text.gadget.info.packets_on_screen": [
         "",
         {"text": "Packets On Screen: ", "color": "gray"},
-        {"index": 0, "color": "white"}
+        {"text": "", "index": 0, "color": "white"}
     ],
     "text.gadget.info.total_packets": [
         "",
         {"text": "Total Packets: ", "color": "gray"},
-        {"index": 0, "color": "white"}
+        {"text": "", "index": 0, "color": "white"}
     ],
+    "text.gadget.menu_button": {
+        "text": "G",
+        "bold": true,
+        "color": "#0096FF"
+    },
     "text.gadget.stats": {
         "text": "s",
         "color": "yellow",
@@ -104,34 +109,29 @@
     "text.gadget.export_button.tooltip": "Export",
     "text.gadget.back": "←",
     "text.gadget.back.tooltip": "Back",
-    "text.gadget.menu_button": {
-        "text": "G",
-        "bold": true,
-        "color": "#0096FF"
-    },
     "text.gadget.open": {
         "text": "Open",
         "underlined": true
     },
     "text.gadget.open_other_dump": {
         "text": "Open other dump",
-        "underlined": "true"
+        "underlined": true
     },
     "text.gadget.inspect_resources": {
         "text": "Inspect resources",
-        "underlined": "true"
+        "underlined": true
     },
     "text.gadget.inspect_server_data": {
         "text": "Inspect server data",
-        "underlined": "true"
+        "underlined": true
     },
     "text.gadget.inspect_exported_classes": {
         "text": "Inspect exported classes",
-        "underlined": "true"
+        "underlined": true
     },
     "text.gadget.inspect_all_classes": {
         "text": "Inspect all classes",
-        "underlined": "true"
+        "underlined": true
     },
     "text.gadget.image_size": "%sx%s %s image.",
 
@@ -276,40 +276,40 @@
             "text": "[WARNING] QF: ",
             "color": "yellow"
         },
-        { "index": 0 }
+        {"text": "", "index": 0}
     ],
     "text.gadget.quiltflower_log.warn.with_error": [
         {
             "text": "[WARNING] QF: ",
             "color": "yellow"
         },
-        { "index": 0 },
+        {"text": "", "index": 0},
         "\n",
-        { "index": 1 }
+        {"text": "", "index": 1}
     ],
     "text.gadget.quiltflower_log.error": [
         {
             "text": "[ERROR] QF: ",
             "color": "red"
         },
-        { "index": 0 }
+        {"text": "", "index": 0}
     ],
     "text.gadget.quiltflower_log.error.with_error": [
         {
             "text": "[ERROR] QF: ",
             "color": "red"
         },
-        { "index": 0 },
+        {"text": "", "index": 0},
         "\n",
-        { "index": 1 }
+        {"text": "", "index": 1}
     ],
     "text.gadget.log.loading_class": "[INFO] Remapper: Loading %s",
 
     "text.gadget.particle_system": "Particle system #%s @ %s, %s, %s",
 
     "text.gadget.deserialized_packet_no_render": [
-        { "color": "red", "text": "! "},
-        { "index": 0 },
+        {"color": "red", "text": "! "},
+        {"text": "", "index": 0},
         " doesn't support rendering."
     ],
     "text.gadget.hide_field": "Hide field",
@@ -327,7 +327,7 @@
     "text.gadget.export.gather_progress": [
         {"text": "", "color": "light_gray"},
         "Found ",
-        {"index": 0},
+        {"text": "", "index": 0},
         " packets"
     ],
     "text.gadget.export.export_button": "Export",
@@ -340,14 +340,14 @@
         {"text": "Packet Read Error!", "color": "red"},
         [
             {"text": " Type #", "color": "gray"},
-            {"index": 0}
+            {"text": "", "index": 0}
         ]
     ],
     "text.gadget.packet_write_error": [
         {"text": "Packet Write Error!", "color": "red"},
         [
             {"text": " Type #", "color": "gray"},
-            {"index": 0}
+            {"text": "", "index": 0}
         ]
     ],
     "text.gadget.packet_errors": {
@@ -375,13 +375,13 @@
     "text.gadget.log_entry": [
         "",
         {"text": "[", "color": "dark_gray"},
-        {"index": 0},
+        {"text": "", "index": 0},
         " ",
-        {"index": 1},
+        {"text": "", "index": 1},
         {"text": "] ", "color": "dark_gray"},
-        {"index": 2, "color": "aqua"},
+        {"text": "", "index": 2, "color": "aqua"},
         ": ",
-        {"index":  3}
+        {"text": "", "index": 3}
     ],
     "text.gadget.log_level.fatal": {"text": "FATAL", "color": "dark_red"},
     "text.gadget.log_level.error": {"text": "ERROR", "color": "red"},
