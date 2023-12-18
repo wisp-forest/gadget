@@ -13,16 +13,4 @@ public interface EntryListWidgetAccessor extends Element {
 
     @Accessor
     int getItemHeight();
-
-    @Accessor
-    int getLeft();
-
-    @Accessor
-    int getTop();
-
-    @Accessor
-    int getWidth();
-
-    @Accessor
-    int getHeight();
 }

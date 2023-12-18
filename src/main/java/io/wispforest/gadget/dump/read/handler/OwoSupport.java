@@ -7,9 +7,10 @@ import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
 import io.wispforest.gadget.util.ErrorSink;
 import io.wispforest.gadget.util.NetworkUtil;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
+import io.wispforest.owo.serialization.endec.BuiltInEndecs;
+import io.wispforest.owo.serialization.Endec;
 import io.wispforest.owo.util.VectorSerializer;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
@@ -29,9 +30,7 @@ import java.util.function.Consumer;
 
 public final class OwoSupport {
     public static final Identifier HANDSHAKE_CHANNEL = new Identifier("owo", "handshake");
-    @SuppressWarnings("unchecked")
-    private static final PacketBufSerializer<Map<Identifier, Integer>> HANDSHAKE_SERIALIZER =
-        (PacketBufSerializer<Map<Identifier, Integer>>) (Object) PacketBufSerializer.createMapSerializer(Map.class, Identifier.class, Integer.class);
+    private static final Endec<Map<Identifier, Integer>> HANDSHAKE_SERIALIZER = Endec.map(BuiltInEndecs.IDENTIFIER, Endec.INT);
 
     private OwoSupport() {
 
@@ -59,7 +58,7 @@ public final class OwoSupport {
 
             if (acc == null) return null;
 
-            Object unwrapped = acc.getSerializer().read(buf);
+            Object unwrapped = buf.read(acc.getSerializer());
 
             return new ChannelPacket(unwrapped, netHandlerId);
         });
@@ -75,7 +74,7 @@ public final class OwoSupport {
             int systemId = buf.readVarInt();
             Vec3d pos = VectorSerializer.read(buf);
             ParticleSystem<?> system = controller.systemsByIndex.get(systemId);
-            Object data = ((ParticleSystemAccessor) system).getAdapter().deserializer().apply(buf);
+            Object data = buf.read(((ParticleSystemAccessor) system).getEndec());
 
             return new ParticleSystemPacket(controller, systemId, pos, data);
         });
@@ -88,7 +87,7 @@ public final class OwoSupport {
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
 
             return new HandshakeRequest(buf.isReadable()
-                ? HANDSHAKE_SERIALIZER.deserializer().apply(buf)
+                ? buf.read(HANDSHAKE_SERIALIZER)
                 : Collections.emptyMap());
         });
 
@@ -99,13 +98,13 @@ public final class OwoSupport {
 
             PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
 
-            Map<Identifier, Integer> requiredChannels = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
-            Map<Identifier, Integer> requiredControllers = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
+            Map<Identifier, Integer> requiredChannels = buf.read(HANDSHAKE_SERIALIZER);
+            Map<Identifier, Integer> requiredControllers = buf.read(HANDSHAKE_SERIALIZER);
 
             Map<Identifier, Integer> optionalChannels = Collections.emptyMap();
 
             if (buf.isReadable())
-                optionalChannels = HANDSHAKE_SERIALIZER.deserializer().apply(buf);
+                optionalChannels = buf.read(HANDSHAKE_SERIALIZER);
 
             return new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels);
         });
