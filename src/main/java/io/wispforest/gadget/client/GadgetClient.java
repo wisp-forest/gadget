@@ -3,6 +3,7 @@ package io.wispforest.gadget.client;
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.client.command.ChatLogCommand;
 import io.wispforest.gadget.client.command.ReloadMappingsCommand;
+import io.wispforest.gadget.client.command.RunCommand;
 import io.wispforest.gadget.client.config.GadgetConfigScreen;
 import io.wispforest.gadget.client.dump.ClientPacketDumper;
 import io.wispforest.gadget.client.dump.handler.ClientPacketHandlers;
@@ -244,6 +245,7 @@ public class GadgetClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             ReloadMappingsCommand.register(dispatcher);
+            RunCommand.register(dispatcher);
             ChatLogCommand.register(dispatcher);
         });
 
