@@ -28,7 +28,7 @@ public class BasedSliderComponent extends SliderComponent {
     }
 
     @Override
-    public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
         NinePatchTexture.draw(ButtonComponent.DISABLED_TEXTURE, (OwoUIDrawContext) ctx, getX(), getY(), width, height);
 
         NinePatchTexture.draw(

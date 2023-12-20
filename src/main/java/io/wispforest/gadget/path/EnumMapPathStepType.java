@@ -1,18 +1,22 @@
 package io.wispforest.gadget.path;
 
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 
 public record EnumMapPathStepType(Class<?> klass) implements MapPathStepType {
+    public static final Endec<EnumMapPathStepType> ENDEC = Endec.STRING.xmap(
+        name -> {
+            try {
+                return new EnumMapPathStepType(Class.forName(name));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        },
+        type -> type.klass.getName()
+    );
+
     public static void init() {
-        PacketBufSerializer.register(EnumMapPathStepType.class, new PacketBufSerializer<>(
-            (buf, type) -> buf.writeString(type.klass.getName()),
-            buf -> {
-                try {
-                    return new EnumMapPathStepType(Class.forName(buf.readString()));
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
+        ReflectiveEndecBuilder.register(ENDEC, EnumMapPathStepType.class);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

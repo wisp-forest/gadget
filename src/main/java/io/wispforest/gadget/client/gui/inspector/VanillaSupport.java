@@ -21,10 +21,10 @@ public final class VanillaSupport {
         ));
 
         ElementUtils.registerElementSupport(EntryListWidgetAccessor.class, ElementSupport.fromLambda(
-            EntryListWidgetAccessor::getLeft,
-            EntryListWidgetAccessor::getTop,
-            EntryListWidgetAccessor::getWidth,
-            EntryListWidgetAccessor::getHeight
+            w -> ((ClickableWidget) w).getX(),
+            w -> ((ClickableWidget) w).getY(),
+            w -> ((ClickableWidget) w).getWidth(),
+            w -> ((ClickableWidget) w).getHeight()
         ));
 
         ElementUtils.registerElementSupport(EntryListWidget.Entry.class, ElementSupport.fromLambda(

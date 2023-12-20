@@ -3,7 +3,8 @@ package io.wispforest.gadget.desc.edit;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
@@ -61,8 +62,6 @@ public final class PrimitiveEditTypes {
         registerForRegistry((Class<BlockEntityType<?>>)(Class<?>) BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE);
         registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
 
-        PacketBufSerializer.register(PrimitiveEditType.class, new PacketBufSerializer<>(
-                (buf, mapPathStepType) -> buf.writeString(REGISTRY.inverse().get(mapPathStepType)),
-                buf -> REGISTRY.get(buf.readString())));
+        ReflectiveEndecBuilder.register(Endec.STRING.xmap(REGISTRY::get, REGISTRY.inverse()::get), PrimitiveEditType.class);
     }
 }

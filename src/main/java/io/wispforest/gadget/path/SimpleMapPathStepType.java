@@ -4,7 +4,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import io.wispforest.gadget.util.PrettyPrinters;
 import io.wispforest.gadget.util.ReflectionUtil;
-import io.wispforest.owo.network.serialization.PacketBufSerializer;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.ReflectiveEndecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
@@ -47,9 +48,7 @@ public record SimpleMapPathStepType(Function<String, Object> fromImpl, Function<
         registerForRegistry(Item.class, Registries.ITEM);
         registerForRegistry(StatusEffect.class, Registries.STATUS_EFFECT);
 
-        PacketBufSerializer.register(SimpleMapPathStepType.class, new PacketBufSerializer<>(
-            (buf, type) -> buf.writeString(REGISTRY.inverse().get(type)),
-            buf -> REGISTRY.get(buf.readString())));
+        ReflectiveEndecBuilder.register(Endec.STRING.xmap(REGISTRY::get, REGISTRY.inverse()::get), SimpleMapPathStepType.class);
     }
 
     @Override
