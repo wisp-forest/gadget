@@ -73,22 +73,22 @@
     "text.gadget.info.fps": [
         "",
         {"text": "FPS: ", "color": "gray"},
-        {"text": "", "index": 0, "color": "white"}
+        {"index": 0, "color": "white"}
     ],
     "text.gadget.info.total_components": [
         "",
         {"text": "Total Components: ", "color": "gray"},
-        {"text": "", "index": 0, "color": "white"}
+        {"index": 0, "color": "white"}
     ],
     "text.gadget.info.packets_on_screen": [
         "",
         {"text": "Packets On Screen: ", "color": "gray"},
-        {"text": "", "index": 0, "color": "white"}
+        {"index": 0, "color": "white"}
     ],
     "text.gadget.info.total_packets": [
         "",
         {"text": "Total Packets: ", "color": "gray"},
-        {"text": "", "index": 0, "color": "white"}
+        {"index": 0, "color": "white"}
     ],
     "text.gadget.menu_button": {
         "text": "G",
@@ -276,32 +276,32 @@
             "text": "[WARNING] QF: ",
             "color": "yellow"
         },
-        {"text": "", "index": 0}
+        {"index": 0}
     ],
     "text.gadget.quiltflower_log.warn.with_error": [
         {
             "text": "[WARNING] QF: ",
             "color": "yellow"
         },
-        {"text": "", "index": 0},
+        {"index": 0},
         "\n",
-        {"text": "", "index": 1}
+        {"index": 1}
     ],
     "text.gadget.quiltflower_log.error": [
         {
             "text": "[ERROR] QF: ",
             "color": "red"
         },
-        {"text": "", "index": 0}
+        {"index": 0}
     ],
     "text.gadget.quiltflower_log.error.with_error": [
         {
             "text": "[ERROR] QF: ",
             "color": "red"
         },
-        {"text": "", "index": 0},
+        {"index": 0},
         "\n",
-        {"text": "", "index": 1}
+        {"index": 1}
     ],
     "text.gadget.log.loading_class": "[INFO] Remapper: Loading %s",
 
@@ -309,7 +309,7 @@
 
     "text.gadget.deserialized_packet_no_render": [
         {"color": "red", "text": "! "},
-        {"text": "", "index": 0},
+        {"index": 0},
         " doesn't support rendering."
     ],
     "text.gadget.hide_field": "Hide field",
@@ -325,9 +325,9 @@
     },
     "text.gadget.export.output_path": "Output Path: ",
     "text.gadget.export.gather_progress": [
-        {"text": "", "color": "light_gray"},
+        {"text": "", "color": "gray"},
         "Found ",
-        {"text": "", "index": 0},
+        {"index": 0},
         " packets"
     ],
     "text.gadget.export.export_button": "Export",
@@ -340,14 +340,14 @@
         {"text": "Packet Read Error!", "color": "red"},
         [
             {"text": " Type #", "color": "gray"},
-            {"text": "", "index": 0}
+            {"index": 0}
         ]
     ],
     "text.gadget.packet_write_error": [
         {"text": "Packet Write Error!", "color": "red"},
         [
             {"text": " Type #", "color": "gray"},
-            {"text": "", "index": 0}
+            {"index": 0}
         ]
     ],
     "text.gadget.packet_errors": {
@@ -362,26 +362,26 @@
     "commands.gadget.chat-log.enable.success": [
         {"translate": "message.gadget.header"},
         "Enabled loud logging for '",
-        {"index":0, "color": "yellow"},
+        {"index": 0, "color": "yellow"},
         "'."
     ],
     "commands.gadget.chat-log.disable.success": [
         {"translate": "message.gadget.header"},
         "Disabled loud logging for '",
-        {"index":0, "color": "yellow"},
+        {"index": 0, "color": "yellow"},
         "'."
     ],
 
     "text.gadget.log_entry": [
         "",
         {"text": "[", "color": "dark_gray"},
-        {"text": "", "index": 0},
+        {"index": 0},
         " ",
-        {"text": "", "index": 1},
+        {"index": 1},
         {"text": "] ", "color": "dark_gray"},
-        {"text": "", "index": 2, "color": "aqua"},
+        {"index": 2, "color": "aqua"},
         ": ",
-        {"text": "", "index": 3}
+        {"index": 3}
     ],
     "text.gadget.log_level.fatal": {"text": "FATAL", "color": "dark_red"},
     "text.gadget.log_level.error": {"text": "ERROR", "color": "red"},
