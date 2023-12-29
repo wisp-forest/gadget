@@ -9,6 +9,7 @@ import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.*;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -196,8 +197,16 @@ public class NbtDataIsland extends FlowLayout {
                 target.removeChild(full);
                 elements.entrySet().removeIf(entry -> entry.getKey().startsWith(path));
             });
+            crossLabel.margins(Insets.right(5));
             row.child(crossLabel);
         }
+
+        var copyLabel = Components.label(Text.literal("C"));
+        copyLabel.tooltip(Text.translatable("chat.copy.click"));
+        GuiUtil.semiButton(copyLabel, () -> {
+             MinecraftClient.getInstance().keyboard.setClipboard(path.follow(data).asString());
+        });
+        row.child(copyLabel);
 
         row
             .margins(Insets.both(0, 2))
