@@ -38,11 +38,10 @@ public abstract class MultiplayerServerEntryMixin {
             .button(Text.translatable("text.gadget.join_with_dump"), dropdown2 -> {
                 DumpPrimer.isPrimed = true;
 
-                    this.screen.select((MultiplayerServerListWidget.ServerEntry)(Object) this);
-                    this.screen.connect();
-                })
+                this.screen.select((MultiplayerServerListWidget.ServerEntry)(Object) this);
+                this.screen.connect();
+            })
             .button(Text.translatable("text.gadget.query_with_dump"), dropdown2 -> {
-                DumpPrimer.isPrimed = true;
                 ClientPacketDumper.start(false);
 
                 try {
