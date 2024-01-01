@@ -314,6 +314,7 @@
     ],
     "text.gadget.hide_field": "Hide field",
     "text.gadget.join_with_dump": "Join and start dumping packets",
+    "text.gadget.query_with_dump": "Query and start dumping packets",
     "text.gadget.save_as_java": "Save as .java",
     "text.gadget.save_as_class": "Save as .class",
     "text.gadget.export_field_dump": "Export field dump",
