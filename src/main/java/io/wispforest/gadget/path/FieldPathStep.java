@@ -12,7 +12,7 @@ public record FieldPathStep(String className, String fieldName) implements PathS
     }
 
     public String runtimeName() {
-        if (!fieldName.startsWith("field_"))
+        if (!(fieldName.startsWith("field_") || fieldName.startsWith("comp_")))
             return fieldName;
 
         return LocalMappings.INSTANCE.mapField(fieldName);
@@ -34,7 +34,7 @@ public record FieldPathStep(String className, String fieldName) implements PathS
 
     @Override
     public String toString() {
-        if (!fieldName.startsWith("field_"))
+        if (!(fieldName.startsWith("field_") || fieldName.startsWith("comp_")))
             return fieldName;
 
         return MappingsManager.displayMappings().mapField(fieldName);
