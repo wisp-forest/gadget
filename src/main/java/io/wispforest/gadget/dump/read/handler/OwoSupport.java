@@ -2,7 +2,7 @@ package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
-import io.wispforest.gadget.mixin.owo.IndexedSerializerAccessor;
+import io.wispforest.gadget.mixin.owo.IndexedEndecAccessor;
 import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
 import io.wispforest.gadget.util.ErrorSink;
@@ -54,11 +54,11 @@ public final class OwoSupport {
             if (!packet.outbound())
                 handlerId = -handlerId;
 
-            IndexedSerializerAccessor acc = channel.getSerializersByIndex().get(handlerId);
+            IndexedEndecAccessor acc = channel.getEndecsByIndex().get(handlerId);
 
             if (acc == null) return null;
 
-            Object unwrapped = buf.read(acc.getSerializer());
+            Object unwrapped = buf.read(acc.getEndec());
 
             return new ChannelPacket(unwrapped, netHandlerId);
         });

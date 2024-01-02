@@ -16,5 +16,5 @@ public interface OwoNetChannelAccessor {
     }
 
     @Accessor
-    Int2ObjectMap<IndexedSerializerAccessor> getSerializersByIndex();
+    Int2ObjectMap<IndexedEndecAccessor> getEndecsByIndex();
 }

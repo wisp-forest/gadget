@@ -18,7 +18,7 @@
         "owo.BaseComponentMixin",
         "owo.BaseParentComponentMixin",
         "owo.ComponentMixin",
-        "owo.IndexedSerializerAccessor",
+        "owo.IndexedEndecAccessor",
         "owo.OwoNetChannelAccessor",
         "owo.OwoUIAdapterMixin",
         "owo.ParentComponentMixin",

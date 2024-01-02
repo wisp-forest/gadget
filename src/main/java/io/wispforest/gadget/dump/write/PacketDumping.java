@@ -2,6 +2,7 @@ package io.wispforest.gadget.dump.write;
 
 import io.wispforest.gadget.Gadget;
 import io.wispforest.gadget.dump.fake.*;
+import io.wispforest.gadget.util.SlicingPacketByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.NetworkSide;
@@ -58,7 +59,7 @@ public final class PacketDumping {
 
             buf.writeVarInt(packetId);
 
-            packet.write(buf);
+            packet.write(new SlicingPacketByteBuf(buf));
         } catch (Exception e) {
             buf.writerIndex(startWriteIdx);
 
