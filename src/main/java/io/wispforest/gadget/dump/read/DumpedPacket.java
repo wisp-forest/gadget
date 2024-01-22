@@ -2,6 +2,7 @@ package io.wispforest.gadget.dump.read;
 
 import io.wispforest.gadget.util.ContextData;
 import net.minecraft.network.NetworkState;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.util.Identifier;
 
@@ -10,15 +11,17 @@ public final class DumpedPacket extends ContextData<DumpedPacket> {
     private final NetworkState state;
     private final Packet<?> packet;
     private final Identifier channelId;
+    private final PacketByteBuf wrappedBuf;
     private final long sentAt;
     private final int size;
 
-    public DumpedPacket(boolean outbound, NetworkState state, Packet<?> packet, Identifier channelId, long sentAt,
-                        int size) {
+    public DumpedPacket(boolean outbound, NetworkState state, Packet<?> packet, Identifier channelId, PacketByteBuf wrappedBuf,
+                        long sentAt, int size) {
         this.outbound = outbound;
         this.state = state;
         this.packet = packet;
         this.channelId = channelId;
+        this.wrappedBuf = wrappedBuf;
         this.sentAt = sentAt;
         this.size = size;
     }
@@ -47,6 +50,10 @@ public final class DumpedPacket extends ContextData<DumpedPacket> {
 
     public Identifier channelId() {
         return channelId;
+    }
+
+    public PacketByteBuf wrappedBuf() {
+        return wrappedBuf;
     }
 
     public long sentAt() {

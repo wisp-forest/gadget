@@ -4,7 +4,6 @@ import io.wispforest.gadget.dump.read.unwrapped.FieldsUnwrappedPacket;
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.network.FabricPacketHacks;
 import io.wispforest.gadget.util.ErrorSink;
-import io.wispforest.gadget.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
@@ -29,7 +28,7 @@ public final class FapiSupport {
 
             if (type == null) return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
             Object unwrapped = type.read(buf);
 
             return new FabricObjectPacket(unwrapped);
@@ -38,7 +37,7 @@ public final class FapiSupport {
         PacketUnwrapper.EVENT.register((packet, errSink) -> {
             if (!Objects.equals(packet.channelId(), EARLY_REGISTRATION_CHANNEL)) return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
             List<Identifier> channels = buf.readList(PacketByteBuf::readIdentifier);
 
             return new EarlyRegisterPacket(channels);

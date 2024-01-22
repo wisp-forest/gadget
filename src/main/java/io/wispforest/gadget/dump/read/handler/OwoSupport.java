@@ -6,7 +6,6 @@ import io.wispforest.gadget.mixin.owo.IndexedEndecAccessor;
 import io.wispforest.gadget.mixin.owo.OwoNetChannelAccessor;
 import io.wispforest.gadget.mixin.owo.ParticleSystemAccessor;
 import io.wispforest.gadget.util.ErrorSink;
-import io.wispforest.gadget.util.NetworkUtil;
 import io.wispforest.owo.particles.systems.ParticleSystem;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.serialization.endec.BuiltInEndecs;
@@ -47,7 +46,7 @@ public final class OwoSupport {
 
             if (channel == null) return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
             int netHandlerId = buf.readVarInt();
             int handlerId = netHandlerId;
 
@@ -70,7 +69,7 @@ public final class OwoSupport {
 
             if (controller == null) return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
             int systemId = buf.readVarInt();
             Vec3d pos = VectorSerializer.read(buf);
             ParticleSystem<?> system = controller.systemsByIndex.get(systemId);
@@ -84,7 +83,7 @@ public final class OwoSupport {
              || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL))
                 return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
 
             return new HandshakeRequest(buf.isReadable()
                 ? buf.read(HANDSHAKE_SERIALIZER)
@@ -96,7 +95,7 @@ public final class OwoSupport {
              || !Objects.equals(packet.channelId(), HANDSHAKE_CHANNEL))
                 return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
 
             Map<Identifier, Integer> requiredChannels = buf.read(HANDSHAKE_SERIALIZER);
             Map<Identifier, Integer> requiredControllers = buf.read(HANDSHAKE_SERIALIZER);

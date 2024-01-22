@@ -2,6 +2,7 @@ package io.wispforest.gadget.util;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.wispforest.gadget.dump.read.DumpedPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.Packet;
@@ -34,32 +35,30 @@ public final class NetworkUtil {
     public static PacketByteBuf unwrapCustom(Packet<?> packet) {
         if (packet instanceof CustomPayloadS2CPacket pkt) {
             PacketByteBuf serializeBuffer = new PacketByteBuf(Unpooled.buffer());
-            pkt.payload().write(serializeBuffer);
+            pkt.payload().write(new SlicingPacketByteBuf(serializeBuffer));
             return serializeBuffer;
         } else if (packet instanceof CustomPayloadC2SPacket pkt) {
             PacketByteBuf serializeBuffer = new PacketByteBuf(Unpooled.buffer());
-            pkt.payload().write(serializeBuffer);
+            pkt.payload().write(new SlicingPacketByteBuf(serializeBuffer));
             return serializeBuffer;
         } else if (packet instanceof LoginQueryRequestS2CPacket pkt) {
             PacketByteBuf serializeBuffer = new PacketByteBuf(Unpooled.buffer());
-            pkt.payload().write(serializeBuffer);
+            pkt.payload().write(new SlicingPacketByteBuf(serializeBuffer));
             return serializeBuffer;
-        } else if (packet instanceof LoginQueryResponseC2SPacket pkt) {
+        } else if (packet instanceof LoginQueryResponseC2SPacket pkt && pkt.response() != null) {
             PacketByteBuf serializeBuffer = new PacketByteBuf(Unpooled.buffer());
-            pkt.response().write(serializeBuffer);
+            pkt.response().write(new SlicingPacketByteBuf(serializeBuffer));
             return serializeBuffer;
         } else {
             return null;
         }
     }
 
-    public static InfallibleClosable resetIndexes(Packet<?> packet) {
-        PacketByteBuf buf = unwrapCustom(packet);
-
-        if (buf == null) {
+    public static InfallibleClosable resetIndexes(DumpedPacket packet) {
+        if (packet.wrappedBuf() == null) {
             return () -> { };
         } else {
-            return resetIndexes(buf);
+            return resetIndexes(packet.wrappedBuf());
         }
     }
 

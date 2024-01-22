@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public interface PacketUnwrapper {
     Event<PacketUnwrapper> EVENT = EventFactory.createArrayBacked(PacketUnwrapper.class, callbacks -> (packet, errSink) -> {
         for (var callback : callbacks) {
-            try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
+            try (var ignored = NetworkUtil.resetIndexes(packet)) {
                 var unwrapped = callback.tryUnwrap(packet, errSink);
 
                 if (unwrapped != null)

@@ -10,7 +10,7 @@ import net.fabricmc.fabric.api.event.EventFactory;
 public interface PlainTextPacketDumper {
     Event<PlainTextPacketDumper> EVENT = EventFactory.createArrayBacked(PlainTextPacketDumper.class, callbacks -> (packet, out, indent, errSink) -> {
         for (var callback : callbacks) {
-            try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
+            try (var ignored = NetworkUtil.resetIndexes(packet)) {
                 callback.dumpAsPlainText(packet, out, indent, errSink);
             } catch (Exception e) {
                 errSink.accept(e);

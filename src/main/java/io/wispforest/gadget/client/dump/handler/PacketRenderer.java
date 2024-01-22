@@ -10,7 +10,7 @@ import net.fabricmc.fabric.api.event.EventFactory;
 public interface PacketRenderer {
     Event<PacketRenderer> EVENT = EventFactory.createArrayBacked(PacketRenderer.class, callbacks -> (packet, view, errSink) -> {
         for (var callback : callbacks) {
-            try (var ignored = NetworkUtil.resetIndexes(packet.packet())) {
+            try (var ignored = NetworkUtil.resetIndexes(packet)) {
                 callback.renderPacket(packet, view, errSink);
             } catch (Exception e) {
                 errSink.accept(e);

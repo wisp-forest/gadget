@@ -76,7 +76,7 @@ public class PacketDumpDeserializer {
                     channelId = loginQueryChannels.get(res.queryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, 0, size));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, NetworkUtil.unwrapCustom(packet), 0, size));
             }
         } catch (IOException e) {
             return new ReadPacketDump(list, e);
@@ -140,7 +140,7 @@ public class PacketDumpDeserializer {
                     channelId = loginQueryChannels.get(res.queryId());
                 }
 
-                list.add(new DumpedPacket(outbound, state, packet, channelId, sentAt, size));
+                list.add(new DumpedPacket(outbound, state, packet, channelId, NetworkUtil.unwrapCustom(packet), sentAt, size));
             }
         } catch (IOException e) {
             return new ReadPacketDump(list, e);

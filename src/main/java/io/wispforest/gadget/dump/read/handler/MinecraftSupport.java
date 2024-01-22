@@ -2,7 +2,6 @@ package io.wispforest.gadget.dump.read.handler;
 
 import io.wispforest.gadget.dump.read.unwrapped.LinesUnwrappedPacket;
 import io.wispforest.gadget.util.ErrorSink;
-import io.wispforest.gadget.util.NetworkUtil;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.BrandCustomPayload;
 import net.minecraft.text.Text;
@@ -27,7 +26,7 @@ public final class MinecraftSupport {
         PacketUnwrapper.EVENT.register((packet, errSink) -> {
             if (!Objects.equals(packet.channelId(), BrandCustomPayload.ID)) return null;
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
             String brand = buf.readString();
 
             return new BrandPacket(brand);
@@ -44,7 +43,7 @@ public final class MinecraftSupport {
                 return null;
             }
 
-            PacketByteBuf buf = NetworkUtil.unwrapCustom(packet.packet());
+            PacketByteBuf buf = packet.wrappedBuf();
             StringBuilder more = new StringBuilder();
             List<Identifier> channels = new ArrayList<>();
 
